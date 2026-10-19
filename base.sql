@@ -173,9 +173,9 @@ CREATE Table statut_contrat(
 
 CREATE Table contrat_candidat(
     id_contrat_candidat serial PRIMARY key,
-    id_ce INTEGER REFERENCES ce(id_ce),
-    id_cdd INTEGER REFERENCES cdd(id_cdd),
-    id_cdi INTEGER REFERENCES cdi(id_cdi),
+    id INTEGER REFERENCES contrat_ce(id),
+    id INTEGER REFERENCES contrat_cdd(id),
+    id INTEGER REFERENCES contrat_cdi(id),
     id_candidat INTEGER REFERENCES candidat(id_candidat),
 );
 
