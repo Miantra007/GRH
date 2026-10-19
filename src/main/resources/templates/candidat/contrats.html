@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mes contrats')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Mes contrats</h1>
+<div class="card">
+<table>
+    <tr><th>N°</th><th>Type</th><th>Statut</th><th></th></tr>
+    <tr th:each="cc : ${contrats}">
+        <td th:text="${cc.id}"></td><td th:text="${cc.typeContrat}"></td>
+        <td><span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
+      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></td>
+        <td><a class="btn" th:href="@{/candidat/contrats/{id}(id=${cc.id})}">Consulter</a></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(contrats)}"><td colspan="4">Aucun contrat pour le moment.</td></tr>
+</table>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Contrat')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Contrat <span th:text="${cc.typeContrat}"></span> n° <span th:text="${cc.id}"></span> <span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
+      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></h1>
+<p>Candidat : <strong th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}"></strong>
+   (<span th:text="${cc.candidat.email}"></span>)</p>
+
+<div class="card">
+    <div th:if="${cc.typeContrat == 'CE'}"><dl><dt>Employeur</dt><dd th:text="${cc.contratCe.employeur.raisonSociale}"></dd><dt>Travailleur</dt><dd th:text="${cc.contratCe.travailleur.nomPrenoms}"></dd><dt>Poste</dt><dd th:text="${cc.contratCe.poste}"></dd><dt>Catégorie</dt><dd th:text="${cc.contratCe.categorie.libelle}"></dd><dt>Missions</dt><dd th:text="${cc.contratCe.missions}"></dd><dt>Lieu de travail</dt><dd th:text="${cc.contratCe.lieuTravail}"></dd><dt>Durée (mois)</dt><dd th:text="${cc.contratCe.dureeMois}"></dd><dt>Date de début</dt><dd th:text="${cc.contratCe.dateDebut}"></dd><dt>Heures hebdo</dt><dd th:text="${cc.contratCe.heuresHebdo}"></dd><dt>Rémunération nette (Ar)</dt><dd th:text="${cc.contratCe.remunerationNette}"></dd><dt>Lieu de signature</dt><dd th:text="${cc.contratCe.lieuSignature}"></dd><dt>Date de signature</dt><dd th:text="${cc.contratCe.dateSignature}"></dd></dl></div>
+    <div th:if="${cc.typeContrat == 'CDD'}"><dl><dt>Employeur</dt><dd th:text="${cc.contratCdd.employeur.raisonSociale}"></dd><dt>Travailleur</dt><dd th:text="${cc.contratCdd.travailleur.nomPrenoms}"></dd><dt>Poste</dt><dd th:text="${cc.contratCdd.poste.libelle}"></dd><dt>Motif</dt><dd th:text="${cc.contratCdd.motif.libelle}"></dd><dt>Précision</dt><dd th:text="${cc.contratCdd.motifPrecision}"></dd><dt>Date de début</dt><dd th:text="${cc.contratCdd.dateDebut}"></dd><dt>Date de fin</dt><dd th:text="${cc.contratCdd.dateFin}"></dd><dt>Salaire de base (Ar)</dt><dd th:text="${cc.contratCdd.salaireBase}"></dd><dt>Heures hebdo</dt><dd th:text="${cc.contratCdd.dureeHebdoHeures}"></dd><dt>Lieu de travail</dt><dd th:text="${cc.contratCdd.lieuTravail}"></dd><dt>Date de conclusion</dt><dd th:text="${cc.contratCdd.dateConclusion}"></dd></dl></div>
+    <div th:if="${cc.typeContrat == 'CDI'}"><dl><dt>Employeur</dt><dd th:text="${cc.contratCdi.employeur.raisonSociale}"></dd><dt>Travailleur</dt><dd th:text="${cc.contratCdi.travailleur.nomPrenoms}"></dd><dt>Emploi</dt><dd th:text="${cc.contratCdi.emploi}"></dd><dt>Prise de fonction</dt><dd th:text="${cc.contratCdi.datePriseFonction}"></dd><dt>Établissement</dt><dd th:text="${cc.contratCdi.etablissement}"></dd><dt>Région</dt><dd th:text="${cc.contratCdi.region}"></dd><dt>Durée de l'essai</dt><dd th:text="${cc.contratCdi.dureeEssai}"></dd><dt>Salaire brut mensuel (Ar)</dt><dd th:text="${cc.contratCdi.salaireBrutMensuel}"></dd><dt>Heures hebdo</dt><dd th:text="${cc.contratCdi.dureeHebdoHeures}"></dd><dt>Lieu de signature</dt><dd th:text="${cc.contratCdi.lieuSignature}"></dd><dt>Date de signature</dt><dd th:text="${cc.contratCdi.dateSignature}"></dd></dl></div>
+</div>
+
+<div class="card">
+    <h3>Actions</h3>
+    <form th:if="${session.user.type == 'CANDIDAT' and cc.statutActuel.libelle == 'Créé'}"
+          th:action="@{/candidat/contrats/{id}/signer(id=${cc.id})}" method="post"
+          onsubmit="return confirm('Confirmer la signature de ce contrat ?');">
+        <button class="btn ok" type="submit">Signer le contrat</button>
+    </form>
+    <form th:if="${session.user.type == 'DG' and cc.statutActuel.libelle == 'Signé'}"
+          th:action="@{/dg/contrats/{id}/valider(id=${cc.id})}" method="post"
+          onsubmit="return confirm('Valider définitivement ce contrat ?');">
+        <button class="btn ok" type="submit">Valider le contrat</button>
+    </form>
+    <p th:if="${session.user.type == 'CANDIDAT' and cc.statutActuel.libelle != 'Créé'}">Vous avez déjà signé ce contrat.</p>
+    <p th:if="${session.user.type == 'DG' and cc.statutActuel.libelle != 'Signé'}"
+       th:text="${cc.statutActuel.libelle == 'Validé'} ? 'Ce contrat est déjà validé.' : 'En attente de la signature du candidat.'"></p>
+    <p th:if="${session.user.type == 'RH'}">Le RH crée le contrat ; la signature revient au candidat, la validation à la Direction générale.</p>
+    <p>
+        <a class="btn sec" th:if="${session.user.type == 'RH'}" th:href="@{/admin/contrats}">Retour</a>
+        <a class="btn sec" th:if="${session.user.type == 'DG'}" th:href="@{/dg/contrats}">Retour</a>
+        <a class="btn sec" th:if="${session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Retour</a>
+    </p>
+</div>
+
+<div class="card">
+    <h3>Historique des statuts</h3>
+    <table>
+        <tr><th>Date</th><th>Statut</th></tr>
+        <tr th:each="h : ${historique}">
+            <td th:text="${#temporals.format(h.dateChangement, 'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${h.statutContrat.libelle}"></td>
+        </tr>
+    </table>
+</div>
+</main>
+</body>
+</html>

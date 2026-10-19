@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Contrats')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Contrats</h1>
+<div class="card">
+<form method="get" th:action="@{/admin/contrats}" style="display:flex;gap:1rem;align-items:end">
+    <div style="max-width:260px"><label>Filtrer par statut</label>
+    <select name="statut" onchange="this.form.submit()">
+        <option value="">Tous</option>
+        <option th:each="s : ${statuts}" th:value="${s.libelle}" th:text="${s.libelle}" th:selected="${s.libelle == statutFiltre}"></option>
+    </select></div>
+    <a class="btn" th:href="@{/admin/candidats}">+ Nouveau contrat</a>
+</form>
+</div>
+<div class="card">
+<table>
+    <tr><th>N°</th><th>Candidat</th><th>Type</th><th>Statut</th><th></th></tr>
+    <tr th:each="cc : ${contrats}">
+        <td th:text="${cc.id}"></td>
+        <td th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}"></td>
+        <td th:text="${cc.typeContrat}"></td>
+        <td><span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
+      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></td>
+        <td><a th:href="@{/admin/contrats/{id}(id=${cc.id})}">Voir</a></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(contrats)}"><td colspan="5">Aucun contrat.</td></tr>
+</table>
+</div>
+</main>
+</body>
+</html>

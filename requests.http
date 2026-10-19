@@ -1,0 +1,64 @@
+### Scénario complet de ta tâche (VS Code "REST Client" ou IntelliJ HTTP Client)
+
+### 0) Vérifier que les statuts existent (Créé / Signé / Validé)
+GET http://localhost:8080/api/statut-contrat
+
+### 1) RH : créer un CONTRAT D'ESSAI (CE = défaut) pour le candidat 1  -> statut "Créé"
+POST http://localhost:8080/api/contrats-candidat/ce?candidatId=1
+Content-Type: application/json
+
+{
+  "employeur": {"id": 1},
+  "travailleur": {"id": 1},
+  "langue": {"id": 1},
+  "categorie": {"id": 6},
+  "poste": "Développeur junior",
+  "missions": "Développement des modules RH",
+  "lieuTravail": "Antananarivo",
+  "dureeMois": 3,
+  "dateDebut": "2026-11-02",
+  "heuresHebdo": 40,
+  "remunerationNette": 800000,
+  "lieuSignature": "Antananarivo"
+}
+
+### 1 bis) RH : créer un CDD à la place
+POST http://localhost:8080/api/contrats-candidat/cdd?candidatId=1
+Content-Type: application/json
+
+{
+  "employeur": {"id": 1},
+  "travailleur": {"id": 1},
+  "poste": {"id": 1},
+  "motif": {"id": 2},
+  "dateDebut": "2026-11-02",
+  "dateFin": "2027-05-01",
+  "salaireBase": 900000
+}
+
+### 1 ter) RH : créer un CDI
+POST http://localhost:8080/api/contrats-candidat/cdi?candidatId=1
+Content-Type: application/json
+
+{
+  "employeur": {"id": 1},
+  "travailleur": {"id": 1},
+  "datePriseFonction": "2026-11-02",
+  "emploi": "Développeur senior",
+  "salaireBrutMensuel": 1500000
+}
+
+### 2) Candidat : signer le contrat 1  -> statut "Signé"
+PUT http://localhost:8080/api/contrats-candidat/1/signer?candidatId=1
+
+### 3a) Direction générale : liste des contrats à valider
+GET http://localhost:8080/api/contrats-candidat/a-valider
+
+### 3b) Direction générale : valider  -> statut "Validé"
+PUT http://localhost:8080/api/contrats-candidat/1/valider
+
+### Historique des statuts
+GET http://localhost:8080/api/contrats-candidat/1/historique
+
+### Cas d'erreur attendu : valider un contrat déjà validé -> 409
+PUT http://localhost:8080/api/contrats-candidat/1/valider

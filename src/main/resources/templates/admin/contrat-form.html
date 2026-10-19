@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Nouveau contrat')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Nouveau contrat pour <span th:text="${candidat.prenomCandidat + ' ' + candidat.nomCandidat}"></span></h1>
+<div class="card types">
+    <strong>Type de contrat :</strong>
+    <label><input type="radio" name="type" value="CE" th:checked="${type == 'CE'}"> Contrat d'essai (CE) – par défaut</label>
+    <label><input type="radio" name="type" value="CDD" th:checked="${type == 'CDD'}"> CDD</label>
+    <label><input type="radio" name="type" value="CDI" th:checked="${type == 'CDI'}"> CDI</label>
+</div>
+<div class="card form-contrat hidden" id="f-CE">
+<h2>Contrat CE</h2>
+<form method="post" th:action="@{/admin/contrats/ce(candidatId=${candidat.id})}">
+<div class="grid">
+<div><label>Employeur *</label>
+        <select name="employeur.id" required>
+            <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
+        </select></div>
+<div><label>Travailleur * (<a th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}">créer</a>)</label>
+        <select name="travailleur.id" required>
+            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
+        </select></div>
+<div><label>Langue du contrat *</label>
+        <select name="langue.id" required>
+            <option th:each="x : ${langues}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Catégorie professionnelle *</label>
+        <select name="categorie.id" required>
+            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+        </select></div>
+<div><label>Convention collective</label>
+        <select name="convention.id"><option value="">—</option>
+            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Poste</label><input type="text" name="poste" ></div>
+<div><label>Indice de classification</label><input type="text" name="indiceClassification" ></div>
+<div><label>Lieu de travail</label><input type="text" name="lieuTravail" ></div>
+<div><label>Durée (mois)</label><input type="number" name="dureeMois" min="1"></div>
+<div><label>Date de début</label><input type="date" name="dateDebut" ></div>
+<div><label>Heures hebdomadaires</label><input type="number" name="heuresHebdo" step="0.5" value="40"></div>
+<div><label>Rémunération nette (Ar)</label><input type="number" name="remunerationNette" ></div>
+<div><label>Lieu de signature</label><input type="text" name="lieuSignature" ></div>
+<div style="grid-column:1/-1"><label>Missions</label><textarea name="missions" rows="3"></textarea></div>
+</div>
+<p><button class="btn ok" type="submit">Enregistrer (statut « Créé »)</button></p>
+</form>
+</div>
+<div class="card form-contrat hidden" id="f-CDD">
+<h2>Contrat CDD</h2>
+<form method="post" th:action="@{/admin/contrats/cdd(candidatId=${candidat.id})}">
+<div class="grid">
+<div><label>Employeur *</label>
+        <select name="employeur.id" required>
+            <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
+        </select></div>
+<div><label>Travailleur * (<a th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}">créer</a>)</label>
+        <select name="travailleur.id" required>
+            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
+        </select></div>
+<div><label>Poste *</label>
+        <select name="poste.id" required>
+            <option th:each="x : ${postes}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Motif du CDD *</label>
+        <select name="motif.id" required>
+            <option th:each="x : ${motifs}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Référence</label><input type="text" name="reference" ></div>
+<div><label>Catégorie professionnelle</label>
+        <select name="categorie.id"><option value="">—</option>
+            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+        </select></div>
+<div><label>Convention collective</label>
+        <select name="convention.id"><option value="">—</option>
+            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Précision du motif</label><input type="text" name="motifPrecision" ></div>
+<div><label>Date de début *</label><input type="date" name="dateDebut" required ></div>
+<div><label>Date de fin *</label><input type="date" name="dateFin" required ></div>
+<div><label>Durée de l'essai (jours)</label><input type="number" name="essaiDuree" ></div>
+<div><label>Heures hebdomadaires</label><input type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
+<div><label>Horaire de travail</label><input type="text" name="horaireTravail" ></div>
+<div><label>Jours travaillés / semaine</label><input type="number" name="joursTravailSemaine" ></div>
+<div><label>Lieu de travail</label><input type="text" name="lieuTravail" ></div>
+<div><label>Salaire de base (Ar) *</label><input type="number" name="salaireBase" required ></div>
+<div><label>Indice de classification</label><input type="text" name="indiceClassification" ></div>
+<div><label>Congé (jours / mois)</label><input type="number" name="congeJoursParMois" step="0.5"></div>
+<div><label>Lieu de conclusion</label><input type="text" name="lieuConclusion" ></div>
+</div>
+<p><button class="btn ok" type="submit">Enregistrer (statut « Créé »)</button></p>
+</form>
+</div>
+<div class="card form-contrat hidden" id="f-CDI">
+<h2>Contrat CDI</h2>
+<form method="post" th:action="@{/admin/contrats/cdi(candidatId=${candidat.id})}">
+<div class="grid">
+<div><label>Employeur *</label>
+        <select name="employeur.id" required>
+            <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
+        </select></div>
+<div><label>Travailleur * (<a th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}">créer</a>)</label>
+        <select name="travailleur.id" required>
+            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
+        </select></div>
+<div><label>Emploi *</label><input type="text" name="emploi" required ></div>
+<div><label>Date de prise de fonction *</label><input type="date" name="datePriseFonction" required ></div>
+<div><label>Catégorie professionnelle</label>
+        <select name="categorie.id"><option value="">—</option>
+            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+        </select></div>
+<div><label>Convention collective</label>
+        <select name="convention.id"><option value="">—</option>
+            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+        </select></div>
+<div><label>Salaire brut mensuel (Ar)</label><input type="number" name="salaireBrutMensuel" ></div>
+<div><label>Établissement</label><input type="text" name="etablissement" ></div>
+<div><label>Région</label><input type="text" name="region" ></div>
+<div><label>District / commune</label><input type="text" name="districtCommune" ></div>
+<div><label>Durée de l'essai</label><input type="text" name="dureeEssai" ></div>
+<div><label>Article de référence (essai)</label><input type="text" name="articleReferenceEssai" ></div>
+<div><label>Source de la période d'essai</label><select name="sourceEssai"><option value="">—</option>
+     <option value="CODE_TRAVAIL">Code du travail</option><option value="CONVENTION_COLLECTIVE">Convention collective</option>
+     <option value="ACCORD_ETABLISSEMENT">Accord d'établissement</option></select></div>
+<div><label>Heures hebdomadaires</label><input type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
+<div><label>Lieu de recrutement</label><input type="text" name="lieuRecrutement" ></div>
+<div><label>Lieu de signature</label><input type="text" name="lieuSignature" ></div>
+<div><label><input type="checkbox" name="nonLieAutreEntreprise" value="true"> Le travailleur n'est lié à aucune autre entreprise</label></div>
+</div>
+<p><button class="btn ok" type="submit">Enregistrer (statut « Créé »)</button></p>
+</form>
+</div>
+<script>
+    function afficher() {
+        var t = document.querySelector('input[name=type]:checked').value;
+        document.querySelectorAll('.form-contrat').forEach(function (f) { f.classList.add('hidden'); });
+        document.getElementById('f-' + t).classList.remove('hidden');
+    }
+    document.querySelectorAll('input[name=type]').forEach(function (r) { r.addEventListener('change', afficher); });
+    afficher();
+</script>
+</main>
+</body>
+</html>
