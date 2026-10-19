@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${vue.ecran.titre})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-xl py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a th:href="@{/}">Accueil</a></li>
+            <li class="breadcrumb-item" th:text="${vue.ecran.groupe.libelle}">Rubrique</li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${vue.ecran.titre}">Écran</li>
+        </ol>
+    </nav>
+
+    <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid" th:classappend="${vue.ecran.icone}"></i></span>
+        <div class="flex-grow-1">
+            <h1 th:text="${vue.ecran.titre}">Titre</h1>
+            <p class="text-muted small mb-0">
+                <span id="compteur" th:text="${#lists.size(objets)}">0</span> élément(s)
+            </p>
+        </div>
+        <a class="btn btn-primary" th:href="@{${vue.base + '/nouveau'}}">
+            <i class="fa-solid fa-plus me-1"></i> Ajouter
+        </a>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="p-3 border-bottom" th:unless="${#lists.isEmpty(objets)}">
+            <div class="input-group" style="max-width: 380px">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="search" class="form-control" placeholder="Rechercher…" aria-label="Rechercher"
+                       data-filtre-tableau="#tableau" data-compteur="#compteur" data-vide="#aucunResultat">
+            </div>
+        </div>
+
+        <div class="table-responsive" th:unless="${#lists.isEmpty(objets)}">
+            <table class="table table-grh" id="tableau">
+                <thead>
+                <tr>
+                    <th class="col-id">#</th>
+                    <th th:each="c : ${vue.colonnes}" th:text="${c.libelle}">Colonne</th>
+                    <th class="col-actions"><span class="visually-hidden">Actions</span></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="o : ${objets}" th:attr="data-href=@{${vue.base + '/' + o.id}}">
+                    <td class="col-id" th:text="${o.id}">1</td>
+                    <td th:each="c : ${vue.colonnes}">
+                        <th:block th:switch="${c.type.name()}">
+                            <span th:case="'BOOLEEN'" class="badge rounded-pill"
+                                  th:classappend="${vue.estCoche(o, c)} ? 'text-bg-success' : 'text-bg-light border'"
+                                  th:text="${vue.afficher(o, c)}">Oui</span>
+                            <span th:case="*" th:text="${vue.afficher(o, c)}">Valeur</span>
+                        </th:block>
+                    </td>
+                    <td class="col-actions">
+                        <a class="btn btn-light border btn-icone" th:href="@{${vue.base + '/' + o.id}}" title="Modifier">
+                            <i class="fa-solid fa-pen"></i><span class="visually-hidden">Modifier</span>
+                        </a>
+                        <button type="button" class="btn btn-light border btn-icone text-danger" title="Supprimer"
+                                data-bs-toggle="modal" data-bs-target="#modaleSuppression"
+                                th:attr="data-url=@{${vue.base + '/' + o.id + '/supprimer'}},data-libelle=${o.affichage}">
+                            <i class="fa-solid fa-trash-can"></i><span class="visually-hidden">Supprimer</span>
+                        </button>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div id="aucunResultat" class="etat-vide d-none">
+                <i class="fa-solid fa-magnifying-glass d-block"></i>
+                Aucun résultat pour cette recherche.
+            </div>
+        </div>
+
+        <div class="etat-vide" th:if="${#lists.isEmpty(objets)}">
+            <i class="fa-solid d-block" th:classappend="${vue.ecran.icone}"></i>
+            <p class="fw-semibold text-body mb-1">Aucun élément pour le moment</p>
+            <p class="small mb-3">Commencez par en créer un.</p>
+            <a class="btn btn-primary" th:href="@{${vue.base + '/nouveau'}}"><i class="fa-solid fa-plus me-1"></i> Créer</a>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/layout :: modaleSuppression}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Tableau de bord')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container-xl py-4">
+    <div class="hero p-4 p-md-5 mb-4 shadow-sm">
+        <span class="badge rounded-pill mb-3"><i class="fa-solid fa-gauge-high me-1"></i> Tableau de bord</span>
+        <h1 class="h3 fw-bold mb-2">Gestion des ressources humaines</h1>
+        <p class="mb-4 opacity-75">Contrats, parties, organisation, recrutement et référentiels au même endroit.</p>
+        <div class="d-flex flex-wrap gap-2 position-relative" style="z-index: 1">
+            <a class="btn btn-light" th:href="@{/contrats/cdi/nouveau}"><i class="fa-solid fa-file-contract me-1"></i> Nouveau CDI</a>
+            <a class="btn btn-outline-light" th:href="@{/contrats/cdd/nouveau}"><i class="fa-solid fa-calendar-days me-1"></i> Nouveau CDD</a>
+            <a class="btn btn-outline-light" th:href="@{/travailleurs/nouveau}"><i class="fa-solid fa-id-card me-1"></i> Nouveau travailleur</a>
+        </div>
+    </div>
+
+    <section class="mb-4" th:each="r : ${rubriques}">
+        <h2 class="h6 fw-bold text-uppercase text-muted mb-3">
+            <i class="fa-solid me-2" th:classappend="${r.groupe.icone}"></i><span th:text="${r.groupe.libelle}">Rubrique</span>
+        </h2>
+        <div class="row g-3">
+            <div class="col-sm-6 col-lg-4 col-xl-3" th:each="l : ${r.liens}">
+                <a class="tuile" th:href="@{${l.ecran.base}}">
+                    <span class="icone"><i class="fa-solid" th:classappend="${l.ecran.icone}"></i></span>
+                    <span>
+                        <span class="nombre d-block" th:text="${l.controleur.compter()}">0</span>
+                        <span class="titre" th:text="${l.ecran.titre}">Écran</span>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

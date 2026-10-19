@@ -1,0 +1,7 @@
+package com.grh.controller.crud;
+
+public enum TypeChamp {
+    TEXTE, TEXTE_LONG, EMAIL, TELEPHONE, MOT_DE_PASSE,
+    ENTIER, DECIMAL, DATE, DATE_HEURE, BOOLEEN,
+    RELATION, ENUMERATION, AUTOCOMPLETE
+}
