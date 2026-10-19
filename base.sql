@@ -7,8 +7,8 @@ CREATE TABLE role(
     libelle VARCHAR(50)
 );
 
-CREATE TABLE employeur(
-    id_employeur serial PRIMARY key,
+CREATE TABLE responsable(
+    id_responsable serial PRIMARY key,
     id_role INTEGER REFERENCES role(id_role),
     email VARCHAR(150) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255) NOT NULL,
@@ -18,7 +18,7 @@ CREATE TABLE employeur(
 CREATE Table departement(
     id_dept serial PRIMARY key,
     nom_dept VARCHAR(50),
-    id_employeur INTEGER REFERENCES employeur(id_employeur)
+    id_responsable INTEGER REFERENCES responsable(id_responsable)
 );
 
 CREATE TABLE employe(
@@ -31,14 +31,20 @@ CREATE TABLE employe(
 CREATE Table poste(
     id_poste serial PRIMARY key,
     libelle VARCHAR(50),
-    id_employeur INTEGER REFERENCES employeur(id_employeur),
+    id_responsable INTEGER REFERENCES responsable(id_responsable),
     date_creation date
 );
 
 CREATE TABLE poste_fille(
     id_poste_fille serial PRIMARY key,
     id_poste INTEGER REFERENCES poste(id_poste),
-    id_dept INTEGER REFERENCES departement(id_dept)
+    id_dept INTEGER REFERENCES departement(id_dept),
+    id_statut_poste INTEGER REFERENCES statut_poste(id_statut_poste)
+);
+
+CREATE TABLE statut_poste(
+    id_statut_poste serial PRIMARY key,
+    libelle VARCHAR(20)
 );
 
 CREATE Table candidat(
@@ -167,5 +173,24 @@ CREATE Table statut_contrat(
 
 CREATE Table contrat_candidat(
     id_contrat_candidat serial PRIMARY key,
-    id_ce INTEGER
-)
+    id_ce INTEGER REFERENCES ce(id_ce),
+    id_cdd INTEGER REFERENCES cdd(id_cdd),
+    id_cdi INTEGER REFERENCES cdi(id_cdi),
+    id_candidat INTEGER REFERENCES candidat(id_candidat),
+);
+
+CREATE Table historique_contrat_employe(
+    historique_contrat_employe serial PRIMARY key,
+    id_employe INTEGER REFERENCES employe(id_employe),
+    id_contrat_candidat INTEGER REFERENCES contrat_candidat(id_contrat_candidat),
+    date_embauche date
+);
+
+CREATE TABLE historique_statut_contrat(
+    id_historique_statut_contrat serial PRIMARY key,
+    id_statut_contrat INTEGER REFERENCES statut_contrat(id_statut_contrat),
+    id_contrat_candidat INTEGER REFERENCES contrat_candidat(id_contrat_candidat),
+    date date
+);
+
+---------------------------------------------CONTRAT---------------------------------------------------
