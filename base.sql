@@ -1,3 +1,5 @@
+create DATABASE grh;
+\c grh;
 CREATE TABLE role(
     id_role serial PRIMARY key,
     libelle VARCHAR(50)
