@@ -1,5 +1,7 @@
 create DATABASE grh;
-\c grh;
+
+\ c grh;
+
 CREATE TABLE role(
     id_role serial PRIMARY key,
     libelle VARCHAR(50)
@@ -8,7 +10,6 @@ CREATE TABLE role(
 CREATE TABLE employeur(
     id_employeur serial PRIMARY key,
     id_role INTEGER REFERENCES role(id_role),
-    id_dept INTEGER REFERENCES departement(id_dept),
     email VARCHAR(150) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255) NOT NULL,
     date_embauche DATE
@@ -17,21 +18,27 @@ CREATE TABLE employeur(
 CREATE Table departement(
     id_dept serial PRIMARY key,
     nom_dept VARCHAR(50),
-    id_manager INTEGER REFERENCES manager(id_manager)
+    id_employeur INTEGER REFERENCES employeur(id_employeur)
 );
 
 CREATE TABLE employe(
     id_employe serial PRIMARY key,
     nom_employe VARCHAR(50),
-    id_poste INTEGER REFERENCES poste(id_poste),
+    id_poste_fille INTEGER REFERENCES poste_fille(id_poste_fille),
     date_embauche date
 );
 
 CREATE Table poste(
     id_poste serial PRIMARY key,
     libelle VARCHAR(50),
-    id_dept INTEGER REFERENCES departement(id_dept),
+    id_employeur INTEGER REFERENCES employeur(id_employeur),
     date_creation date
+);
+
+CREATE TABLE poste_fille(
+    id_poste_fille serial PRIMARY key,
+    id_poste INTEGER REFERENCES poste(id_poste),
+    id_dept INTEGER REFERENCES departement(id_dept)
 );
 
 CREATE Table candidat(
@@ -151,3 +158,14 @@ CREATE Table entretien(
     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
     date_entretien date
 );
+
+---------------------------------------------CONTRAT---------------------------------------------------
+CREATE Table statut_contrat(
+    id_statut_contrat serial PRIMARY key,
+    libelle VARCHAR(20)
+);
+
+CREATE Table contrat_candidat(
+    id_contrat_candidat serial PRIMARY key,
+    id_ce INTEGER
+)
