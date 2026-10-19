@@ -1,232 +1,41 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrat de travail CDI</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
-
-    <style>
-        :root {
-            --grh-primary: #1f5fbf;
-            --grh-primary-rgb: 31, 95, 191;
-            --grh-primary-dark: #174a96;
-            --grh-bg: #f4f6fb;
-            --grh-border: #e3e8f0;
-            --grh-muted: #6b7686;
-            --bs-primary: var(--grh-primary);
-            --bs-primary-rgb: var(--grh-primary-rgb);
-            --bs-body-font-family: "Open Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-            --bs-body-color: #1f2937;
-            --bs-border-radius: .6rem;
-        }
-        body { background: var(--grh-bg); font-size: .95rem; }
-
-        /* ---------- Barre supérieure ---------- */
-        .topbar {
-            background: #fff;
-            border-bottom: 1px solid var(--grh-border);
-        }
-        .brand-logo {
-            width: 36px; height: 36px;
-            display: inline-flex; align-items: center; justify-content: center;
-            border-radius: .6rem;
-            background: var(--grh-primary); color: #fff;
-        }
-
-        /* ---------- En-tête du document ---------- */
-        .doc-hero {
-            background: linear-gradient(120deg, var(--grh-primary) 0%, #3b7be0 100%);
-            color: #fff;
-            border-radius: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .doc-hero::after {
-            content: "";
-            position: absolute; right: -60px; top: -60px;
-            width: 220px; height: 220px; border-radius: 50%;
-            background: rgba(255, 255, 255, .08);
-        }
-        .doc-hero .badge { background: rgba(255, 255, 255, .18); font-weight: 600; }
-
-        /* ---------- Navigation latérale ---------- */
-        .side-nav { position: sticky; top: 1.5rem; }
-        .side-nav .nav-link {
-            color: var(--grh-muted);
-            border-radius: .5rem;
-            padding: .55rem .75rem;
-            display: flex; align-items: center; gap: .65rem;
-            font-weight: 500;
-        }
-        .side-nav .nav-link .step {
-            width: 26px; height: 26px; flex-shrink: 0;
-            border-radius: 50%;
-            border: 1.5px solid var(--grh-border);
-            display: inline-flex; align-items: center; justify-content: center;
-            font-size: .75rem; background: #fff;
-        }
-        .side-nav .nav-link:hover { background: #fff; color: var(--bs-body-color); }
-        .side-nav .nav-link.active {
-            background: rgba(var(--grh-primary-rgb), .08);
-            color: var(--grh-primary);
-        }
-        .side-nav .nav-link.active .step {
-            border-color: var(--grh-primary);
-            background: var(--grh-primary); color: #fff;
-        }
-        .side-nav .nav-link.done .step {
-            border-color: #198754; background: #198754; color: #fff;
-        }
-
-        /* ---------- Sections ---------- */
-        .section-card {
-            border: 1px solid var(--grh-border);
-            border-radius: 1rem;
-            scroll-margin-top: 1.5rem;
-        }
-        .section-icon {
-            width: 42px; height: 42px; flex-shrink: 0;
-            border-radius: .75rem;
-            display: inline-flex; align-items: center; justify-content: center;
-            background: rgba(var(--grh-primary-rgb), .1);
-            color: var(--grh-primary);
-            font-size: 1.1rem;
-        }
-        .section-card .card-title { font-weight: 700; margin-bottom: .1rem; }
-
-        .form-label { font-weight: 600; font-size: .85rem; margin-bottom: .35rem; }
-        .form-label .req { color: #dc3545; margin-left: 2px; }
-        .form-control, .form-select { padding: .6rem .85rem; border-color: #d5dce7; }
-        .form-control:focus, .form-select:focus {
-            border-color: var(--grh-primary);
-            box-shadow: 0 0 0 .2rem rgba(var(--grh-primary-rgb), .15);
-        }
-        .input-group-text { background: #f7f9fc; border-color: #d5dce7; color: var(--grh-muted); }
-        .form-text { color: var(--grh-muted); }
-
-        /* ---------- Autocomplétion ---------- */
-        .autocomplete { position: relative; }
-        .autocomplete-menu {
-            position: absolute; left: 0; right: 0; top: calc(100% + 4px); z-index: 20;
-            max-height: 260px; overflow-y: auto;
-            margin: 0; padding: .3rem;
-            background: #fff;
-            border: 1px solid var(--grh-border);
-            border-radius: .6rem;
-            box-shadow: 0 10px 28px rgba(16, 24, 40, .12);
-            display: none;
-        }
-        .autocomplete-menu.show { display: block; }
-        .autocomplete-menu li {
-            display: flex; align-items: center; justify-content: space-between; gap: .75rem;
-            padding: .5rem .7rem;
-            border-radius: .45rem;
-            cursor: pointer;
-        }
-        .autocomplete-menu li.active, .autocomplete-menu li:hover { background: rgba(var(--grh-primary-rgb), .08); }
-        .autocomplete-menu li .pays { color: var(--grh-muted); font-size: .8rem; }
-        .autocomplete-menu li .code {
-            font-size: .7rem; font-weight: 700; color: var(--grh-primary);
-            background: rgba(var(--grh-primary-rgb), .1);
-            border-radius: .3rem; padding: .1rem .35rem; margin-right: .5rem;
-        }
-        .autocomplete-menu mark { background: none; padding: 0; color: var(--grh-primary); font-weight: 700; }
-        .autocomplete-menu .vide { color: var(--grh-muted); cursor: default; justify-content: center; }
-        .autocomplete-menu .vide:hover { background: none; }
-        .was-validated .autocomplete:has(:invalid) .invalid-feedback { display: block; }
-
-        /* ---------- Aperçu des clauses ---------- */
-        .clause {
-            background: #f8fafd;
-            border-left: 3px solid var(--grh-primary);
-            border-radius: 0 .6rem .6rem 0;
-            padding: .85rem 1rem;
-            font-size: .88rem;
-            color: #374151;
-            line-height: 1.65;
-        }
-        .clause .art { font-weight: 700; color: var(--grh-primary); margin-right: .25rem; }
-        .clause .bind {
-            font-weight: 600;
-            color: var(--grh-primary-dark);
-            background: rgba(var(--grh-primary-rgb), .08);
-            padding: 0 .3rem; border-radius: .25rem;
-        }
-        .clause .bind.empty { color: #a0a9b8; font-style: italic; font-weight: 400; }
-
-        .accordion-button { font-weight: 600; font-size: .9rem; }
-        .accordion-button:not(.collapsed) {
-            color: var(--grh-primary);
-            background: rgba(var(--grh-primary-rgb), .06);
-            box-shadow: none;
-        }
-        .accordion-button:focus { box-shadow: 0 0 0 .2rem rgba(var(--grh-primary-rgb), .15); }
-        .accordion-body { font-size: .88rem; color: #374151; }
-
-        /* ---------- Signatures ---------- */
-        .sign-box {
-            border: 1.5px dashed #cdd6e4;
-            border-radius: .75rem;
-            height: 110px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            color: var(--grh-muted); background: #fff;
-            font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; font-weight: 600;
-        }
-        .sign-box i { font-size: 1.3rem; margin-bottom: .4rem; color: #b6c1d3; }
-
-        /* ---------- Barre d'actions ---------- */
-        .action-bar {
-            position: sticky; bottom: 0; z-index: 10;
-            background: rgba(255, 255, 255, .92);
-            backdrop-filter: blur(8px);
-            border-top: 1px solid var(--grh-border);
-        }
-        .btn { font-weight: 600; padding: .55rem 1.1rem; }
-        .btn-primary { --bs-btn-bg: var(--grh-primary); --bs-btn-border-color: var(--grh-primary);
-                       --bs-btn-hover-bg: var(--grh-primary-dark); --bs-btn-hover-border-color: var(--grh-primary-dark); }
-        .progress { height: 6px; background: #e6ebf3; }
-        .progress-bar { background: var(--grh-primary); transition: width .3s; }
-
-        @media print {
-            .topbar, .side-col, .action-bar, .no-print { display: none !important; }
-            body { background: #fff; }
-            .section-card { break-inside: avoid; box-shadow: none !important; }
-        }
-    </style>
-</head>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org" th:with="creation=${objet.id == null}">
+<head th:replace="~{fragments/layout :: head(${creation} ? 'Nouveau CDI' : ${objet.affichage})}"></head>
 <body data-bs-spy="scroll" data-bs-target="#nav-sections" data-bs-root-margin="0px 0px -60%">
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
 
-<!-- ===================== BARRE SUPÉRIEURE ===================== -->
-<nav class="topbar py-2">
-    <div class="container-xl d-flex align-items-center justify-content-between">
-        <a class="d-flex align-items-center gap-2 text-decoration-none text-body" th:href="@{/}">
-            <span class="brand-logo"><i class="fa-solid fa-people-group"></i></span>
-            <span class="fw-bold fs-5">GRH</span>
-        </a>
-        <nav aria-label="breadcrumb" class="d-none d-md-block">
-            <ol class="breadcrumb mb-0 small">
-                <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none">Accueil</a></li>
-                <li class="breadcrumb-item"><a href="#" class="text-decoration-none">Contrats</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Nouveau CDI</li>
-            </ol>
-        </nav>
-    </div>
-</nav>
+<form th:action="@{/contrats/cdi/enregistrer}" th:object="${objet}" method="post" id="contratForm"
+      class="needs-validation d-flex flex-column flex-grow-1" novalidate>
+<input type="hidden" name="id" th:unless="${creation}" th:value="${objet.id}">
 
-<form th:action="@{/contrat/cdi}" method="post" id="contratForm" class="needs-validation" novalidate>
 <div class="container-xl py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-3">
+            <li class="breadcrumb-item"><a th:href="@{/}">Accueil</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/contrats/cdi}">Contrats CDI</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${creation} ? 'Nouveau' : 'Modifier'">Nouveau</li>
+        </ol>
+    </nav>
 
     <!-- ===================== EN-TÊTE ===================== -->
-    <div class="doc-hero p-4 p-md-5 mb-4 shadow-sm">
+    <div class="hero p-4 p-md-5 mb-4 shadow-sm">
         <span class="badge rounded-pill mb-3"><i class="fa-solid fa-file-contract me-1"></i> Annexe I</span>
-        <h1 class="h3 fw-bold mb-2">Contrat de travail à durée indéterminée</h1>
+        <h1 class="h3 fw-bold mb-2" th:text="${creation} ? 'Contrat de travail à durée indéterminée' : ${objet.affichage}">
+            Contrat de travail à durée indéterminée</h1>
         <p class="mb-0 opacity-75">Renseignez les informations ci-dessous : les clauses du contrat se complètent automatiquement.</p>
+    </div>
+
+    <div th:replace="~{fragments/layout :: flash}"></div>
+
+    <div class="alert alert-danger d-flex gap-2" role="alert" th:unless="${#lists.isEmpty(erreursGlobales) and #maps.isEmpty(erreurs)}">
+        <i class="fa-solid fa-triangle-exclamation mt-1"></i>
+        <div>
+            <strong>Le contrat n'a pas été enregistré.</strong>
+            <ul class="mb-0 ps-3">
+                <li th:each="e : ${erreursGlobales}" th:text="${e}"></li>
+                <li th:each="e : ${erreurs}" th:text="${e.value}"></li>
+            </ul>
+        </div>
     </div>
 
     <div class="row g-4">
@@ -234,7 +43,7 @@
         <!-- ===================== NAVIGATION ===================== -->
         <aside class="col-lg-3 side-col d-none d-lg-block">
             <div class="side-nav">
-                <div class="card border-0 shadow-sm rounded-4 p-3 mb-3">
+                <div class="card-grh p-3 mb-3">
                     <div class="d-flex justify-content-between small mb-2">
                         <span class="fw-semibold">Progression</span>
                         <span class="text-muted" id="progressLabel">0 %</span>
@@ -242,12 +51,11 @@
                     <div class="progress"><div class="progress-bar" id="progressBar" style="width:0%"></div></div>
                 </div>
                 <nav id="nav-sections" class="nav flex-column gap-1">
-                    <a class="nav-link" href="#s-employeur" data-section="s-employeur"><span class="step">1</span> Employeur</a>
-                    <a class="nav-link" href="#s-travailleur" data-section="s-travailleur"><span class="step">2</span> Travailleur</a>
-                    <a class="nav-link" href="#s-engagement" data-section="s-engagement"><span class="step">3</span> Engagement</a>
-                    <a class="nav-link" href="#s-remuneration" data-section="s-remuneration"><span class="step">4</span> Essai & rémunération</a>
-                    <a class="nav-link" href="#s-clauses" data-section="s-clauses"><span class="step">5</span> Clauses générales</a>
-                    <a class="nav-link" href="#s-signature" data-section="s-signature"><span class="step">6</span> Signature</a>
+                    <a class="nav-link" href="#s-parties" data-section="s-parties"><span class="step">1</span> Parties</a>
+                    <a class="nav-link" href="#s-engagement" data-section="s-engagement"><span class="step">2</span> Engagement</a>
+                    <a class="nav-link" href="#s-remuneration" data-section="s-remuneration"><span class="step">3</span> Essai & rémunération</a>
+                    <a class="nav-link" href="#s-clauses" data-section="s-clauses"><span class="step">4</span> Clauses générales</a>
+                    <a class="nav-link" href="#s-signature" data-section="s-signature"><span class="step">5</span> Signature</a>
                 </nav>
             </div>
         </aside>
@@ -255,139 +63,111 @@
         <!-- ===================== CONTENU ===================== -->
         <main class="col-lg-9 d-flex flex-column gap-4">
 
-            <!-- 1. EMPLOYEUR -->
-            <section id="s-employeur" class="card section-card shadow-sm">
-                <div class="card-body p-4">
+            <!-- 1. PARTIES -->
+            <section id="s-parties" class="section-card">
+                <div class="p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
-                        <span class="section-icon"><i class="fa-solid fa-building"></i></span>
+                        <span class="section-icon"><i class="fa-solid fa-handshake"></i></span>
                         <div>
-                            <h2 class="card-title h5">L'employeur</h2>
-                            <p class="text-muted small mb-0">Entreprise et représentant signataire</p>
+                            <h2 class="card-title h5">Les parties</h2>
+                            <p class="text-muted small mb-0">Employeur, travailleur et statut du contrat</p>
                         </div>
                     </div>
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label for="nomEntreprise" class="form-label">Nom de l'entreprise<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="nomEntreprise" name="nomEntreprise" required>
-                            <div class="invalid-feedback">Le nom de l'entreprise est requis.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="adresseEntreprise" class="form-label">Siège social<span class="req">*</span></label>
+                            <label for="employeur" class="form-label">Employeur<span class="req">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-location-dot"></i></span>
-                                <input type="text" class="form-control" id="adresseEntreprise" name="adresseEntreprise" required>
+                                <span class="input-group-text"><i class="fa-solid fa-building"></i></span>
+                                <select class="form-select" id="employeur" name="employeur" required
+                                        th:classappend="${erreurs.containsKey('employeur')} ? 'is-invalid'">
+                                    <option value="">— Choisir un employeur —</option>
+                                    <option th:each="e : ${options['employeur']}" th:value="${e.id}" th:text="${e.affichage}"
+                                            th:selected="${objet.employeur?.id == e.id}"></option>
+                                </select>
+                                <a class="btn btn-light border" th:href="@{/employeurs/nouveau}" target="_blank" title="Créer un employeur">
+                                    <i class="fa-solid fa-plus"></i><span class="visually-hidden">Créer un employeur</span>
+                                </a>
+                            </div>
+                            <div class="form-text" th:if="${#lists.isEmpty(options['employeur'])}">
+                                Aucun employeur enregistré : créez-en un avec <i class="fa-solid fa-plus"></i>.
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="nomRepresentant" class="form-label">Représenté par<span class="req">*</span></label>
+                            <label for="travailleur" class="form-label">Travailleur<span class="req">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-user-tie"></i></span>
-                                <input type="text" class="form-control" id="nomRepresentant" name="nomRepresentant" placeholder="Nom et prénoms" required>
+                                <span class="input-group-text"><i class="fa-solid fa-id-card"></i></span>
+                                <select class="form-select" id="travailleur" name="travailleur" required
+                                        th:classappend="${erreurs.containsKey('travailleur')} ? 'is-invalid'">
+                                    <option value="">— Choisir un travailleur —</option>
+                                    <option th:each="t : ${options['travailleur']}" th:value="${t.id}" th:text="${t.affichage}"
+                                            th:selected="${objet.travailleur?.id == t.id}"></option>
+                                </select>
+                                <a class="btn btn-light border" th:href="@{/travailleurs/nouveau}" target="_blank" title="Créer un travailleur">
+                                    <i class="fa-solid fa-plus"></i><span class="visually-hidden">Créer un travailleur</span>
+                                </a>
+                            </div>
+                            <div class="form-text" th:if="${#lists.isEmpty(options['travailleur'])}">
+                                Aucun travailleur enregistré : créez-en un avec <i class="fa-solid fa-plus"></i>.
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <label for="fonctionRepresentant" class="form-label">Agissant en qualité de<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="fonctionRepresentant" name="fonctionRepresentant" placeholder="Ex. Directeur général" required>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. TRAVAILLEUR -->
-            <section id="s-travailleur" class="card section-card shadow-sm">
-                <div class="card-body p-4">
-                    <div class="d-flex align-items-center gap-3 mb-4">
-                        <span class="section-icon"><i class="fa-solid fa-id-card"></i></span>
-                        <div>
-                            <h2 class="card-title h5">Le travailleur</h2>
-                            <p class="text-muted small mb-0">État civil de la personne engagée</p>
-                        </div>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-3">
-                            <label for="civilite" class="form-label">Civilité<span class="req">*</span></label>
-                            <select class="form-select" id="civilite" name="civilite" required>
-                                <option value="Monsieur">Monsieur</option>
-                                <option value="Madame">Madame</option>
+                            <label for="statut" class="form-label">Statut du contrat<span class="req">*</span></label>
+                            <select class="form-select" id="statut" name="statut" required
+                                    th:classappend="${erreurs.containsKey('statut')} ? 'is-invalid'">
+                                <option value="">— Choisir —</option>
+                                <option th:each="s : ${options['statut']}" th:value="${s.id}" th:text="${s.affichage}"
+                                        th:selected="${objet.statut?.id == s.id}"></option>
                             </select>
                         </div>
-                        <div class="col-md-9">
-                            <label for="nomTravailleur" class="form-label">Nom et prénoms<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="nomTravailleur" name="nomTravailleur" required>
-                            <div class="invalid-feedback">Le nom du travailleur est requis.</div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="dateNaissance" class="form-label">Date de naissance<span class="req">*</span></label>
-                            <input type="date" class="form-control" id="dateNaissance" name="dateNaissance" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="lieuNaissance" class="form-label">Lieu de naissance<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="lieuNaissance" name="lieuNaissance" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="filiation" class="form-label">Fils / Fille de</label>
-                            <input type="text" class="form-control" id="filiation" name="filiation" placeholder="Nom des parents">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="residence" class="form-label">Résidant à<span class="req">*</span></label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fa-solid fa-house"></i></span>
-                                <input type="text" class="form-control" id="residence" name="residence" required>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="profession" class="form-label">Profession</label>
-                            <input type="text" class="form-control" id="profession" name="profession">
-                        </div>
-                        <div class="col-md-6">
-                            <label for="nationalite" class="form-label">Nationalité<span class="req">*</span></label>
-                            <div class="autocomplete" th:attr="data-source=@{/data/pays.json}" data-source="/data/pays.json">
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fa-solid fa-flag"></i></span>
-                                    <input type="text" class="form-control" id="nationalite" name="nationalite" value="Malagasy"
-                                           placeholder="Rechercher un pays ou une nationalité" autocomplete="off"
-                                           role="combobox" aria-expanded="false" aria-controls="nationaliteListe" aria-autocomplete="list" required>
-                                </div>
-                                <input type="hidden" id="codePays" name="codePays" value="MG">
-                                <ul class="autocomplete-menu list-unstyled" id="nationaliteListe" role="listbox"></ul>
-                                <div class="invalid-feedback">Choisissez une nationalité dans la liste.</div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 3. ENGAGEMENT -->
-            <section id="s-engagement" class="card section-card shadow-sm">
-                <div class="card-body p-4">
+            <!-- 2. ENGAGEMENT -->
+            <section id="s-engagement" class="section-card">
+                <div class="p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="section-icon"><i class="fa-solid fa-briefcase"></i></span>
                         <div class="flex-grow-1">
                             <h2 class="card-title h5">Engagement et lieu de travail</h2>
-                            <p class="text-muted small mb-0">Articles 1 à 4</p>
+                            <p class="text-muted small mb-0">Articles 1 à 3</p>
                         </div>
-                        <span class="badge text-bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
+                        <span class="badge bg-success-subtle text-success-emphasis rounded-pill px-3 py-2">
                             <i class="fa-solid fa-infinity me-1"></i> Durée indéterminée
                         </span>
                     </div>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label for="emploi" class="form-label">Emploi occupé<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="emploi" name="emploi" placeholder="Ex. Comptable" required>
+                            <input type="text" class="form-control" th:field="*{emploi}" placeholder="Ex. Comptable" required
+                                   th:classappend="${erreurs.containsKey('emploi')} ? 'is-invalid'">
                         </div>
                         <div class="col-md-6">
-                            <label for="dateDebut" class="form-label">Date de prise de fonction<span class="req">*</span></label>
-                            <input type="date" class="form-control" id="dateDebut" name="dateDebut" required>
+                            <label for="datePriseFonction" class="form-label">Date de prise de fonction<span class="req">*</span></label>
+                            <input type="date" class="form-control" th:field="*{datePriseFonction}" required
+                                   th:classappend="${erreurs.containsKey('datePriseFonction')} ? 'is-invalid'">
                         </div>
-                        <div class="col-md-6">
-                            <label for="etablissement" class="form-label">Établissement d'affectation<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="etablissement" name="etablissement" required>
+                        <div class="col-md-4">
+                            <label for="etablissement" class="form-label">Établissement d'affectation</label>
+                            <input type="text" class="form-control" th:field="*{etablissement}">
                         </div>
-                        <div class="col-md-6">
-                            <label for="regionDistrict" class="form-label">Région / District<span class="req">*</span></label>
+                        <div class="col-md-4">
+                            <label for="region" class="form-label">Région</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-solid fa-map-location-dot"></i></span>
-                                <input type="text" class="form-control" id="regionDistrict" name="regionDistrict" required>
+                                <input type="text" class="form-control" th:field="*{region}">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="districtCommune" class="form-label">District / Commune</label>
+                            <input type="text" class="form-control" th:field="*{districtCommune}">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" th:field="*{nonLieAutreEntreprise}">
+                                <label class="form-check-label" for="nonLieAutreEntreprise1">
+                                    Le travailleur déclare formellement n'être lié à aucune autre entreprise
+                                </label>
                             </div>
                         </div>
                     </div>
@@ -396,16 +176,15 @@
                     <div class="d-flex flex-column gap-2">
                         <div class="clause">
                             <span class="art">Article 1</span>
-                            <span class="bind" data-bind="civilite"></span> <span class="bind" data-bind="nomTravailleur"></span>
-                            est engagé(e), à compter du <span class="bind" data-bind="dateDebut"></span>,
-                            par <span class="bind" data-bind="nomEntreprise"></span>
+                            <span class="bind" data-bind="travailleur"></span>
+                            est engagé(e), à compter du <span class="bind" data-bind="datePriseFonction"></span>,
+                            par <span class="bind" data-bind="employeur"></span>
                             en qualité de <span class="bind" data-bind="emploi"></span>.
-                            Le travailleur déclare formellement n'être lié à aucune autre entreprise.
                         </div>
                         <div class="clause">
                             <span class="art">Article 2</span>
                             Le travailleur est affecté à <span class="bind" data-bind="etablissement"></span>
-                            sis à <span class="bind" data-bind="regionDistrict"></span>.
+                            sis à <span class="bind" data-bind="districtCommune"></span>, région <span class="bind" data-bind="region"></span>.
                             En fonction des nécessités de service, il pourra être appelé à servir en tout autre point du territoire national.
                         </div>
                         <div class="clause">
@@ -416,9 +195,9 @@
                 </div>
             </section>
 
-            <!-- 4. ESSAI & RÉMUNÉRATION -->
-            <section id="s-remuneration" class="card section-card shadow-sm">
-                <div class="card-body p-4">
+            <!-- 3. ESSAI & RÉMUNÉRATION -->
+            <section id="s-remuneration" class="section-card">
+                <div class="p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="section-icon"><i class="fa-solid fa-sack-dollar"></i></span>
                         <div>
@@ -430,88 +209,105 @@
                     <h3 class="h6 fw-bold mb-3"><i class="fa-solid fa-hourglass-half text-primary me-2"></i>Période d'essai</h3>
                     <div class="row g-3 mb-4">
                         <div class="col-md-4">
-                            <label for="dureeEssai" class="form-label">Durée<span class="req">*</span></label>
+                            <label for="essaiNombre" class="form-label">Durée</label>
                             <div class="input-group">
-                                <input type="number" min="0" class="form-control" id="dureeEssai" name="dureeEssai" required>
-                                <select class="form-select" name="uniteEssai" id="uniteEssai" style="max-width:110px">
+                                <input type="number" min="0" class="form-control" id="essaiNombre">
+                                <select class="form-select" id="essaiUnite" style="max-width:110px" aria-label="Unité">
                                     <option value="jours">jours</option>
                                     <option value="mois" selected>mois</option>
                                 </select>
                             </div>
+                            <!-- Valeur réellement enregistrée, ex. "3 mois" -->
+                            <input type="hidden" th:field="*{dureeEssai}">
                         </div>
                         <div class="col-md-5">
                             <label for="sourceEssai" class="form-label">Conformément au / à la</label>
                             <select class="form-select" id="sourceEssai" name="sourceEssai">
-                                <option>Code du travail</option>
-                                <option>Convention collective</option>
-                                <option>Accord d'établissement</option>
+                                <option value="">— Choisir —</option>
+                                <option th:each="s : ${T(com.grh.model.enums.SourceEssai).values()}" th:value="${s.name()}"
+                                        th:text="${s.libelle}" th:selected="${objet.sourceEssai == s}"></option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label for="articleEssai" class="form-label">Article n°</label>
-                            <input type="text" class="form-control" id="articleEssai" name="articleEssai">
+                            <label for="articleReferenceEssai" class="form-label">Article n°</label>
+                            <input type="text" class="form-control" th:field="*{articleReferenceEssai}">
                         </div>
                     </div>
 
                     <h3 class="h6 fw-bold mb-3"><i class="fa-solid fa-layer-group text-primary me-2"></i>Classement et salaire</h3>
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label for="categorie" class="form-label">Catégorie professionnelle<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="categorie" name="categorie" placeholder="Ex. 3A" required>
+                            <label for="categorie" class="form-label">Catégorie professionnelle</label>
+                            <select class="form-select" id="categorie" name="categorie">
+                                <option value="">— Choisir —</option>
+                                <option th:each="c : ${options['categorie']}" th:value="${c.id}" th:text="${c.affichage}"
+                                        th:selected="${objet.categorie?.id == c.id}"></option>
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="conventionCollective" class="form-label">Convention collective</label>
-                            <input type="text" class="form-control" id="conventionCollective" name="conventionCollective">
+                            <label for="convention" class="form-label">Convention collective</label>
+                            <select class="form-select" id="convention" name="convention">
+                                <option value="">— Choisir —</option>
+                                <option th:each="c : ${options['convention']}" th:value="${c.id}" th:text="${c.affichage}"
+                                        th:selected="${objet.convention?.id == c.id}"></option>
+                            </select>
                         </div>
                         <div class="col-md-6">
-                            <label for="salaireBrut" class="form-label">Salaire brut mensuel<span class="req">*</span></label>
+                            <label for="salaireBrutMensuel" class="form-label">Salaire brut mensuel</label>
                             <div class="input-group">
-                                <input type="number" min="0" step="1" class="form-control" id="salaireBrut" name="salaireBrut" required>
+                                <input type="number" min="0" step="1" class="form-control" th:field="*{salaireBrutMensuel}">
                                 <span class="input-group-text fw-semibold">Ar</span>
                             </div>
                             <div class="form-text">Les retenues légales et réglementaires seront déduites.</div>
                         </div>
                         <div class="col-md-6">
-                            <label for="heuresHebdo" class="form-label">Durée hebdomadaire<span class="req">*</span></label>
+                            <label for="dureeHebdoHeures" class="form-label">Durée hebdomadaire</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="fa-regular fa-clock"></i></span>
-                                <input type="number" min="1" max="60" class="form-control" id="heuresHebdo" name="heuresHebdo" value="40" required>
+                                <input type="number" min="1" max="60" step="0.5" class="form-control" th:field="*{dureeHebdoHeures}">
                                 <span class="input-group-text">h / semaine</span>
                             </div>
-                            <div class="form-text">Horaires fixés par le règlement intérieur de l'entreprise.</div>
                         </div>
-                    </div>
-
-                    <h3 class="h6 fw-bold mb-3"><i class="fa-solid fa-umbrella-beach text-primary me-2"></i>Congés payés</h3>
-                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="horairesFixesPar" class="form-label">Horaires fixés par</label>
+                            <input type="text" class="form-control" th:field="*{horairesFixesPar}">
+                        </div>
                         <div class="col-md-6">
                             <label for="lieuRecrutement" class="form-label">Lieu de recrutement</label>
-                            <input type="text" class="form-control" id="lieuRecrutement" name="lieuRecrutement">
+                            <input type="text" class="form-control" th:field="*{lieuRecrutement}">
                             <div class="form-text">Lieu où le congé annuel payé sera accordé.</div>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- 5. CLAUSES GÉNÉRALES -->
-            <section id="s-clauses" class="card section-card shadow-sm">
-                <div class="card-body p-4">
+            <!-- 4. CLAUSES GÉNÉRALES -->
+            <section id="s-clauses" class="section-card">
+                <div class="p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="section-icon"><i class="fa-solid fa-scale-balanced"></i></span>
                         <div>
                             <h2 class="card-title h5">Clauses générales</h2>
-                            <p class="text-muted small mb-0">Articles 8 à 17 — texte standard, à consulter</p>
+                            <p class="text-muted small mb-0">Articles 8 à 17</p>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
-                            <label for="conventionMaladie" class="form-label">Convention applicable (maladie non professionnelle)</label>
-                            <input type="text" class="form-control" id="conventionMaladie" name="conventionMaladie">
+                            <label for="regimeAccidentTravail" class="form-label">Régime accident du travail</label>
+                            <input type="text" class="form-control" th:field="*{regimeAccidentTravail}">
                         </div>
                         <div class="col-md-6">
-                            <label for="directionRegionale" class="form-label">Direction Régionale du Travail de<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="directionRegionale" name="directionRegionale" required>
+                            <label for="regimeMaladieNonPro" class="form-label">Régime maladie non professionnelle</label>
+                            <input type="text" class="form-control" th:field="*{regimeMaladieNonPro}" placeholder="Convention collective applicable">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="entrepriseConfidentialite" class="form-label">Entreprise couverte par la confidentialité</label>
+                            <input type="text" class="form-control" th:field="*{entrepriseConfidentialite}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="directionRegionaleTravail" class="form-label">Direction régionale du travail de</label>
+                            <input type="text" class="form-control" th:field="*{directionRegionaleTravail}">
                         </div>
                     </div>
 
@@ -538,7 +334,7 @@
                             </h3>
                             <div id="c2" class="accordion-collapse collapse" data-bs-parent="#accClauses">
                                 <div class="accordion-body">
-                                    <p><strong>Article 11 —</strong> En cas d'accident du travail ou de maladie professionnelle, le régime d'indemnisation applicable est celui prévu par le code de prévoyance sociale.</p>
+                                    <p><strong>Article 11 —</strong> En cas d'accident du travail ou de maladie professionnelle, le régime d'indemnisation applicable est celui prévu par le <span class="clause-inline" data-bind="regimeAccidentTravail"></span>.</p>
                                     <p class="mb-0"><strong>Article 12 —</strong> En cas d'accident ou de maladie non professionnelle, le régime applicable est celui prévu par la convention collective.</p>
                                 </div>
                             </div>
@@ -564,7 +360,16 @@
                             </h3>
                             <div id="c4" class="accordion-collapse collapse" data-bs-parent="#accClauses">
                                 <div class="accordion-body">
-                                    <p><strong>Article 15 —</strong> Pour toute disposition non précisée, il est fait référence au code du travail, au code de prévoyance sociale, aux textes d'application et à la convention collective.</p>
+                                    <p class="mb-1"><strong>Article 15 —</strong> Pour toute disposition non précisée, il est fait référence aux textes suivants :</p>
+                                    <ul class="mb-3">
+                                        <li th:each="t : ${textesLegaux}">
+                                            <span th:text="${t.reference}"></span>
+                                            <span th:if="${t.dateTexte}" th:text="'du ' + ${#temporals.format(t.dateTexte, 'dd/MM/yyyy')}"></span>
+                                            <span th:text="${t.intitule}"></span>
+                                        </li>
+                                        <li>Textes pris en application des lois susvisées ;</li>
+                                        <li>Convention collective applicable.</li>
+                                    </ul>
                                     <p><strong>Article 16 —</strong> La résiliation du contrat interviendra conformément aux dispositions du code du travail.</p>
                                     <p class="mb-0"><strong>Article 17 —</strong> Tout différend non réglé à l'amiable relève de la juridiction du travail du lieu d'exécution du contrat.</p>
                                 </div>
@@ -574,31 +379,43 @@
                 </div>
             </section>
 
-            <!-- 6. SIGNATURE -->
-            <section id="s-signature" class="card section-card shadow-sm">
-                <div class="card-body p-4">
+            <!-- 5. SIGNATURE -->
+            <section id="s-signature" class="section-card">
+                <div class="p-4">
                     <div class="d-flex align-items-center gap-3 mb-4">
                         <span class="section-icon"><i class="fa-solid fa-file-signature"></i></span>
                         <div>
                             <h2 class="card-title h5">Dispositions finales et signatures</h2>
-                            <p class="text-muted small mb-0">Article 18 — établi en quatre (4) exemplaires</p>
+                            <p class="text-muted small mb-0">Article 18</p>
                         </div>
                     </div>
                     <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label for="lieuSignature" class="form-label">Fait à<span class="req">*</span></label>
-                            <input type="text" class="form-control" id="lieuSignature" name="lieuSignature" required>
+                        <div class="col-md-5">
+                            <label for="lieuSignature" class="form-label">Fait à</label>
+                            <input type="text" class="form-control" th:field="*{lieuSignature}">
                         </div>
-                        <div class="col-md-6">
-                            <label for="dateSignature" class="form-label">Le<span class="req">*</span></label>
-                            <input type="date" class="form-control" id="dateSignature" name="dateSignature" required>
+                        <div class="col-md-4">
+                            <label for="dateSignature" class="form-label">Le</label>
+                            <input type="date" class="form-control" th:field="*{dateSignature}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="nbExemplaires" class="form-label">Exemplaires<span class="req">*</span></label>
+                            <input type="number" min="1" class="form-control" th:field="*{nbExemplaires}" required
+                                   th:classappend="${erreurs.containsKey('nbExemplaires')} ? 'is-invalid'">
                         </div>
                     </div>
                     <div class="row g-3">
-                        <div class="col-6 col-md-3"><div class="sign-box"><i class="fa-solid fa-building"></i>L'employeur</div></div>
-                        <div class="col-6 col-md-3"><div class="sign-box"><i class="fa-solid fa-user"></i>Le travailleur</div></div>
-                        <div class="col-6 col-md-3"><div class="sign-box text-center px-2"><i class="fa-solid fa-landmark"></i>Le directeur régional du travail</div></div>
-                        <div class="col-6 col-md-3"><div class="sign-box"><i class="fa-solid fa-user-doctor"></i>Le médecin</div></div>
+                        <div class="col-6 col-md-3" th:each="r : ${roles}">
+                            <div class="sign-box" th:classappend="${signes.contains(r)} ? 'signe'">
+                                <i class="fa-solid" th:classappend="${r.icone}"></i>
+                                <span th:text="${r.libelle}">Signataire</span>
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" role="switch" name="signes"
+                                           th:id="${'signe-' + r.name()}" th:value="${r.name()}" th:checked="${signes.contains(r)}">
+                                    <label class="form-check-label small" th:for="${'signe-' + r.name()}">Signé</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -608,12 +425,17 @@
 
 <!-- ===================== BARRE D'ACTIONS ===================== -->
 <div class="action-bar py-3">
-    <div class="container-xl d-flex flex-wrap align-items-center justify-content-between gap-2">
-        <span class="small text-muted d-none d-sm-inline">
+    <div class="container-xl d-flex flex-wrap align-items-center gap-2">
+        <a class="btn btn-light border" th:href="@{/contrats/cdi}"><i class="fa-solid fa-arrow-left me-1"></i> Retour à la liste</a>
+        <span class="small text-muted d-none d-md-inline ms-2">
             <i class="fa-solid fa-circle-info me-1"></i> Les champs marqués <span class="text-danger">*</span> sont obligatoires
         </span>
         <div class="d-flex gap-2 ms-auto">
-            <button type="reset" class="btn btn-light border"><i class="fa-solid fa-rotate-left me-1"></i> Réinitialiser</button>
+            <button type="button" class="btn btn-outline-danger" th:unless="${creation}"
+                    data-bs-toggle="modal" data-bs-target="#modaleSuppression"
+                    th:attr="data-url=@{${'/contrats/cdi/' + objet.id + '/supprimer'}},data-libelle=${objet.affichage}">
+                <i class="fa-solid fa-trash-can me-1"></i> Supprimer
+            </button>
             <button type="button" class="btn btn-outline-primary" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Imprimer</button>
             <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer</button>
         </div>
@@ -621,14 +443,28 @@
 </div>
 </form>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div th:replace="~{fragments/layout :: modaleSuppression}"></div>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 <script>
     (function () {
         const form = document.getElementById('contratForm');
         const required = [...form.querySelectorAll('[required]')];
 
-        // Remplissage en direct des clauses
+        // ---------- Durée d'essai : "3 mois" <-> nombre + unité ----------
+        const essaiNombre = document.getElementById('essaiNombre');
+        const essaiUnite = document.getElementById('essaiUnite');
+        const dureeEssai = document.getElementById('dureeEssai');
+        const m = /^(\d+)\s*(jours|mois)$/.exec(dureeEssai.value.trim());
+        if (m) { essaiNombre.value = m[1]; essaiUnite.value = m[2]; }
+        const syncEssai = () => { dureeEssai.value = essaiNombre.value ? essaiNombre.value + ' ' + essaiUnite.value : ''; };
+        essaiNombre.addEventListener('input', syncEssai);
+        essaiUnite.addEventListener('change', syncEssai);
+
+        // ---------- Remplissage en direct des clauses ----------
         function formatValue(el) {
+            if (el.tagName === 'SELECT') {
+                return el.value ? el.selectedOptions[0].text : '';
+            }
             if (el.type === 'date' && el.value) {
                 return new Date(el.value + 'T00:00').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
             }
@@ -643,153 +479,29 @@
             });
         }
 
-        // Progression globale et par section
+        // ---------- Progression globale et par section ----------
         function refreshProgress() {
             const filled = required.filter(el => el.value.trim() !== '').length;
             const pct = Math.round(filled / required.length * 100);
             document.getElementById('progressBar').style.width = pct + '%';
             document.getElementById('progressLabel').textContent = pct + ' %';
 
-            document.querySelectorAll('#nav-sections .nav-link').forEach(link => {
+            document.querySelectorAll('#nav-sections .nav-link').forEach((link, i) => {
                 const fields = [...document.getElementById(link.dataset.section).querySelectorAll('[required]')];
                 const done = fields.length > 0 && fields.every(el => el.value.trim() !== '');
                 link.classList.toggle('done', done);
-                link.querySelector('.step').innerHTML = done
-                    ? '<i class="fa-solid fa-check"></i>'
-                    : [...link.parentNode.children].indexOf(link) + 1;
+                link.querySelector('.step').innerHTML = done ? '<i class="fa-solid fa-check"></i>' : i + 1;
             });
         }
+
+        // ---------- Signatures : la carte passe au vert quand elle est cochée ----------
+        document.querySelectorAll('input[name="signes"]').forEach(cb =>
+            cb.addEventListener('change', () => cb.closest('.sign-box').classList.toggle('signe', cb.checked)));
 
         function refresh() { refreshBindings(); refreshProgress(); }
         form.addEventListener('input', refresh);
         form.addEventListener('change', refresh);
-        form.addEventListener('reset', () => setTimeout(() => { form.classList.remove('was-validated'); refresh(); }));
-
-        // Validation Bootstrap : on amène l'utilisateur au premier champ invalide
-        form.addEventListener('submit', e => {
-            if (!form.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-                const first = form.querySelector(':invalid');
-                first.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                first.focus({ preventScroll: true });
-            }
-            form.classList.add('was-validated');
-        });
-
         refresh();
-    })();
-
-    // Autocomplétion de la nationalité (données : /data/pays.json)
-    (function () {
-        const wrapper = document.querySelector('.autocomplete');
-        const input = document.getElementById('nationalite');
-        const code = document.getElementById('codePays');
-        const menu = document.getElementById('nationaliteListe');
-        let pays = [];
-        let resultats = [];
-        let actif = -1;
-
-        const normaliser = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
-        const echapper = s => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-
-        function surligner(texte, requete) {
-            if (!requete) return echapper(texte);
-            const i = normaliser(texte).indexOf(normaliser(requete));
-            if (i < 0) return echapper(texte);
-            return echapper(texte.slice(0, i)) + '<mark>' + echapper(texte.slice(i, i + requete.length)) + '</mark>'
-                + echapper(texte.slice(i + requete.length));
-        }
-
-        // Le champ n'est valide que si la valeur correspond à une entrée de la liste
-        function valider() {
-            const trouve = pays.find(p => normaliser(p.nationalite) === normaliser(input.value.trim()));
-            code.value = trouve ? trouve.code : '';
-            input.setCustomValidity(trouve || !pays.length ? '' : 'invalide');
-        }
-
-        function ouvrir() { menu.classList.add('show'); input.setAttribute('aria-expanded', 'true'); }
-        function fermer() { menu.classList.remove('show'); input.setAttribute('aria-expanded', 'false'); actif = -1; }
-
-        // tout = true : liste complète (à l'ouverture, quand une valeur est déjà choisie)
-        function afficher(tout = false) {
-            const q = tout ? '' : input.value.trim();
-            const nq = normaliser(q);
-            resultats = pays
-                .filter(p => !nq || normaliser(p.nationalite).includes(nq) || normaliser(p.pays).includes(nq))
-                .sort((a, b) => normaliser(a.nationalite).startsWith(nq) === normaliser(b.nationalite).startsWith(nq)
-                    ? 0 : normaliser(a.nationalite).startsWith(nq) ? -1 : 1)
-                .slice(0, 50);
-
-            menu.innerHTML = resultats.length
-                ? resultats.map((p, i) =>
-                    `<li role="option" id="opt-${p.code}" data-index="${i}">
-                        <span><span class="code">${p.code}</span>${surligner(p.nationalite, q)}</span>
-                        <span class="pays">${surligner(p.pays, q)}</span>
-                     </li>`).join('')
-                : erreurChargement
-                    ? '<li class="vide text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Liste des pays indisponible</li>'
-                    : !pays.length
-                        ? '<li class="vide"><i class="fa-solid fa-spinner fa-spin me-2"></i>Chargement…</li>'
-                        : '<li class="vide"><i class="fa-solid fa-magnifying-glass me-2"></i>Aucun résultat</li>';
-            actif = -1;
-            ouvrir();
-        }
-
-        function choisir(i) {
-            const p = resultats[i];
-            if (!p) return;
-            input.value = p.nationalite;
-            valider();
-            fermer();
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-        }
-
-        function deplacer(delta) {
-            if (!resultats.length) return;
-            actif = (actif + delta + resultats.length) % resultats.length;
-            menu.querySelectorAll('li').forEach((li, i) => li.classList.toggle('active', i === actif));
-            const li = menu.children[actif];
-            li.scrollIntoView({ block: 'nearest' });
-            input.setAttribute('aria-activedescendant', li.id);
-        }
-
-        input.addEventListener('focus', () => { input.select(); afficher(code.value !== ''); });
-        input.addEventListener('input', () => { afficher(); valider(); });
-        input.addEventListener('keydown', e => {
-            if (e.key === 'ArrowDown') { e.preventDefault(); menu.classList.contains('show') ? deplacer(1) : afficher(); }
-            else if (e.key === 'ArrowUp') { e.preventDefault(); deplacer(-1); }
-            else if (e.key === 'Enter' && menu.classList.contains('show')) {
-                e.preventDefault();
-                choisir(actif >= 0 ? actif : 0);
-            }
-            else if (e.key === 'Escape') fermer();
-        });
-        // mousedown plutôt que click : se déclenche avant la perte de focus du champ
-        menu.addEventListener('mousedown', e => {
-            const li = e.target.closest('li[data-index]');
-            if (li) { e.preventDefault(); choisir(+li.dataset.index); }
-        });
-        input.addEventListener('blur', () => { fermer(); valider(); });
-        document.getElementById('contratForm').addEventListener('reset', () => setTimeout(valider));
-
-        // Servi par Spring : data-source (/data/pays.json).
-        // Ouvert hors Spring (Live Server, aperçu IDE) : chemin relatif vers static/.
-        const sources = [wrapper.dataset.source, '../../static/data/pays.json'];
-        let erreurChargement = false;
-
-        function charger(i = 0) {
-            if (i >= sources.length) {
-                erreurChargement = true;
-                console.error('Impossible de charger la liste des pays depuis :', sources);
-                return;
-            }
-            fetch(sources[i])
-                .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
-                .then(data => { pays = data; valider(); if (document.activeElement === input) afficher(); })
-                .catch(() => charger(i + 1));
-        }
-        charger();
     })();
 </script>
 </body>
