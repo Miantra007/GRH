@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(titre)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${titre} + ' – GRH'">GRH</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:fragment="nav" class="nav">
+    <span class="brand">GRH</span>
+    <nav>
+        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidats}">Candidats</a>
+        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/contrats}">Contrats</a>
+        <a th:if="${session.user != null and session.user.type == 'DG'}" th:href="@{/dg/contrats}">Contrats à valider</a>
+        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Mes contrats</a>
+    </nav>
+    <form th:if="${session.user != null}" th:action="@{/logout}" method="post">
+        <span th:text="${session.user.email}"></span>
+        <button class="btn sec" type="submit">Déconnexion</button>
+    </form>
+</header>
+<div th:fragment="messages">
+    <div class="msg ok" th:if="${succes}" th:text="${succes}"></div>
+    <div class="msg ko" th:if="${erreur}" th:text="${erreur}"></div>
+</div>
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Candidats')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Candidats</h1>
+<div class="card">
+<table>
+    <tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Naissance</th><th></th></tr>
+    <tr th:each="c : ${candidats}">
+        <td th:text="${c.nomCandidat}"></td>
+        <td th:text="${c.prenomCandidat}"></td>
+        <td th:text="${c.email}"></td>
+        <td th:text="${#temporals.format(c.dtn, 'dd/MM/yyyy')}"></td>
+        <td><a class="btn" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">Créer un contrat</a></td>
+    </tr>
+    <tr th:if="${#lists.isEmpty(candidats)}"><td colspan="5">Aucun candidat.</td></tr>
+</table>
+</div>
+</main>
+</body>
+</html>

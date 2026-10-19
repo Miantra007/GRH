@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Nouveau travailleur')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Nouveau travailleur</h1>
+<div class="card">
+<form method="post" th:action="@{/admin/travailleurs(candidatId=${candidatId})}">
+<div class="grid">
+    <div><label>Civilité</label><select name="civilite.id"><option value="">—</option>
+        <option th:each="x : ${civilites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
+    <div><label>Nom et prénoms *</label><input name="nomPrenoms" required></div>
+    <div><label>Date de naissance *</label><input type="date" name="dateNaissance" required></div>
+    <div><label>Lieu de naissance *</label><input name="lieuNaissance" required></div>
+    <div><label>Nationalité *</label><select name="nationalite.id" required>
+        <option th:each="x : ${nationalites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
+    <div><label>Situation de famille</label><select name="situationFamille.id"><option value="">—</option>
+        <option th:each="x : ${situations}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
+    <div><label>Nombre d'enfants</label><input type="number" name="nombreEnfants" min="0"></div>
+    <div><label>Adresse de résidence</label><input name="adresseResidence"></div>
+    <div><label>Profession</label><input name="profession"></div>
+    <div><label>Téléphone</label><input name="telephone"></div>
+    <div><label>Email</label><input type="email" name="email"></div>
+    <div><label>N° CIN</label><input name="cinNumero"></div>
+    <div><label>N° CNaPS</label><input name="numeroCnaps"></div>
+</div>
+<p><button class="btn ok" type="submit">Enregistrer</button>
+   <a class="btn sec" th:href="@{/admin/contrats/nouveau(candidatId=${candidatId})}">Annuler</a></p>
+</form>
+</div>
+</main>
+</body>
+</html>

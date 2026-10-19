@@ -1,42 +1,35 @@
-# GRH
+# grh-backend (Java 17 + Spring Boot 3 + PostgreSQL)
 
-Application de gestion des ressources humaines : Spring Boot 4, Thymeleaf, PostgreSQL, Bootstrap 5.
+## Lancer
+1. psql -U postgres -f db/grh_schema.sql
+2. psql -U postgres -f db/grh_donnees_test.sql
+3. psql -U postgres -f db/grh_donnees_complement.sql
+3 bis. psql -U postgres -f db/grh_mots_de_passe_dev.sql   (vrais hash BCrypt, mot de passe de test : motdepasse123)
+4. Mettre ton mot de passe dans src/main/resources/application.properties
+5. mvn spring-boot:run   (IDE : activer le plugin Lombok + "annotation processing")
+6. Ouvrir http://localhost:8080  (interface Thymeleaf)
+7. API REST testable avec requests.http
 
-## Démarrage
+## Comptes de test (mot de passe : motdepasse123)
+rh@entreprise.mg          -> Administrateur RH : crée les contrats      (/admin/...)
+hery.rabe@mail.mg         -> Candidat          : consulte et signe      (/candidat/...)
+dg@entreprise.mg          -> Direction générale: valide les contrats    (/dg/...)
 
-1. Créer la base et l'utilisateur `grh` (mot de passe = `DB_PASSWORD` du `.env`), puis le schéma :
-   ```bash
-   psql -h localhost -U grh -d grh -f schema.sql
-   ```
-   `schema.sql` regroupe `base.sql` et `RH.sql` dans l'ordre d'exécution, avec les données de référence.
-2. Lancer l'application (Spring ne lit pas le `.env` tout seul) :
-   ```bash
-   set -a; source .env; set +a
-   ./mvnw spring-boot:run
-   ```
-3. Ouvrir http://localhost:8080
+## Front Thymeleaf
+controller/web/   AuthWeb, AdminContratWeb, CandidatContratWeb, DgContratWeb (@Controller)
+web/              SessionUser + AuthInterceptor (accès par rôle)
+templates/        login, fragments (nav/messages), contrat-detail (commun),
+                  admin/{candidats,contrats,contrat-form,travailleur-form}, candidat/contrats, dg/contrats
+static/css/       style.css
 
-`HIBERNATE_DDL_AUTO=validate` : au démarrage, Hibernate vérifie que les entités correspondent aux tables.
-Toute modification du schéma doit être faite dans `schema.sql` **et** dans l'entité correspondante.
+## Architecture (par table : 5 fichiers)
+model/       entité JPA (@Entity)            -> 46 classes + Identifiable
+repository/  Spring Data JpaRepository
+dao/         DAO générique (EntityManager / JPQL) + 1 DAO par entité
+service/     GenericService (CRUD) + 1 service par entité
+controller/  GenericController (REST CRUD /api/<table-en-kebab-case>)
+exception/   404 / 409 / 403 / 400 centralisés
+config/      CORS
 
-## Organisation du code
-
-| Couche | Paquet | Rôle |
-|---|---|---|
-| Modèle | `com.grh.model` | Une entité JPA par table, toutes implémentent `Entite` (id + libellé affiché) |
-| Repository | `com.grh.repository` | Interfaces Spring Data (`JpaRepository`) |
-| DAO | `com.grh.dao` | `GenericDao` (lister, obtenir, enregistrer, supprimer) + requêtes métier |
-| Contrôleur | `com.grh.controller` | Un contrôleur par table, qui étend `CrudController` |
-| Pages | `templates/crud/` | Liste et formulaire génériques, pilotés par la description des champs |
-
-Pages dédiées : `templates/contrat/contrat-cdi.html` (formulaire du CDI).
-
-## Ajouter un écran pour une nouvelle table
-
-1. `model/MaTable.java` : entité `implements Entite`, avec `getAffichage()`.
-2. `repository/MaTableRepository.java` : `extends JpaRepository<MaTable, Integer>`.
-3. `dao/MaTableDao.java` : `extends GenericDao<MaTable>`.
-4. `controller/MaTableController.java` : `extends CrudController<MaTable>`, avec l'`Ecran` (URL, titre, icône,
-   rubrique du menu) et la liste des `Champ`. L'écran apparaît automatiquement dans le menu et le tableau de bord.
-
-Pour une page sur mesure, redéfinir `vueFormulaire()` dans le contrôleur (exemple : `ContratCdiController`).
+Écrits à la main : service/ContratCandidatService + controller/ContratCandidatController
+(workflow Créé -> Signé -> Validé).
