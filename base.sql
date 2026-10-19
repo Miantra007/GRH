@@ -1,6 +1,6 @@
 create DATABASE grh;
 
-\ c grh;
+\c grh;
 
 CREATE TABLE role(
     id_role serial PRIMARY key,
