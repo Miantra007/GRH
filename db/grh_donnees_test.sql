@@ -1,3 +1,4 @@
+-- grh_donnees_test.sql
 -- Données de test pour la base grh
 -- À exécuter après grh.sql, sur une base vide (les id commencent à 1)
 -- Les mots de passe sont factices : ne jamais utiliser ce format en production

@@ -1,3 +1,4 @@
+-- grh_schema.sql
 -- =====================================================================
 -- GRH : schéma corrigé (remplace base.sql)
 -- Exécution : psql -U postgres -f grh_schema.sql

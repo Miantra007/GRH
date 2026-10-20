@@ -1,3 +1,4 @@
+-- grh_integration.sql
 -- =====================================================================
 -- GRH : consignes d'intégration envoyées par RH au candidat
 --   (formations à suivre, compte bancaire à créer, matériel à utiliser, ...)

@@ -1,7 +1,14 @@
 -- ============================================================
+-- BASE MIANTRA : GESTION DU RECRUTEMENT
+-- Fichier : base_miantra.sql
+-- ============================================================
+\c grh 
+BEGIN;
+
+-- ============================================================
 -- 1. TABLE TYPE_CONTRAT
 -- ============================================================
-CREATE TABLE type_contrat (
+CREATE TABLE IF NOT EXISTS type_contrat (
     id_type_contrat SERIAL PRIMARY KEY,
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
@@ -11,12 +18,112 @@ INSERT INTO
 VALUES
     ('CE'),
     ('CDD'),
-    ('CDI');
+    ('CDI') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
--- 2. TABLE BESOIN
+-- 2. TABLE STATUT_BESOIN
 -- ============================================================
-CREATE TABLE besoin (
+CREATE TABLE IF NOT EXISTS statut_besoin (
+    id_statut_besoin SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    statut_besoin (libelle)
+VALUES
+    ('EN_ATTENTE_RH'),
+    ('EN_ATTENTE_FINANCE'),
+    ('EN_ATTENTE_DG'),
+    ('VALIDEE'),
+    ('REFUSEE') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 3. TABLE STATUT_OFFRE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS statut_offre (
+    id_statut_offre SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    statut_offre (libelle)
+VALUES
+    ('BROUILLON'),
+    ('PUBLIEE'),
+    ('FERMEE'),
+    ('ANNULEE') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 4. TABLE STATUT_CANDIDATURE
+-- ============================================================
+CREATE TABLE IF NOT EXISTS statut_candidature (
+    id_statut_candidature SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    statut_candidature (libelle)
+VALUES
+    ('RECUE'),
+    ('DOSSIER_RETENU'),
+    ('DOSSIER_REJETE'),
+    ('TEST_TECHNIQUE'),
+    ('ENTRETIEN'),
+    ('RETENUE'),
+    ('NON_RETENUE') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 5. TABLE REPONSE_CANDIDAT
+-- ============================================================
+CREATE TABLE IF NOT EXISTS reponse_candidat (
+    id_reponse_candidat SERIAL PRIMARY KEY,
+    libelle VARCHAR(10) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    reponse_candidat (libelle)
+VALUES
+    ('OUI'),
+    ('NON'),
+    ('AUTRE') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 6. TABLE DECISION_RH
+-- ============================================================
+CREATE TABLE IF NOT EXISTS decision_rh (
+    id_decision_rh SERIAL PRIMARY KEY,
+    libelle VARCHAR(10) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    decision_rh (libelle)
+VALUES
+    ('ACCEPTEE'),
+    ('REFUSEE') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 7. TABLE STATUT_PROPOSITION
+-- ============================================================
+CREATE TABLE IF NOT EXISTS statut_proposition (
+    id_statut_proposition SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+INSERT INTO
+    statut_proposition (libelle)
+VALUES
+    ('EN_ATTENTE_CANDIDAT'),
+    ('EN_ATTENTE_RH'),
+    ('ACCORD_FINAL'),
+    ('REFUSEE_CANDIDAT'),
+    ('REFUSEE_RH') ON CONFLICT (libelle) DO NOTHING;
+
+-- ============================================================
+-- 8. TABLE BESOIN
+-- Dépend de :
+-- direction, departement, responsable, statut_besoin
+-- ============================================================
+CREATE TABLE IF NOT EXISTS besoin (
     id_besoin SERIAL PRIMARY KEY,
     id_direction INTEGER NOT NULL REFERENCES direction(id_direction),
     id_dept INTEGER NOT NULL REFERENCES departement(id_dept),
@@ -38,9 +145,10 @@ CREATE TABLE besoin (
 );
 
 -- ============================================================
--- 3. TABLE BESOIN_POSTE
+-- 9. TABLE BESOIN_POSTE
+-- Dépend de : besoin, poste, type_contrat
 -- ============================================================
-CREATE TABLE besoin_poste (
+CREATE TABLE IF NOT EXISTS besoin_poste (
     id_besoin_poste SERIAL PRIMARY KEY,
     id_besoin INTEGER NOT NULL REFERENCES besoin(id_besoin) ON DELETE CASCADE,
     id_poste INTEGER NOT NULL REFERENCES poste(id_poste),
@@ -53,25 +161,10 @@ CREATE TABLE besoin_poste (
 );
 
 -- ============================================================
--- 4. TABLE STATUT_OFFRE
+-- 10. TABLE OFFRE_EMPLOI
+-- Dépend de : besoin_poste, statut_offre
 -- ============================================================
-CREATE TABLE statut_offre (
-    id_statut_offre SERIAL PRIMARY KEY,
-    libelle VARCHAR(30) NOT NULL UNIQUE
-);
-
-INSERT INTO
-    statut_offre (libelle)
-VALUES
-    ('BROUILLON'),
-    ('PUBLIEE'),
-    ('FERMEE'),
-    ('ANNULEE');
-
--- ============================================================
--- 5. TABLE OFFRE_EMPLOI
--- ============================================================
-CREATE TABLE offre_emploi (
+CREATE TABLE IF NOT EXISTS offre_emploi (
     id_offre SERIAL PRIMARY KEY,
     id_besoin_poste INTEGER NOT NULL REFERENCES besoin_poste(id_besoin_poste),
     titre VARCHAR(150) NOT NULL,
@@ -89,28 +182,10 @@ CREATE TABLE offre_emploi (
 );
 
 -- ============================================================
--- 6. TABLE STATUT_CANDIDATURE
+-- 11. TABLE CANDIDATURE
+-- Dépend de : offre_emploi, candidat, statut_candidature
 -- ============================================================
-CREATE TABLE statut_candidature (
-    id_statut_candidature SERIAL PRIMARY KEY,
-    libelle VARCHAR(30) NOT NULL UNIQUE
-);
-
-INSERT INTO
-    statut_candidature (libelle)
-VALUES
-    ('RECUE'),
-    ('DOSSIER_RETENU'),
-    ('DOSSIER_REJETE'),
-    ('TEST_TECHNIQUE'),
-    ('ENTRETIEN'),
-    ('RETENUE'),
-    ('NON_RETENUE');
-
--- ============================================================
--- 7. TABLE CANDIDATURE
--- ============================================================
-CREATE TABLE candidature (
+CREATE TABLE IF NOT EXISTS candidature (
     id_candidature SERIAL PRIMARY KEY,
     id_offre INTEGER NOT NULL REFERENCES offre_emploi(id_offre),
     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat),
@@ -120,9 +195,10 @@ CREATE TABLE candidature (
 );
 
 -- ============================================================
--- 8. TABLE TEST_TECHNIQUE
+-- 12. TABLE TEST_TECHNIQUE
+-- Dépend de : candidature
 -- ============================================================
-CREATE TABLE test_technique (
+CREATE TABLE IF NOT EXISTS test_technique (
     id_test_technique SERIAL PRIMARY KEY,
     description VARCHAR(50),
     id_candidature INTEGER NOT NULL REFERENCES candidature(id_candidature) ON DELETE CASCADE,
@@ -130,9 +206,10 @@ CREATE TABLE test_technique (
 );
 
 -- ============================================================
--- 9. TABLE ENTRETIEN
+-- 13. TABLE ENTRETIEN
+-- Dépend de : candidature
 -- ============================================================
-CREATE TABLE entretien (
+CREATE TABLE IF NOT EXISTS entretien (
     id_entretien SERIAL PRIMARY KEY,
     description VARCHAR(50),
     id_candidature INTEGER NOT NULL REFERENCES candidature(id_candidature) ON DELETE CASCADE,
@@ -140,55 +217,12 @@ CREATE TABLE entretien (
 );
 
 -- ============================================================
--- 10. TABLE REPONSE_CANDIDAT
+-- 14. TABLE PROPOSITION_EMBAUCHE
+-- Dépend de :
+-- candidature, reponse_candidat, decision_rh,
+-- statut_proposition
 -- ============================================================
-CREATE TABLE reponse_candidat (
-    id_reponse_candidat SERIAL PRIMARY KEY,
-    libelle VARCHAR(10) NOT NULL UNIQUE
-);
-
-INSERT INTO
-    reponse_candidat (libelle)
-VALUES
-    ('OUI'),
-    ('NON'),
-    ('AUTRE');
-
--- ============================================================
--- 11. TABLE DECISION_RH
--- ============================================================
-CREATE TABLE decision_rh (
-    id_decision_rh SERIAL PRIMARY KEY,
-    libelle VARCHAR(10) NOT NULL UNIQUE
-);
-
-INSERT INTO
-    decision_rh (libelle)
-VALUES
-    ('ACCEPTEE'),
-    ('REFUSEE');
-
--- ============================================================
--- 12. TABLE STATUT_PROPOSITION
--- ============================================================
-CREATE TABLE statut_proposition (
-    id_statut_proposition SERIAL PRIMARY KEY,
-    libelle VARCHAR(30) NOT NULL UNIQUE
-);
-
-INSERT INTO
-    statut_proposition (libelle)
-VALUES
-    ('EN_ATTENTE_CANDIDAT'),
-    ('EN_ATTENTE_RH'),
-    ('ACCORD_FINAL'),
-    ('REFUSEE_CANDIDAT'),
-    ('REFUSEE_RH');
-
--- ============================================================
--- 13. TABLE PROPOSITION_EMBAUCHE
--- ============================================================
-CREATE TABLE proposition_embauche (
+CREATE TABLE IF NOT EXISTS proposition_embauche (
     id_proposition SERIAL PRIMARY KEY,
     id_candidature INTEGER NOT NULL UNIQUE REFERENCES candidature(id_candidature),
     salaire_propose NUMERIC(12, 0) NOT NULL CHECK (salaire_propose >= 0),
@@ -206,9 +240,10 @@ CREATE TABLE proposition_embauche (
 );
 
 -- ============================================================
--- 14. TABLE NOTIFICATION
+-- 15. TABLE NOTIFICATION
+-- Dépend de : candidat, responsable, proposition_embauche
 -- ============================================================
-CREATE TABLE notification (
+CREATE TABLE IF NOT EXISTS notification (
     id_notification SERIAL PRIMARY KEY,
     id_candidat INTEGER REFERENCES candidat(id_candidat),
     id_responsable INTEGER REFERENCES responsable(id_responsable),
@@ -230,3 +265,34 @@ CREATE TABLE notification (
             )
         )
 );
+
+COMMIT;
+
+-- ============================================================
+-- 16. VERIFICATION DES TABLES
+-- ============================================================
+SELECT
+    table_name
+FROM
+    information_schema.tables
+WHERE
+    table_schema = 'public'
+    AND table_name IN (
+        'type_contrat',
+        'statut_besoin',
+        'statut_offre',
+        'statut_candidature',
+        'reponse_candidat',
+        'decision_rh',
+        'statut_proposition',
+        'besoin',
+        'besoin_poste',
+        'offre_emploi',
+        'candidature',
+        'test_technique',
+        'entretien',
+        'proposition_embauche',
+        'notification'
+    )
+ORDER BY
+    table_name;
