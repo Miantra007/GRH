@@ -163,19 +163,19 @@ CREATE TABLE centre_interet (
     description TEXT
 );
 
-CREATE TABLE test_technique(
-    id_test_technique SERIAL PRIMARY KEY,
-    description VARCHAR(50),
-    id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
-    date_test DATE
-);
+-- CREATE TABLE test_technique(
+--     id_test_technique SERIAL PRIMARY KEY,
+--     description VARCHAR(50),
+--     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
+--     date_test DATE
+-- );
 
-CREATE TABLE entretien(
-    id_entretien SERIAL PRIMARY KEY,
-    description VARCHAR(50),
-    id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
-    date_entretien DATE
-);
+-- CREATE TABLE entretien(
+--     id_entretien SERIAL PRIMARY KEY,
+--     description VARCHAR(50),
+--     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
+--     date_entretien DATE
+-- );
 
 -- ---------- RÉFÉRENTIELS CONTRAT ----------
 CREATE TABLE civilite (
