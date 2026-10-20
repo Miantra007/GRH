@@ -14,6 +14,7 @@
         <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/contrats}">Contrats</a>
         <a th:if="${session.user != null and session.user.type == 'DG'}" th:href="@{/dg/contrats}">Contrats à valider</a>
         <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Mes contrats</a>
+        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/integration}">Mon intégration</a>
     </nav>
     <form th:if="${session.user != null}" th:action="@{/logout}" method="post">
         <span th:text="${session.user.email}"></span>

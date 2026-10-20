@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mon intégration')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+<div th:replace="~{fragments :: messages}"></div>
+<h1>Mon intégration</h1>
+<p class="muted">Ce que le service RH vous demande de faire pour préparer votre arrivée.</p>
+
+<div class="card" th:if="${total > 0}">
+    <strong th:text="${#lists.size(faites) + ' sur ' + total + ' consigne(s) faite(s)'}"></strong>
+    <div class="progress"><div th:style="'width:' + ${#lists.size(faites) * 100 / total} + '%'"></div></div>
+</div>
+
+<div class="card">
+    <h2>À faire</h2>
+    <div class="consigne" th:each="c : ${aFaire}" th:classappend="${c.enRetard} ? 'retard'">
+        <div class="consigne-tete">
+            <span class="badge b-type" th:text="${c.typeConsigne.libelle}"></span>
+            <strong th:text="${c.titre}"></strong>
+            <span class="badge b-retard" th:if="${c.enRetard}">En retard</span>
+            <span class="muted" th:if="${c.dateLimite}" th:text="'avant le ' + ${#temporals.format(c.dateLimite, 'dd/MM/yyyy')}"></span>
+        </div>
+        <p th:if="${c.description}" th:text="${c.description}"></p>
+        <form th:action="@{/candidat/integration/{id}/faite(id=${c.id})}" method="post" class="consigne-action">
+            <input name="commentaire" maxlength="500" placeholder="Commentaire pour RH (facultatif)">
+            <button class="btn ok" type="submit">C'est fait</button>
+        </form>
+    </div>
+    <p th:if="${#lists.isEmpty(aFaire)}">Rien à faire pour le moment.</p>
+</div>
+
+<div class="card" th:unless="${#lists.isEmpty(faites)}">
+    <h2>Déjà fait</h2>
+    <div class="consigne faite" th:each="c : ${faites}">
+        <div class="consigne-tete">
+            <span class="badge b-type" th:text="${c.typeConsigne.libelle}"></span>
+            <strong th:text="${c.titre}"></strong>
+            <span class="muted" th:text="'fait le ' + ${#temporals.format(c.dateRealisation, 'dd/MM/yyyy')}"></span>
+        </div>
+        <p class="muted" th:if="${c.commentaireCandidat}" th:text="'Votre commentaire : ' + ${c.commentaireCandidat}"></p>
+        <form th:action="@{/candidat/integration/{id}/rouvrir(id=${c.id})}" method="post">
+            <button class="btn sec" type="submit">Remettre à faire</button>
+        </form>
+    </div>
+</div>
+</main>
+</body>
+</html>

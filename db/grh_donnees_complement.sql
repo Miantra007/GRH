@@ -2,9 +2,10 @@
 \c grh
 
 -- Rôle + compte "Direction générale" (celui qui valide les contrats)
-INSERT INTO role (libelle) VALUES ('Direction générale');            -- id 4
+INSERT INTO role (libelle) VALUES ('Direction générale');
 INSERT INTO responsable (id_role, email, mot_de_passe, date_embauche)
-VALUES (4, 'dg@entreprise.mg', 'hash_factice_7', '2012-01-02');      -- id 7
+VALUES ((SELECT id_role FROM role WHERE libelle = 'Direction générale'),
+        'dg@entreprise.mg', 'hash_factice_7', '2012-01-02');      -- id 7
 
 INSERT INTO employeur (raison_sociale, forme_juridique, adresse_siege, representant_nom, representant_fonction, civilite_id)
 VALUES ('Entreprise Demo SARL', 'SARL', 'Antananarivo', 'Rakoto Jean', 'Directeur Général', 1);   -- id 1

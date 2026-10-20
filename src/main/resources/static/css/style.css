@@ -21,3 +21,14 @@ input[type=checkbox],input[type=radio]{width:auto}
 .types label{display:inline-block;margin-right:1.5rem;font-size:1rem}
 .login{max-width:380px;margin:4rem auto}.hidden{display:none}
 dl{display:grid;grid-template-columns:230px 1fr;gap:.35rem 1rem;margin:0}dt{font-weight:bold;color:#555}dd{margin:0}
+
+/* Consignes d'intégration */
+.muted{color:#666;font-size:.9rem;font-weight:normal}
+.b-retard{background:var(--ko)}.b-type{background:#efe9f7;color:var(--c)}
+.progress{height:8px;background:#e4e0ea;border-radius:4px;margin-top:.5rem;overflow:hidden}
+.progress div{height:100%;background:var(--ok)}
+.consigne{border:1px solid #e4e0ea;border-left:4px solid var(--c);border-radius:6px;padding:.8rem 1rem;margin-bottom:.8rem}
+.consigne.retard{border-left-color:var(--ko)}.consigne.faite{border-left-color:var(--ok);background:#fafdfb}
+.consigne p{margin:.5rem 0}
+.consigne-tete{display:flex;flex-wrap:wrap;gap:.6rem;align-items:center}
+.consigne-action{display:flex;gap:.6rem;margin-top:.5rem}.consigne-action input{flex:1}

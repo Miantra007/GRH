@@ -14,7 +14,8 @@
         <td th:text="${c.prenomCandidat}"></td>
         <td th:text="${c.email}"></td>
         <td th:text="${#temporals.format(c.dtn, 'dd/MM/yyyy')}"></td>
-        <td><a class="btn" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">Créer un contrat</a></td>
+        <td><a class="btn" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">Créer un contrat</a>
+            <a class="btn sec" th:href="@{/admin/candidats/{id}/integration(id=${c.id})}">Intégration</a></td>
     </tr>
     <tr th:if="${#lists.isEmpty(candidats)}"><td colspan="5">Aucun candidat.</td></tr>
 </table>

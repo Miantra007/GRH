@@ -6,6 +6,20 @@ UPDATE candidat SET mot_de_passe = '$2b$12$AL9SLkK5ftyES4VMS/kY7u6HFPsSRN5kwJzOl
 
 
 
+CREATE TABLE statut_besoin (
+id_statut_besoin SERIAL PRIMARY KEY,
+code VARCHAR(30) NOT NULL UNIQUE,
+libelle VARCHAR(100) NOT NULL
+);
+
+INSERT INTO statut_besoin (code, libelle) VALUES
+('DEMANDE_DIRECTION', 'Demande créée par la direction'),
+('TRAITE_RH', 'Traitée par RH'),
+('VALIDE_FINANCE', 'Validée par le responsable financier'),
+('VALIDE_DG', 'Validée par le directeur général'),
+('PUBLIE_CLIENT', 'Publiée côté client'),
+('REJETE', 'Rejetée');
+
 CREATE TABLE besoin (
     id_besoin SERIAL PRIMARY KEY,
 
@@ -41,17 +55,3 @@ commentaire_dg TEXT,
 
 visible_client BOOLEAN NOT NULL DEFAULT FALSE
 );
-
-CREATE TABLE statut_besoin (
-id_statut_besoin SERIAL PRIMARY KEY,
-code VARCHAR(30) NOT NULL UNIQUE,
-libelle VARCHAR(100) NOT NULL
-);
-
-INSERT INTO statut_besoin (code, libelle) VALUES
-('DEMANDE_DIRECTION', 'Demande créée par la direction'),
-('TRAITE_RH', 'Traitée par RH'),
-('VALIDE_FINANCE', 'Validée par le responsable financier'),
-('VALIDE_DG', 'Validée par le directeur général'),
-('PUBLIE_CLIENT', 'Publiée côté client'),
-('REJETE', 'Rejetée');
