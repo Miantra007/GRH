@@ -11,7 +11,8 @@ VALUES
     -- id 1
     ('Directeur'),
     -- id 2
-    ('Administrateur RH');
+    ('Administrateur RH'),
+    ('Financier');
 
 -- id 3
 -- ---------- RESPONSABLES ----------
