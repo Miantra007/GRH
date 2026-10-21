@@ -17,7 +17,15 @@ VALUES
     ('REMPLACEMENT')
 ON CONFLICT (libelle) DO NOTHING;
 
-
+INSERT INTO statut_employe (libelle)
+VALUES
+    ('ACTIF'),
+    ('EN_CONGE'),
+    ('SUSPENDU'),
+    ('DEMISSIONNAIRE'),
+    ('LICENCIE'),
+    ('RETRAITE')
+ON CONFLICT (libelle) DO NOTHING;
 -- ============================================================
 -- 2. INITIALISER LES STATUTS DU BESOIN
 -- ============================================================

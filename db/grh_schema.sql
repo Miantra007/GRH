@@ -11,10 +11,15 @@ CREATE TABLE role(
     id_role SERIAL PRIMARY KEY,
     libelle VARCHAR(50)
 );
+CREATE TABLE IF NOT EXISTS statut_employe (
+    id_statut_employe SERIAL PRIMARY KEY,
+    libelle VARCHAR(20) NOT NULL UNIQUE
+);
 
 CREATE TABLE responsable(
     id_responsable SERIAL PRIMARY KEY,
     id_role INTEGER REFERENCES role(id_role),
+    id_statut_employe INTEGER NOT NULL REFERENCES statut_employe(id_statut_employe),
     email VARCHAR(150) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255) NOT NULL,
     date_embauche DATE
