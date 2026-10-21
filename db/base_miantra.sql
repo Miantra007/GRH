@@ -70,10 +70,7 @@ CREATE TABLE IF NOT EXISTS statut_proposition (
     id_statut_proposition SERIAL PRIMARY KEY,
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
-CREATE TABLE IF NOT EXISTS statut_employe (
-    id_statut_employe SERIAL PRIMARY KEY,
-    libelle VARCHAR(20) NOT NULL UNIQUE
-);
+
 
 
 -- ============================================================
