@@ -13,3 +13,10 @@ psql -U postgres -f db/grh_integration.sql
 psql -U postgres -d grh -f db/base_miantra.sql
 
 psql -U postgres -d grh -f db/donnee_test_acceptation.sql
+
+
+
+psql -U postgres -c "DROP DATABASE grh;"
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'grh'
