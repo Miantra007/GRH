@@ -15,48 +15,64 @@ VALUES
     ('Administrateur RH'),
     ('Financier');
 
+INSERT INTO statut_employe (libelle)
+VALUES
+    ('ACTIF'),
+    ('EN_CONGE'),
+    ('SUSPENDU'),
+    ('DEMISSIONNAIRE'),
+    ('LICENCIE'),
+    ('RETRAITE')
+ON CONFLICT (libelle) DO NOTHING;
 -- id 3
 -- ---------- RESPONSABLES ----------
-INSERT INTO
-    responsable (id_role, email, mot_de_passe, date_embauche)
+
+INSERT INTO responsable (
+    id_role,
+    id_statut_employe,
+    email,
+    mot_de_passe,
+    date_embauche
+)
 VALUES
     (
         2,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'directeur.si@entreprise.mg',
         'hash_factice_1',
         '2015-03-02'
     ),
-    -- id 1 : directeur SI
     (
         2,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'directeur.finance@entreprise.mg',
         'hash_factice_2',
         '2014-09-15'
     ),
-    -- id 2 : directeur financier
     (
         1,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'manager.finance@entreprise.mg',
         'hash_factice_3',
         '2018-01-08'
     ),
-    -- id 3 : manager Finance
     (
         1,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'manager.marketing@entreprise.mg',
         'hash_factice_4',
         '2019-06-17'
     ),
-    -- id 4 : manager Marketing
     (
         1,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'manager.production@entreprise.mg',
         'hash_factice_5',
         '2017-11-20'
     ),
-    -- id 5 : manager Production
     (
         3,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
         'rh@entreprise.mg',
         'hash_factice_6',
         '2016-04-04'
@@ -237,4 +253,65 @@ VALUES
         'Loi n° 09-015',
         '2009-06-26',
         'instituant l''Assurance Maladie Obligatoire'
+    );
+
+
+    -- ============================================================
+-- DONNÉES DE TEST : EMPLOYÉS
+-- ============================================================
+
+INSERT INTO employe (
+    nom_employe,
+    id_poste_fille,
+    date_embauche,
+    id_statut_employe
+)
+VALUES
+    (
+        'Jean Rakoto',
+        1,
+        '2020-02-15',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
+    ),
+    (
+        'Marie Rasoanaivo',
+        2,
+        '2021-06-10',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
+    ),
+    (
+        'Hery Randria',
+        3,
+        '2022-03-01',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
+    ),
+    (
+        'Soa Rakotomalala',
+        4,
+        '2019-09-12',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'EN_CONGE')
+    ),
+    (
+        'Paul Andrianina',
+        5,
+        '2023-01-16',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
+    ),
+    (
+        'Lalao Rabe',
+        6,
+        '2018-11-05',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'SUSPENDU')
+    ),
+    (
+        'Tiana Rakotoarisoa',
+        7,
+        '2024-04-08',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
+    ),
+    (
+        'Fara Randrianarisoa',
+        8,
+        '2020-07-20',
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF')
     );
