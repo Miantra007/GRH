@@ -9,4 +9,8 @@ public class ExperienceProfessionnelleService extends GenericService<ExperienceP
     public ExperienceProfessionnelleService(ExperienceProfessionnelleRepository repository) {
         super(repository);
     }
+
+    public ExperienceProfessionnelle enregistrer(ExperienceProfessionnelle experience) {
+        return repository.save(experience);
+    }
 }
