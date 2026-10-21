@@ -51,13 +51,45 @@ CREATE TABLE poste_fille(
     id_statut_poste INTEGER REFERENCES statut_poste(id_statut_poste)
 );
 
-CREATE TABLE employe(
-    id_employe SERIAL PRIMARY KEY,
-    nom_employe VARCHAR(50),
-    id_poste_fille INTEGER REFERENCES poste_fille(id_poste_fille),
-    date_embauche DATE
-);
+-- ============================================================
+-- 4. TABLE EMPLOYE
+-- ============================================================
 
+CREATE TABLE IF NOT EXISTS employe (
+    id_employe SERIAL PRIMARY KEY,
+
+    nom_employe VARCHAR(50) NOT NULL,
+
+    id_poste_fille INTEGER
+        REFERENCES poste_fille(id_poste_fille),
+
+    date_embauche DATE NOT NULL,
+
+    id_statut_employe INTEGER NOT NULL
+        REFERENCES statut_employe(id_statut_employe)
+);
+CREATE TABLE IF NOT EXISTS historique_employe (
+    id_historique_employe SERIAL PRIMARY KEY,
+
+    id_employe INTEGER NOT NULL
+        REFERENCES employe(id_employe),
+
+    id_statut_employe INTEGER NOT NULL
+        REFERENCES statut_employe(id_statut_employe),
+
+    date_debut DATE NOT NULL,
+
+    date_fin DATE,
+
+    motif TEXT,
+
+    date_enregistrement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CHECK (
+        date_fin IS NULL
+        OR date_fin >= date_debut
+    )
+);
 -- ---------- CANDIDAT + CV ----------
 CREATE TABLE candidat(
     id_candidat SERIAL PRIMARY KEY,

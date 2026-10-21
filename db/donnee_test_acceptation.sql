@@ -2,15 +2,26 @@
 -- GRH : DONNEES DE TEST POUR LA PROPOSITION D'EMBAUCHE
 -- Base de données : grh
 -- ============================================================
+
 \c grh
 
 BEGIN;
 
 -- ============================================================
--- 1. AJOUTER LES STATUTS NECESSAIRES
+-- 1. INITIALISER LES TYPES DE BESOIN
 -- ============================================================
 
--- Statuts du besoin
+INSERT INTO type_besoin (libelle)
+VALUES
+    ('CREATION'),
+    ('REMPLACEMENT')
+ON CONFLICT (libelle) DO NOTHING;
+
+
+-- ============================================================
+-- 2. INITIALISER LES STATUTS DU BESOIN
+-- ============================================================
+
 INSERT INTO statut_besoin (libelle)
 VALUES
     ('EN_ATTENTE_RH'),
@@ -21,7 +32,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Statuts de l'offre d'emploi
+-- ============================================================
+-- 3. INITIALISER LES STATUTS DE L'OFFRE
+-- ============================================================
+
 INSERT INTO statut_offre (libelle)
 VALUES
     ('BROUILLON'),
@@ -31,7 +45,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Statuts de la candidature
+-- ============================================================
+-- 4. INITIALISER LES STATUTS DE LA CANDIDATURE
+-- ============================================================
+
 INSERT INTO statut_candidature (libelle)
 VALUES
     ('RECUE'),
@@ -44,7 +61,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Statuts de la proposition d'embauche
+-- ============================================================
+-- 5. INITIALISER LES STATUTS DE LA PROPOSITION
+-- ============================================================
+
 INSERT INTO statut_proposition (libelle)
 VALUES
     ('EN_ATTENTE_CANDIDAT'),
@@ -55,7 +75,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Réponses possibles du candidat
+-- ============================================================
+-- 6. INITIALISER LES REPONSES DU CANDIDAT
+-- ============================================================
+
 INSERT INTO reponse_candidat (libelle)
 VALUES
     ('OUI'),
@@ -64,7 +87,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Décisions possibles des RH
+-- ============================================================
+-- 7. INITIALISER LES DECISIONS RH
+-- ============================================================
+
 INSERT INTO decision_rh (libelle)
 VALUES
     ('ACCEPTEE'),
@@ -72,7 +98,10 @@ VALUES
 ON CONFLICT (libelle) DO NOTHING;
 
 
--- Types de contrat
+-- ============================================================
+-- 8. INITIALISER LES TYPES DE CONTRAT
+-- ============================================================
+
 INSERT INTO type_contrat (libelle)
 VALUES
     ('CE'),
@@ -82,7 +111,7 @@ ON CONFLICT (libelle) DO NOTHING;
 
 
 -- ============================================================
--- 2. CREER LE BESOIN DE RECRUTEMENT
+-- 9. CREER LE BESOIN DE RECRUTEMENT
 -- ============================================================
 
 DO $$
@@ -92,70 +121,55 @@ DECLARE
     v_id_directeur INTEGER;
     v_id_rh INTEGER;
     v_id_statut INTEGER;
+    v_id_type_besoin INTEGER;
     v_id_besoin INTEGER;
     v_id_poste INTEGER;
     v_id_type_contrat INTEGER;
 BEGIN
 
-    -- --------------------------------------------------------
-    -- 2.1. Rechercher la direction
-    -- --------------------------------------------------------
-
+    -- Rechercher la direction
     SELECT id_direction
     INTO v_id_direction
     FROM direction
     WHERE nom_direction = 'Direction des Systèmes d''Information'
     LIMIT 1;
 
-
-    -- --------------------------------------------------------
-    -- 2.2. Rechercher le département
-    -- --------------------------------------------------------
-
+    -- Rechercher le département
     SELECT id_dept
     INTO v_id_dept
     FROM departement
     WHERE nom_dept = 'Marketing'
     LIMIT 1;
 
-
-    -- --------------------------------------------------------
-    -- 2.3. Rechercher le directeur demandeur
-    -- --------------------------------------------------------
-
+    -- Rechercher le directeur demandeur
     SELECT id_responsable
     INTO v_id_directeur
     FROM responsable
     WHERE email = 'directeur.si@entreprise.mg'
     LIMIT 1;
 
-
-    -- --------------------------------------------------------
-    -- 2.4. Rechercher le responsable RH
-    -- --------------------------------------------------------
-
+    -- Rechercher le responsable RH
     SELECT id_responsable
     INTO v_id_rh
     FROM responsable
     WHERE email = 'rh@entreprise.mg'
     LIMIT 1;
 
-
-    -- --------------------------------------------------------
-    -- 2.5. Rechercher le statut VALIDEE
-    -- --------------------------------------------------------
-
+    -- Rechercher le statut VALIDEE
     SELECT id_statut_besoin
     INTO v_id_statut
     FROM statut_besoin
     WHERE libelle = 'VALIDEE'
     LIMIT 1;
 
+    -- Rechercher le type de besoin CREATION
+    SELECT id_type_besoin
+    INTO v_id_type_besoin
+    FROM type_besoin
+    WHERE libelle = 'CREATION'
+    LIMIT 1;
 
-    -- --------------------------------------------------------
-    -- 2.6. Vérifier les données nécessaires
-    -- --------------------------------------------------------
-
+    -- Vérifier les données nécessaires
     IF v_id_direction IS NULL THEN
         RAISE EXCEPTION
             'Direction introuvable : Direction des Systèmes d''Information';
@@ -181,28 +195,26 @@ BEGIN
             'Statut du besoin introuvable : VALIDEE';
     END IF;
 
+    IF v_id_type_besoin IS NULL THEN
+        RAISE EXCEPTION
+            'Type de besoin introuvable : CREATION';
+    END IF;
 
-    -- --------------------------------------------------------
-    -- 2.7. Rechercher le besoin de test existant
-    -- --------------------------------------------------------
-
+    -- Rechercher le besoin de test existant
     SELECT id_besoin
     INTO v_id_besoin
     FROM besoin
     WHERE motif = 'Recrutement de test - Développeur junior'
     LIMIT 1;
 
-
-    -- --------------------------------------------------------
-    -- 2.8. Créer le besoin s'il n'existe pas
-    -- --------------------------------------------------------
-
+    -- Créer le besoin s'il n'existe pas
     IF v_id_besoin IS NULL THEN
 
         INSERT INTO besoin (
             id_direction,
             id_dept,
             id_directeur_demandeur,
+            id_type_besoin,
             motif,
             id_statut_besoin,
             id_rh_traitant,
@@ -216,6 +228,7 @@ BEGIN
             v_id_direction,
             v_id_dept,
             v_id_directeur,
+            v_id_type_besoin,
             'Recrutement de test - Développeur junior',
             v_id_statut,
             v_id_rh,
@@ -227,12 +240,12 @@ BEGIN
         )
         RETURNING id_besoin INTO v_id_besoin;
 
+    ELSE
+        -- Actualiser le type de besoin du besoin existant
+        UPDATE besoin
+        SET id_type_besoin = v_id_type_besoin
+        WHERE id_besoin = v_id_besoin;
     END IF;
-
-
-    -- ========================================================
-    -- 3. ASSOCIER LE BESOIN AU POSTE
-    -- ========================================================
 
     -- Rechercher le poste
     SELECT id_poste
@@ -241,12 +254,10 @@ BEGIN
     WHERE libelle = 'Développeur junior'
     LIMIT 1;
 
-
     IF v_id_poste IS NULL THEN
         RAISE EXCEPTION
             'Poste introuvable : Développeur junior';
     END IF;
-
 
     -- Rechercher le type de contrat CDI
     SELECT id_type_contrat
@@ -255,14 +266,12 @@ BEGIN
     WHERE libelle = 'CDI'
     LIMIT 1;
 
-
     IF v_id_type_contrat IS NULL THEN
         RAISE EXCEPTION
             'Type de contrat introuvable : CDI';
     END IF;
 
-
-    -- Créer l'association si elle n'existe pas
+    -- Associer le besoin au poste s'il n'existe pas déjà
     IF NOT EXISTS (
         SELECT 1
         FROM besoin_poste bp
@@ -291,8 +300,7 @@ BEGIN
 
     END IF;
 
-
-    -- Vérifier que le besoin possède bien un poste
+    -- Vérifier que le besoin possède un poste
     IF NOT EXISTS (
         SELECT 1
         FROM besoin_poste bp
@@ -307,7 +315,7 @@ $$;
 
 
 -- ============================================================
--- 4. CREER L'OFFRE D'EMPLOI
+-- 10. CREER L'OFFRE D'EMPLOI
 -- ============================================================
 
 INSERT INTO offre_emploi (
@@ -347,7 +355,7 @@ WHERE b.motif = 'Recrutement de test - Développeur junior'
 
 
 -- ============================================================
--- 5. CREER LA CANDIDATURE DE HERY RABE
+-- 11. CREER LA CANDIDATURE DE HERY RABE
 -- ============================================================
 
 INSERT INTO candidature (
@@ -381,7 +389,7 @@ WHERE o.titre = 'Recrutement de test - Développeur junior'
 
 
 -- ============================================================
--- 6. INITIALISER LES TYPES DE CRITERES
+-- 12. INITIALISER LES TYPES DE CRITERES
 -- ============================================================
 
 INSERT INTO type_critere_proposition (libelle)
@@ -395,7 +403,7 @@ ON CONFLICT (libelle) DO NOTHING;
 
 
 -- ============================================================
--- 7. INITIALISER LES REPONSES POSSIBLES
+-- 13. INITIALISER LES REPONSES PAR CRITERE
 -- ============================================================
 
 INSERT INTO reponse_critere (libelle)
@@ -407,7 +415,7 @@ ON CONFLICT (libelle) DO NOTHING;
 
 
 -- ============================================================
--- 8. CREER OU ACTUALISER LA PROPOSITION D'EMBAUCHE
+-- 14. CREER OU ACTUALISER LA PROPOSITION D'EMBAUCHE
 -- ============================================================
 
 INSERT INTO proposition_embauche (
@@ -429,21 +437,15 @@ SELECT
     DATE '2026-11-02',
     CURRENT_TIMESTAMP,
     sp.id_statut_proposition
-
 FROM candidature ca
-
 JOIN candidat c
     ON c.id_candidat = ca.id_candidat
-
 JOIN offre_emploi o
     ON o.id_offre = ca.id_offre
-
 JOIN statut_proposition sp
     ON sp.libelle = 'EN_ATTENTE_CANDIDAT'
-
 WHERE c.email = 'hery.rabe@mail.mg'
   AND o.titre = 'Recrutement de test - Développeur junior'
-
 ON CONFLICT (id_candidature)
 DO UPDATE SET
     salaire_propose = EXCLUDED.salaire_propose,
@@ -454,31 +456,24 @@ DO UPDATE SET
 
 
 -- ============================================================
--- 9. CREER LES CINQ CRITERES DE LA PROPOSITION
+-- 15. CREER LES CINQ CRITERES DE LA PROPOSITION
 -- ============================================================
 
 INSERT INTO critere_proposition (
     id_proposition,
     id_type_critere
 )
-
 SELECT
     pe.id_proposition,
     tc.id_type_critere
-
 FROM proposition_embauche pe
-
 JOIN candidature ca
     ON ca.id_candidature = pe.id_candidature
-
 JOIN candidat c
     ON c.id_candidat = ca.id_candidat
-
 JOIN offre_emploi o
     ON o.id_offre = ca.id_offre
-
 CROSS JOIN type_critere_proposition tc
-
 WHERE c.email = 'hery.rabe@mail.mg'
   AND o.titre = 'Recrutement de test - Développeur junior'
   AND tc.libelle IN (
@@ -488,7 +483,6 @@ WHERE c.email = 'hery.rabe@mail.mg'
       'TRAVAIL',
       'DATE_PRISE_POSTE'
   )
-
 ON CONFLICT (id_proposition, id_type_critere)
 DO NOTHING;
 
@@ -496,7 +490,7 @@ COMMIT;
 
 
 -- ============================================================
--- 10. VERIFIER LA PROPOSITION ET SES CRITERES
+-- 16. VERIFIER LA PROPOSITION ET SES CRITERES
 -- ============================================================
 
 SELECT
@@ -505,45 +499,31 @@ SELECT
     c.prenom_candidat,
     c.email,
     o.titre AS offre,
-
     pe.salaire_propose,
     pe.horaire_travail,
     pe.responsable_hierarchique,
     pe.travail_a_effectuer,
     pe.date_prise_poste,
-
     tc.libelle AS critere,
     rc.libelle AS reponse_candidat,
-
     cp.contre_proposition,
     cp.commentaire_candidat,
-
     sp.libelle AS statut_proposition
-
 FROM proposition_embauche pe
-
 JOIN candidature ca
     ON ca.id_candidature = pe.id_candidature
-
 JOIN candidat c
     ON c.id_candidat = ca.id_candidat
-
 JOIN offre_emploi o
     ON o.id_offre = ca.id_offre
-
 JOIN statut_proposition sp
     ON sp.id_statut_proposition = pe.id_statut_proposition
-
 LEFT JOIN critere_proposition cp
     ON cp.id_proposition = pe.id_proposition
-
 LEFT JOIN type_critere_proposition tc
     ON tc.id_type_critere = cp.id_type_critere
-
 LEFT JOIN reponse_critere rc
     ON rc.id_reponse_critere = cp.id_reponse_critere
-
 WHERE c.email = 'hery.rabe@mail.mg'
   AND o.titre = 'Recrutement de test - Développeur junior'
-
 ORDER BY tc.id_type_critere;

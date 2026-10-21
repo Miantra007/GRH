@@ -30,6 +30,12 @@ CREATE TABLE IF NOT EXISTS statut_offre (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
+CREATE TABLE IF NOT EXISTS type_besoin (
+    id_type_besoin SERIAL PRIMARY KEY,
+    libelle VARCHAR(20) NOT NULL UNIQUE
+);
+
+
 
 -- ============================================================
 -- 4. TABLE STATUT_CANDIDATURE
@@ -64,6 +70,10 @@ CREATE TABLE IF NOT EXISTS statut_proposition (
     id_statut_proposition SERIAL PRIMARY KEY,
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
+CREATE TABLE IF NOT EXISTS statut_employe (
+    id_statut_employe SERIAL PRIMARY KEY,
+    libelle VARCHAR(20) NOT NULL UNIQUE
+);
 
 
 -- ============================================================
@@ -71,24 +81,51 @@ CREATE TABLE IF NOT EXISTS statut_proposition (
 -- Dépend de :
 -- direction, departement, responsable, statut_besoin
 -- ============================================================
+-- ============================================================
+-- 2. TABLE BESOIN
+-- ============================================================
+
 CREATE TABLE IF NOT EXISTS besoin (
     id_besoin SERIAL PRIMARY KEY,
-    id_direction INTEGER NOT NULL REFERENCES direction(id_direction),
-    id_dept INTEGER NOT NULL REFERENCES departement(id_dept),
-    id_directeur_demandeur INTEGER NOT NULL REFERENCES responsable(id_responsable),
+
+    id_direction INTEGER NOT NULL
+        REFERENCES direction(id_direction),
+
+    id_dept INTEGER NOT NULL
+        REFERENCES departement(id_dept),
+
+    id_directeur_demandeur INTEGER NOT NULL
+        REFERENCES responsable(id_responsable),
+
+    -- Type de besoin : CREATION ou REMPLACEMENT
+    id_type_besoin INTEGER NOT NULL
+        REFERENCES type_besoin(id_type_besoin),
+
     motif TEXT,
-    id_statut_besoin INTEGER NOT NULL REFERENCES statut_besoin(id_statut_besoin),
-    id_rh_traitant INTEGER REFERENCES responsable(id_responsable),
-    id_finance_validateur INTEGER REFERENCES responsable(id_responsable),
-    id_dg_validateur INTEGER REFERENCES responsable(id_responsable),
+
+    id_statut_besoin INTEGER NOT NULL
+        REFERENCES statut_besoin(id_statut_besoin),
+
+    id_rh_traitant INTEGER
+        REFERENCES responsable(id_responsable),
+
+    id_finance_validateur INTEGER
+        REFERENCES responsable(id_responsable),
+
+    id_dg_validateur INTEGER
+        REFERENCES responsable(id_responsable),
+
     date_demande TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     date_traitement_rh TIMESTAMP,
     date_validation_finance TIMESTAMP,
     date_validation_dg TIMESTAMP,
     date_publication_client TIMESTAMP,
+
     commentaire_rh TEXT,
     commentaire_finance TEXT,
     commentaire_dg TEXT,
+
     visible_client BOOLEAN NOT NULL DEFAULT FALSE
 );
 

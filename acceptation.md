@@ -1,6 +1,6 @@
 dans mon projet de processus Rh
 
-mon tache consiste a creer un formulaire d'acceptation delivrer par le Rh apres leur decision final concernant le besoin(y compris le salaire decider)
+mon tache consiste a creer un formulaire d'acceptation delivrer par le Rh apres leur decision final concernant le besoin
 Le candidat qui a postule apres avoir ete retenu apres l'entretien devrait remplir ce formulaire 
 ou les champs seront pre rempli par les decision du rh et il choisira juste oui/non/autre
 il y aura 3 boutons alors soit valider / Attrendre / Refuser
