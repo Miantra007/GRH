@@ -2,6 +2,7 @@
 -- GRH : DONNEES DE TEST POUR LA PROPOSITION D'EMBAUCHE
 -- Base de données : grh
 -- ============================================================
+\c grh
 
 BEGIN;
 
@@ -380,69 +381,169 @@ WHERE o.titre = 'Recrutement de test - Développeur junior'
 
 
 -- ============================================================
--- 6. CREER LA PROPOSITION D'EMBAUCHE
+-- 6. INITIALISER LES TYPES DE CRITERES
+-- ============================================================
+
+INSERT INTO type_critere_proposition (libelle)
+VALUES
+    ('SALAIRE'),
+    ('HORAIRE'),
+    ('RESPONSABLE'),
+    ('TRAVAIL'),
+    ('DATE_PRISE_POSTE')
+ON CONFLICT (libelle) DO NOTHING;
+
+
+-- ============================================================
+-- 7. INITIALISER LES REPONSES POSSIBLES
+-- ============================================================
+
+INSERT INTO reponse_critere (libelle)
+VALUES
+    ('OUI'),
+    ('NON'),
+    ('AUTRE')
+ON CONFLICT (libelle) DO NOTHING;
+
+
+-- ============================================================
+-- 8. CREER OU ACTUALISER LA PROPOSITION D'EMBAUCHE
 -- ============================================================
 
 INSERT INTO proposition_embauche (
     id_candidature,
     salaire_propose,
+    horaire_travail,
+    responsable_hierarchique,
+    travail_a_effectuer,
+    date_prise_poste,
     date_envoi,
     id_statut_proposition
 )
 SELECT
     ca.id_candidature,
     1200000,
+    'Du lundi au vendredi, de 8 h à 16 h',
+    'Responsable du développement informatique',
+    'Développement d''applications web, gestion des bases de données, correction des anomalies et tests',
+    DATE '2026-11-02',
     CURRENT_TIMESTAMP,
     sp.id_statut_proposition
+
 FROM candidature ca
+
 JOIN candidat c
     ON c.id_candidat = ca.id_candidat
+
 JOIN offre_emploi o
     ON o.id_offre = ca.id_offre
+
 JOIN statut_proposition sp
     ON sp.libelle = 'EN_ATTENTE_CANDIDAT'
+
 WHERE c.email = 'hery.rabe@mail.mg'
   AND o.titre = 'Recrutement de test - Développeur junior'
-  AND NOT EXISTS (
-      SELECT 1
-      FROM proposition_embauche pe
-      WHERE pe.id_candidature = ca.id_candidature
-  );
+
+ON CONFLICT (id_candidature)
+DO UPDATE SET
+    salaire_propose = EXCLUDED.salaire_propose,
+    horaire_travail = EXCLUDED.horaire_travail,
+    responsable_hierarchique = EXCLUDED.responsable_hierarchique,
+    travail_a_effectuer = EXCLUDED.travail_a_effectuer,
+    date_prise_poste = EXCLUDED.date_prise_poste;
 
 
 -- ============================================================
--- 7. VERIFIER LES DONNEES CREEES
+-- 9. CREER LES CINQ CRITERES DE LA PROPOSITION
 -- ============================================================
+
+INSERT INTO critere_proposition (
+    id_proposition,
+    id_type_critere
+)
+
+SELECT
+    pe.id_proposition,
+    tc.id_type_critere
+
+FROM proposition_embauche pe
+
+JOIN candidature ca
+    ON ca.id_candidature = pe.id_candidature
+
+JOIN candidat c
+    ON c.id_candidat = ca.id_candidat
+
+JOIN offre_emploi o
+    ON o.id_offre = ca.id_offre
+
+CROSS JOIN type_critere_proposition tc
+
+WHERE c.email = 'hery.rabe@mail.mg'
+  AND o.titre = 'Recrutement de test - Développeur junior'
+  AND tc.libelle IN (
+      'SALAIRE',
+      'HORAIRE',
+      'RESPONSABLE',
+      'TRAVAIL',
+      'DATE_PRISE_POSTE'
+  )
+
+ON CONFLICT (id_proposition, id_type_critere)
+DO NOTHING;
 
 COMMIT;
 
 
+-- ============================================================
+-- 10. VERIFIER LA PROPOSITION ET SES CRITERES
+-- ============================================================
+
 SELECT
-    c.id_candidat,
+    pe.id_proposition,
     c.nom_candidat,
     c.prenom_candidat,
     c.email,
     o.titre AS offre,
-    p.libelle AS poste,
-    bp.salaire_valide_finance AS salaire_valide_finance,
-    pe.salaire_propose AS salaire_propose_candidat,
-    sc.libelle AS statut_candidature,
-    sprop.libelle AS statut_proposition,
-    pe.date_envoi
+
+    pe.salaire_propose,
+    pe.horaire_travail,
+    pe.responsable_hierarchique,
+    pe.travail_a_effectuer,
+    pe.date_prise_poste,
+
+    tc.libelle AS critere,
+    rc.libelle AS reponse_candidat,
+
+    cp.contre_proposition,
+    cp.commentaire_candidat,
+
+    sp.libelle AS statut_proposition
+
 FROM proposition_embauche pe
+
 JOIN candidature ca
     ON ca.id_candidature = pe.id_candidature
+
 JOIN candidat c
     ON c.id_candidat = ca.id_candidat
+
 JOIN offre_emploi o
     ON o.id_offre = ca.id_offre
-JOIN besoin_poste bp
-    ON bp.id_besoin_poste = o.id_besoin_poste
-JOIN poste p
-    ON p.id_poste = bp.id_poste
-JOIN statut_candidature sc
-    ON sc.id_statut_candidature = ca.id_statut_candidature
-JOIN statut_proposition sprop
-    ON sprop.id_statut_proposition = pe.id_statut_proposition
+
+JOIN statut_proposition sp
+    ON sp.id_statut_proposition = pe.id_statut_proposition
+
+LEFT JOIN critere_proposition cp
+    ON cp.id_proposition = pe.id_proposition
+
+LEFT JOIN type_critere_proposition tc
+    ON tc.id_type_critere = cp.id_type_critere
+
+LEFT JOIN reponse_critere rc
+    ON rc.id_reponse_critere = cp.id_reponse_critere
+
 WHERE c.email = 'hery.rabe@mail.mg'
-  AND o.titre = 'Recrutement de test - Développeur junior';
+  AND o.titre = 'Recrutement de test - Développeur junior'
+
+ORDER BY tc.id_type_critere;

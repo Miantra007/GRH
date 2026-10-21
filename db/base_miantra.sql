@@ -2,7 +2,7 @@
 -- BASE MIANTRA : GESTION DU RECRUTEMENT
 -- Fichier : base_miantra.sql
 -- ============================================================
-\c grh 
+\c grh
 BEGIN;
 
 -- ============================================================
@@ -13,13 +13,6 @@ CREATE TABLE IF NOT EXISTS type_contrat (
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    type_contrat (libelle)
-VALUES
-    ('CE'),
-    ('CDD'),
-    ('CDI') ON CONFLICT (libelle) DO NOTHING;
-
 -- ============================================================
 -- 2. TABLE STATUT_BESOIN
 -- ============================================================
@@ -28,14 +21,6 @@ CREATE TABLE IF NOT EXISTS statut_besoin (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    statut_besoin (libelle)
-VALUES
-    ('EN_ATTENTE_RH'),
-    ('EN_ATTENTE_FINANCE'),
-    ('EN_ATTENTE_DG'),
-    ('VALIDEE'),
-    ('REFUSEE') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
 -- 3. TABLE STATUT_OFFRE
@@ -45,13 +30,6 @@ CREATE TABLE IF NOT EXISTS statut_offre (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    statut_offre (libelle)
-VALUES
-    ('BROUILLON'),
-    ('PUBLIEE'),
-    ('FERMEE'),
-    ('ANNULEE') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
 -- 4. TABLE STATUT_CANDIDATURE
@@ -61,16 +39,6 @@ CREATE TABLE IF NOT EXISTS statut_candidature (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    statut_candidature (libelle)
-VALUES
-    ('RECUE'),
-    ('DOSSIER_RETENU'),
-    ('DOSSIER_REJETE'),
-    ('TEST_TECHNIQUE'),
-    ('ENTRETIEN'),
-    ('RETENUE'),
-    ('NON_RETENUE') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
 -- 5. TABLE REPONSE_CANDIDAT
@@ -80,12 +48,6 @@ CREATE TABLE IF NOT EXISTS reponse_candidat (
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    reponse_candidat (libelle)
-VALUES
-    ('OUI'),
-    ('NON'),
-    ('AUTRE') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
 -- 6. TABLE DECISION_RH
@@ -95,13 +57,7 @@ CREATE TABLE IF NOT EXISTS decision_rh (
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    decision_rh (libelle)
-VALUES
-    ('ACCEPTEE'),
-    ('REFUSEE') ON CONFLICT (libelle) DO NOTHING;
-
--- ============================================================
+--==================================================
 -- 7. TABLE STATUT_PROPOSITION
 -- ============================================================
 CREATE TABLE IF NOT EXISTS statut_proposition (
@@ -109,14 +65,6 @@ CREATE TABLE IF NOT EXISTS statut_proposition (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-INSERT INTO
-    statut_proposition (libelle)
-VALUES
-    ('EN_ATTENTE_CANDIDAT'),
-    ('EN_ATTENTE_RH'),
-    ('ACCORD_FINAL'),
-    ('REFUSEE_CANDIDAT'),
-    ('REFUSEE_RH') ON CONFLICT (libelle) DO NOTHING;
 
 -- ============================================================
 -- 8. TABLE BESOIN
@@ -225,17 +173,29 @@ CREATE TABLE IF NOT EXISTS entretien (
 CREATE TABLE IF NOT EXISTS proposition_embauche (
     id_proposition SERIAL PRIMARY KEY,
     id_candidature INTEGER NOT NULL UNIQUE REFERENCES candidature(id_candidature),
+    -- Proposition salariale du RH
     salaire_propose NUMERIC(12, 0) NOT NULL CHECK (salaire_propose >= 0),
+    -- Autres conditions proposées par le RH
+    horaire_travail VARCHAR(150),
+    responsable_hierarchique VARCHAR(150),
+    travail_a_effectuer TEXT,
+    date_prise_poste DATE,
+    -- Date d'envoi de la proposition
     date_envoi TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    -- Réponse générale du candidat
     id_reponse_candidat INTEGER REFERENCES reponse_candidat(id_reponse_candidat),
     commentaire_candidat TEXT,
     contre_proposition TEXT,
+    -- Négociation salariale
     salaire_demande NUMERIC(12, 0) CHECK (salaire_demande >= 0),
     date_reponse_candidat TIMESTAMP,
+    -- Décision du RH
     id_decision_rh INTEGER REFERENCES decision_rh(id_decision_rh),
     commentaire_rh TEXT,
     date_decision_rh TIMESTAMP,
+    -- Salaire finalement retenu
     salaire_final NUMERIC(12, 0) CHECK (salaire_final >= 0),
+    -- Statut général de la proposition
     id_statut_proposition INTEGER NOT NULL REFERENCES statut_proposition(id_statut_proposition)
 );
 
@@ -266,10 +226,42 @@ CREATE TABLE IF NOT EXISTS notification (
         )
 );
 
+-- ============================================================
+-- 16. TABLE TYPE_CRITERE_PROPOSITION
+-- ============================================================
+CREATE TABLE IF NOT EXISTS type_critere_proposition (
+    id_type_critere SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+-- ============================================================
+-- 17. TABLE REPONSE_CRITERE
+-- (manquait : référencée par critere_proposition)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS reponse_critere (
+    id_reponse_critere SERIAL PRIMARY KEY,
+    libelle VARCHAR(10) NOT NULL UNIQUE
+);
+
+-- ============================================================
+-- 18. TABLE CRITERE_PROPOSITION
+-- Une réponse indépendante pour chaque critère
+-- ============================================================
+CREATE TABLE IF NOT EXISTS critere_proposition (
+    id_critere_proposition SERIAL PRIMARY KEY,
+    id_proposition INTEGER NOT NULL REFERENCES proposition_embauche(id_proposition) ON DELETE CASCADE,
+    id_type_critere INTEGER NOT NULL REFERENCES type_critere_proposition(id_type_critere),
+    id_reponse_critere INTEGER REFERENCES reponse_critere(id_reponse_critere),
+    contre_proposition TEXT,
+    commentaire_candidat TEXT,
+    date_reponse TIMESTAMP,
+    UNIQUE (id_proposition, id_type_critere)
+);
+
 COMMIT;
 
 -- ============================================================
--- 16. VERIFICATION DES TABLES
+-- 19. VERIFICATION DES TABLES
 -- ============================================================
 SELECT
     table_name
@@ -292,7 +284,10 @@ WHERE
         'test_technique',
         'entretien',
         'proposition_embauche',
-        'notification'
+        'notification',
+        'type_critere_proposition',
+        'reponse_critere',
+        'critere_proposition'
     )
 ORDER BY
     table_name;
