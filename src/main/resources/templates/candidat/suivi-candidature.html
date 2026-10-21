@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Suivi de candidature</title></head>
+<body>
+<main>
+    <h1>Suivi de candidature</h1>
+    <p>Offre : <strong th:text="${candidature.offre.titre}"></strong></p>
+    <p>Statut : <strong th:text="${candidature.statut.libelle}"></strong></p>
+    <p>Déposée le : <time th:text="${candidature.dateCandidature}"></time></p>
+    <h2>Notifications</h2>
+    <ul><li th:each="n : ${notifications}"><strong th:text="${n.titre}"></strong> — <span th:text="${n.message}"></span></li></ul>
+    <h2>Tests techniques</h2>
+    <ul><li th:each="t : ${tests}"><span th:text="${t.dateTest}"></span> <span th:text="${t.heureTest}"></span> — <span th:text="${t.lieu}"></span><p th:text="${t.consignes}"></p><p th:text="${t.messageCandidat}"></p></li></ul>
+    <h2>Entretiens</h2>
+    <ul><li th:each="e : ${entretiens}"><span th:text="${e.dateEntretien}"></span> <span th:text="${e.heureEntretien}"></span> — <span th:text="${e.lieu}"></span><p th:text="${e.consignes}"></p><p th:text="${e.messageCandidat}"></p></li></ul>
+    <section th:if="${proposition != null}">
+        <h2>Proposition d’embauche</h2>
+        <p>Salaire proposé : <span th:text="${proposition.salairePropose}"></span></p>
+        <p th:text="${proposition.horaireTravail}"></p><p th:text="${proposition.travailAEffectuer}"></p>
+        <p>Date de prise de poste : <span th:text="${proposition.datePrisePoste}"></span></p>
+        <p th:if="${proposition.statutProposition.libelle == 'EN_ATTENTE_CANDIDAT'}">Répondez à la proposition :</p>
+        <form th:if="${proposition.statutProposition.libelle == 'EN_ATTENTE_CANDIDAT'}" method="post" th:action="@{/api/candidat/suivi/{code}/proposition(code=${candidature.codeSuivi})}">
+            <label><input type="radio" name="reponse" value="OUI" required> Oui</label>
+            <label><input type="radio" name="reponse" value="NON"> Non</label>
+            <label><input type="radio" name="reponse" value="AUTRE"> Autre</label>
+            <p><label for="salaireDemande">Salaire demandé</label><input id="salaireDemande" name="salaireDemande" type="number" min="0"></p>
+            <p><label for="contreProposition">Contre-proposition</label><textarea id="contreProposition" name="contreProposition"></textarea></p>
+            <p><label for="commentaire">Commentaire</label><textarea id="commentaire" name="commentaire"></textarea></p>
+            <button type="submit">Envoyer ma réponse</button>
+        </form>
+        <p th:if="${proposition.reponseCandidat != null}">Réponse : <span th:text="${proposition.reponseCandidat.libelle}"></span></p>
+        <p th:if="${proposition.commentaireRh != null}" th:text="${proposition.commentaireRh}"></p>
+    </section>
+    <p><a href="/api/candidat/offres">Retour aux offres</a></p>
+</main>
+</body>
+</html>

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><title>Dossier candidat</title></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+    <div th:replace="~{fragments :: messages}"></div>
+    <p><a href="/admin/candidatures">Retour aux candidatures</a></p>
+    <h1>Dossier de candidature</h1>
+    <h2 th:text="${candidature.offre.titre}"></h2>
+    <p>Candidat : <span th:text="|${candidature.candidat.prenomCandidat} ${candidature.candidat.nomCandidat}|"></span> — <span th:text="${candidature.candidat.email}"></span></p>
+    <p>Reçue le <time th:text="${candidature.dateCandidature}"></time> — statut <strong th:text="${candidature.statut.libelle}"></strong></p>
+    <form method="post" th:action="@{/admin/candidatures/{id}/statut(id=${candidature.id})}">
+        <label for="statut">Modifier le statut</label><select id="statut" name="statut"><option th:each="s : ${statuts}" th:value="${s.libelle}" th:text="${s.libelle}" th:selected="${s.id == candidature.statut.id}"></option></select>
+        <button type="submit">Enregistrer le statut</button>
+    </form>
+    <h2>Lettre de motivation</h2><p th:if="${dossier == null}">Aucun dossier associé.</p><pre th:if="${dossier != null}" th:text="${dossier.lettreMotivation}"></pre>
+    <h2>CV</h2>
+    <section th:if="${cv != null}">
+        <h3 th:text="${cv.titreCv}"></h3><p th:text="${cv.profilProfessionnel}"></p>
+        <p>Adresse : <span th:text="${cv.adresse}"></span></p>
+        <h3>Formations</h3><ul><li th:each="f : ${formations}" th:text="|${f.nomFormation} — ${f.etablissement} (${f.dateDebut} - ${f.dateFin})|"></li></ul>
+        <h3>Diplômes</h3><ul><li th:each="e : ${educations}" th:text="|${e.diplome} — ${e.etablissement} (${e.niveau})|"></li></ul>
+        <h3>Expériences</h3><ul><li th:each="e : ${experiences}" th:text="|${e.poste} — ${e.entreprise}|"></li></ul>
+        <h3>Compétences</h3><ul><li th:each="c : ${competences}" th:text="|${c.nomCompetence} — ${c.niveauCompetence.libelleNiveau}|"></li></ul>
+        <h3>Langues</h3><ul><li th:each="l : ${languesCv}" th:text="|${l.langue.nomLangue} — ${l.niveauLangue.libelleNiveau}|"></li></ul>
+    </section>
+    <h2>Documents justificatifs</h2>
+    <ul><li th:each="doc : ${documents}"><a th:href="@{/admin/candidatures/{id}/documents/{docId}(id=${candidature.id},docId=${doc.id})}" th:text="${doc.nomFichier}"></a></li></ul>
+    <h2>Planifier un test technique</h2>
+    <form method="post" th:action="@{/admin/candidatures/{id}/test(id=${candidature.id})}">
+        <p><label>Date <input name="date" type="date" required></label> <label>Heure <input name="heure" type="time" required></label></p>
+        <p><label>Lieu <input name="lieu" required></label></p><p><label>Consignes <textarea name="consignes" required></textarea></label></p><p><label>Message au candidat <textarea name="message"></textarea></label></p>
+        <button type="submit">Planifier le test</button>
+    </form>
+    <ul><li th:each="t : ${tests}" th:text="|${t.dateTest} ${t.heureTest} — ${t.lieu}: ${t.consignes}|"></li></ul>
+    <h2>Planifier un entretien</h2>
+    <form method="post" th:action="@{/admin/candidatures/{id}/entretien(id=${candidature.id})}">
+        <p><label>Date <input name="date" type="date" required></label> <label>Heure <input name="heure" type="time" required></label></p>
+        <p><label>Lieu <input name="lieu" required></label></p><p><label>Consignes <textarea name="consignes" required></textarea></label></p><p><label>Message au candidat <textarea name="message"></textarea></label></p>
+        <button type="submit">Planifier l’entretien</button>
+    </form>
+    <ul><li th:each="e : ${entretiens}" th:text="|${e.dateEntretien} ${e.heureEntretien} — ${e.lieu}: ${e.consignes}|"></li></ul>
+    <h2>Proposition d’embauche</h2>
+    <form th:if="${proposition == null or proposition.reponseCandidat == null}" method="post" th:action="@{/admin/candidatures/{id}/proposition(id=${candidature.id})}">
+        <p><label>Salaire proposé <input name="salaire" type="number" min="0" required th:value="${proposition?.salairePropose}"></label></p>
+        <p><label>Horaire <input name="horaire" th:value="${proposition?.horaireTravail}"></label></p><p><label>Responsable hiérarchique <input name="responsable" th:value="${proposition?.responsableHierarchique}"></label></p>
+        <p><label>Missions <textarea name="missions" th:text="${proposition?.travailAEffectuer}"></textarea></label></p><p><label>Prise de poste <input name="datePrisePoste" type="date" th:value="${proposition?.datePrisePoste}"></label></p>
+        <button type="submit">Transmettre la proposition</button>
+    </form>
+    <section th:if="${proposition != null and proposition.reponseCandidat != null}">
+        <h3>Réponse candidat : <span th:text="${proposition.reponseCandidat.libelle}"></span></h3>
+        <p th:text="${proposition.commentaireCandidat}"></p><p th:text="${proposition.contreProposition}"></p>
+        <form method="post" th:action="@{/admin/candidatures/{id}/proposition/decision(id=${candidature.id})}">
+            <label>Décision <select name="decision" required><option value="ACCEPTEE">Acceptée</option><option value="REFUSEE">Refusée</option></select></label>
+            <label>Commentaire RH <textarea name="commentaire"></textarea></label><button type="submit">Enregistrer la décision finale</button>
+        </form>
+    </section>
+</main>
+</body>
+</html>

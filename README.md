@@ -6,6 +6,8 @@
 3. psql -U postgres -f db/grh_donnees_complement.sql
 3 bis. psql -U postgres -f db/grh_mots_de_passe_dev.sql   (vrais hash BCrypt, mot de passe de test : motdepasse123)
 3 ter. psql -U postgres -f db/grh_integration.sql        (consignes d'intégration RH -> candidat)
+3 quater. psql -U postgres -f db/base_miantra.sql        (offres, candidatures, suivi et propositions d'embauche)
+3 quinquies. psql -U postgres -f db/grh_offres_exemple.sql (offres de démonstration visibles sans connexion)
 4. Mettre ton mot de passe dans src/main/resources/application.properties
 5. mvn spring-boot:run   (IDE : activer le plugin Lombok + "annotation processing")
 6. Ouvrir http://localhost:8080  (interface Thymeleaf)

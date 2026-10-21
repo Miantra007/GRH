@@ -11,6 +11,7 @@
     <span class="brand">GRH</span>
     <nav>
         <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidats}">Candidats</a>
+        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures}">Candidatures</a>
         <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/contrats}">Contrats</a>
         <a th:if="${session.user != null and session.user.type == 'DG'}" th:href="@{/dg/contrats}">Contrats à valider</a>
         <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Mes contrats</a>

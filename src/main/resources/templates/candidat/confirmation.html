@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Candidature envoyée</title></head>
+<body>
+<main>
+    <h1>Candidature envoyée</h1>
+    <p>Votre dossier pour l’offre « <span th:text="${candidature.offre.titre}"></span> » a été transmis.</p>
+    <p>Conservez ce code privé pour consulter votre statut et vos convocations :</p>
+    <p><strong th:text="${candidature.codeSuivi}"></strong></p>
+    <p><a th:href="@{/api/candidat/suivi/{code}(code=${candidature.codeSuivi})}">Consulter le suivi</a></p>
+    <p><a href="/api/candidat/offres">Retour aux offres</a></p>
+</main>
+</body>
+</html>

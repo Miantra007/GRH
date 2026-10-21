@@ -4,8 +4,10 @@ import mg.grh.model.Candidat;
 import mg.grh.repository.CandidatRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Locale;
+import java.util.Optional;
 
 @Service
 public class CandidatService extends GenericService<Candidat> {
@@ -32,7 +34,7 @@ public class CandidatService extends GenericService<Candidat> {
                 || candidat.getEmail().length() > 150) {
             throw new IllegalArgumentException("Un des champs dépasse la longueur autorisée.");
         }
-        candidatRepository.findByEmail(candidat.getEmail())
+        candidatRepository.findByEmailIgnoreCase(candidat.getEmail())
                 .filter(existant -> !existant.getId().equals(candidat.getId()))
                 .ifPresent(existant -> { throw new IllegalArgumentException("Un compte existe déjà avec cet email."); });
         if (motDePasse != null && !motDePasse.isBlank()) {
@@ -41,11 +43,18 @@ public class CandidatService extends GenericService<Candidat> {
         } else if (candidat.getId() == null) {
             throw new IllegalArgumentException("Le mot de passe est obligatoire.");
         }
-        return candidatRepository.save(candidat);
+        try { return candidatRepository.saveAndFlush(candidat); }
+        catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Un compte existe déjà avec cet email.", e);
+        }
     }
 
     public Candidat trouverParId(Integer id) {
         return candidatRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Compte candidat introuvable."));
+    }
+
+    public Optional<Candidat> trouverParEmail(String email) {
+        return candidatRepository.findByEmailIgnoreCase(email.trim());
     }
 }
