@@ -1,0 +1,33 @@
+package mg.grh.controller;
+
+// NotificationController.java
+
+import mg.grh.repository.NotificationRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
+@Controller
+@RequiredArgsConstructor
+public class NotificationController {
+
+    private final NotificationRepository notifications;
+
+    @GetMapping("/candidats/{id}/notifications")
+    public String pourCandidat(@PathVariable Integer id, Model model) {
+        model.addAttribute("liste", notifications.findByIdCandidatOrderByDateCreationDesc(id));
+        model.addAttribute("candidat", true);
+        model.addAttribute("proprietaire", id);
+        return "proposition/notifications";
+    }
+
+    @GetMapping("/rh/{id}/notifications")
+    public String pourRh(@PathVariable Integer id, Model model) {
+        model.addAttribute("liste", notifications.findByIdResponsableOrderByDateCreationDesc(id));
+        model.addAttribute("candidat", false);
+        model.addAttribute("proprietaire", id);
+        return "proposition/notifications";
+    }
+}
