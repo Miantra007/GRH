@@ -14,6 +14,9 @@ public interface PropositionEmbaucheRepository extends JpaRepository<Proposition
 
     @Query("select p from PropositionEmbauche p where p.idCandidature = :candidatureId")
     Optional<PropositionEmbauche> findByCandidatureId(@Param("candidatureId") Integer candidatureId);
+
+    @Query("select p from PropositionEmbauche p where p.id = :id and p.statut.libelle = 'ACCORD_FINAL'")
+    Optional<PropositionEmbauche> findAccordFinal(@Param("id") Integer id);
     
     @Query(nativeQuery = true, value = """
             SELECT pe.id_proposition  AS "idProposition",

@@ -28,7 +28,7 @@
     <div class="card-grh card-corps mb-4">
         <div class="etapes">
             <div class="etape" th:classappend="${etat == 'Créé'} ? 'courante' : 'fait'">
-                <span class="pastille"><i class="fa-solid" th:classappend="${etat == 'Créé'} ? 'fa-pen' : 'fa-check'"></i></span> Créé par le RH
+                <span class="pastille"><i class="fa-solid" th:classappend="${etat == 'Créé'} ? 'fa-pen' : 'fa-check'"></i></span> Créé
             </div>
             <span class="trait" th:classappend="${etat != 'Créé'} ? 'fait'"></span>
             <div class="etape" th:classappend="${etat == 'Créé'} ? '' : (${etat == 'Signé'} ? 'courante' : 'fait')">
@@ -36,7 +36,7 @@
             </div>
             <span class="trait" th:classappend="${etat == 'Validé'} ? 'fait'"></span>
             <div class="etape" th:classappend="${etat == 'Validé'} ? 'fait'">
-                <span class="pastille"><i class="fa-solid" th:classappend="${etat == 'Validé'} ? 'fa-check' : 'fa-stamp'"></i></span> Validé par la Direction
+                <span class="pastille"><i class="fa-solid" th:classappend="${etat == 'Validé'} ? 'fa-check' : 'fa-stamp'"></i></span> Validé par le RH
             </div>
         </div>
     </div>
@@ -125,20 +125,18 @@
                     <p class="mb-0 text-muted" th:if="${role == 'CANDIDAT' and etat != 'Créé'}">
                         <i class="fa-solid fa-circle-check text-success me-1"></i> Vous avez signé ce contrat.</p>
 
-                    <form th:if="${role == 'DG' and etat == 'Signé'}" th:action="@{/dg/contrats/{id}/valider(id=${cc.id})}" method="post"
+                    <form th:if="${role == 'RH' and etat == 'Signé'}" th:action="@{/admin/contrats/{id}/valider(id=${cc.id})}" method="post"
                           th:attr="data-confirm=${'Valider définitivement ce contrat ? ' + (besoin != null ? besoin.message : '')}"
                           data-confirm-titre="Valider le contrat" data-confirm-bouton="Valider" data-confirm-style="btn-success">
-                        <button class="btn btn-success w-100" type="submit" th:disabled="${besoin != null and besoin.bloque}">
+                        <button class="btn btn-success w-100" type="submit">
                             <i class="fa-solid fa-stamp me-1"></i> Valider le contrat</button>
-                        <p class="small text-danger mt-2 mb-0" th:if="${besoin != null and besoin.bloque}">
-                            Validation impossible tant que le problème du besoin n'est pas corrigé.</p>
                     </form>
                     <p class="mb-0 text-muted" th:if="${role == 'DG' and etat != 'Signé'}">
                         <i class="fa-solid me-1" th:classappend="${etat == 'Validé'} ? 'fa-circle-check text-success' : 'fa-hourglass-half'"></i>
                         <span th:text="${etat == 'Validé'} ? 'Ce contrat est déjà validé.' : 'En attente de la signature du candidat.'">état</span></p>
 
                     <p class="mb-0 text-muted" th:if="${role == 'RH'}">
-                        <i class="fa-solid fa-circle-info me-1"></i> Le RH crée le contrat ; la signature revient au candidat, la validation à la Direction générale.</p>
+                        <i class="fa-solid fa-circle-info me-1"></i> Le candidat choisit et signe le contrat ; le RH responsable le valide.</p>
                     <button class="btn btn-outline-primary w-100 mt-3" type="button" onclick="window.print()"><i class="fa-solid fa-print me-1"></i> Imprimer</button>
                 </div>
             </div>

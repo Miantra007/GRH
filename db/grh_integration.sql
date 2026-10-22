@@ -53,3 +53,7 @@ FROM (VALUES
 JOIN type_consigne t ON t.code = v.code
 JOIN candidat c ON c.email = 'hery.rabe@mail.mg'
 JOIN responsable r ON r.email = 'rh@entreprise.mg';
+ALTER TABLE contrat_candidat
+    ADD COLUMN IF NOT EXISTS id_proposition INTEGER UNIQUE
+        REFERENCES proposition_embauche(id_proposition);
+

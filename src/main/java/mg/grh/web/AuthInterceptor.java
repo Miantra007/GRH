@@ -13,7 +13,9 @@ public class AuthInterceptor implements HandlerInterceptor {
         HttpSession session = req.getSession(false);
         SessionUser user = session == null ? null : (SessionUser) session.getAttribute("user");
         String path = req.getRequestURI().substring(req.getContextPath().length());
-        String requis = path.startsWith("/admin") ? "RH" : path.startsWith("/dg") ? "DG" : "CANDIDAT";
+        String requis = path.startsWith("/admin") || path.startsWith("/rh/") ? "RH"
+                : path.startsWith("/dg") ? "DG"
+                : path.startsWith("/candidat") || path.startsWith("/candidats/") ? "CANDIDAT" : "RH";
         if (user == null) {
             res.sendRedirect(req.getContextPath() + "/login");
             return false;

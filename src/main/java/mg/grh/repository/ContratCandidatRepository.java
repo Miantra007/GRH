@@ -14,6 +14,7 @@ import java.util.Optional;
 @Repository
 public interface ContratCandidatRepository extends JpaRepository<ContratCandidat, Integer> {
     List<ContratCandidat> findByCandidatId(Integer candidatId);
+    boolean existsByPropositionId(Integer propositionId);
 
     /** Besoin (type, poste, département) auquel répond une candidature. */
     @Query(nativeQuery = true, value = """

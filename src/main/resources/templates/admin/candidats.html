@@ -39,8 +39,6 @@
                     <td th:text="${c.email}">email</td>
                     <td th:text="${#temporals.format(c.dtn, 'dd/MM/yyyy')} ?: '—'">date</td>
                     <td class="col-actions">
-                        <a class="btn btn-primary btn-sm" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">
-                            <i class="fa-solid fa-file-circle-plus me-1"></i> Créer un contrat</a>
                         <a class="btn btn-outline-primary btn-sm" th:href="@{/admin/candidats/{id}/integration(id=${c.id})}">
                             <i class="fa-solid fa-list-check me-1"></i> Intégration</a>
                     </td>

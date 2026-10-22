@@ -14,8 +14,6 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<<<<<<< HEAD
-
 <!-- ===================== Barre de navigation (menu selon le rôle) ===================== -->
 <header th:fragment="nav" class="topbar navbar navbar-expand-lg py-2 sticky-top">
     <div class="container-xl">
@@ -54,6 +52,12 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/candidat/integration}"
                                             th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/candidat/integration')} ? 'active'">
                         <i class="fa-solid fa-list-check me-1"></i> Mon intégration</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/candidats/{id}/notifications(id=${session.user.id})}">
+                        <i class="fa-regular fa-bell me-1"></i> Notifications</a></li>
+                </th:block>
+                <th:block th:if="${session.user.type == 'RH'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/rh/{id}/notifications(id=${session.user.id})}">
+                        <i class="fa-regular fa-bell me-1"></i> Notifications</a></li>
                 </th:block>
             </ul>
             <form th:action="@{/logout}" method="post" class="user-chip mt-3 mt-lg-0">
@@ -68,25 +72,6 @@
             </form>
         </div>
     </div>
-=======
-<header th:fragment="nav" class="nav">
-    <span class="brand">GRH</span>
-    <nav>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidats}">Candidats</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures}">Candidatures</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures/tests}">Tests techniques</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures/entretiens}">Entretiens</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/contrats}">Contrats</a>
-        <a th:if="${session.user != null and session.user.type == 'DG'}" th:href="@{/dg/contrats}">Contrats à valider</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Mes contrats</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/notifications}">Mes notifications</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/integration}">Mon intégration</a>
-    </nav>
-    <form th:if="${session.user != null}" th:action="@{/logout}" method="post">
-        <span th:text="${session.user.email}"></span>
-        <button class="btn sec" type="submit">Déconnexion</button>
-    </form>
->>>>>>> 33e03d0c11dfb58f49c3361d50f3c1173277bb77
 </header>
 
 <!-- ===================== Messages (succès / erreur) ===================== -->
