@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Notifications</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .notif {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: .75rem;
+        }
+
+        .notif h3 {
+            margin: 0 0 .25rem;
+            font-size: 1rem;
+        }
+
+        .date {
+            color: #777;
+            font-size: .85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Notifications</h1>
+        <p th:if="${liste.isEmpty()}">Aucune notification.</p>
+
+        <div class="notif" th:each="n : ${liste}">
+            <h3 th:text="${n.titre}"></h3>
+            <div class="date" th:text="${#temporals.format(n.dateCreation, 'dd/MM/yyyy HH:mm')}"></div>
+            <p th:text="${n.message}"></p>
+            <a th:if="${n.idProposition != null and candidat}"
+                th:href="@{/candidats/{c}/propositions/{p}(c=${proprietaire},p=${n.idProposition})}">Ouvrir la
+                proposition</a>
+            <a th:if="${n.idProposition != null and !candidat}"
+                th:href="@{/rh/propositions/{p}(p=${n.idProposition})}">Examiner la réponse</a>
+        </div>
+    </main>
+</body>
+
+</html>
