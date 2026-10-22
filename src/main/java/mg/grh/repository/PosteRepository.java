@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PosteRepository extends JpaRepository<Poste, Integer> {
+    java.util.Optional<Poste> findByLibelleIgnoreCase(String libelle);
 }

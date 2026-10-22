@@ -1,6 +1,5 @@
 package mg.grh.controller.web;
 
-import mg.grh.dto.ResultatValidation;
 import mg.grh.model.ContratCandidat;
 import mg.grh.service.EmbaucheService;
 import mg.grh.service.ContratCandidatService;
@@ -11,7 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-/** Côté Direction générale : valide les contrats signés (statut "Validé"). */
+/** Consultation DG des contrats et du besoin associé. */
 @Controller
 @RequestMapping("/dg")
 public class DgContratWebController {
@@ -42,14 +41,4 @@ public class DgContratWebController {
         return "contrat-detail";
     }
 
-    @PostMapping("/contrats/{id}/valider")
-    public String valider(@PathVariable Integer id, RedirectAttributes ra) {
-        try {
-            ResultatValidation r = contratService.validerEtEmbaucher(id);
-            ra.addFlashAttribute("succes", "Contrat validé. " + r.embauche().message());
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("erreur", "Validation impossible : " + e.getMessage());
-        }
-        return "redirect:/dg/contrats/" + id;
-    }
 }

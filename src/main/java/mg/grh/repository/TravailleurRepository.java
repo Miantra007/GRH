@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface TravailleurRepository extends JpaRepository<Travailleur, Integer> {
+    java.util.List<Travailleur> findByEmail(String email);
 }

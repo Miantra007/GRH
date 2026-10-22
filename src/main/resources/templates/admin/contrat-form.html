@@ -6,14 +6,14 @@
 <main class="container-xl py-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb mb-2">
-            <li class="breadcrumb-item"><a th:href="@{/admin/candidats}">Candidats</a></li>
+                <li class="breadcrumb-item"><a th:href="${proposition != null} ? @{/candidat/contrats} : @{/admin/candidats}" th:text="${proposition != null ? 'Mes contrats' : 'Candidats'}">Candidats</a></li>
             <li class="breadcrumb-item active" aria-current="page">Nouveau contrat</li>
         </ol>
     </nav>
     <div class="page-header d-flex align-items-center gap-3 mb-4">
         <span class="icone"><i class="fa-solid fa-file-circle-plus"></i></span>
         <div>
-            <h1>Nouveau contrat</h1>
+            <h1 th:text="${proposition != null ? 'Choisir mon contrat' : 'Nouveau contrat'}">Nouveau contrat</h1>
             <p class="text-muted small mb-0">
                 <i class="fa-solid fa-user me-1"></i>Pour <strong th:text="${candidat.prenomCandidat + ' ' + candidat.nomCandidat}">Candidat</strong>
                 · statut initial « Créé »
@@ -30,7 +30,11 @@
             <h2 class="titre-section">Besoin de recrutement</h2>
         </div>
         <div class="card-corps">
-            <th:block th:unless="${#lists.isEmpty(candidatures)}">
+            <th:block th:if="${proposition != null}">
+                <p class="mb-0">Le poste, la date de début et le salaire sont repris de la proposition acceptée et vérifiés à l’enregistrement.</p>
+                <p th:if="${#lists.isEmpty(travailleurs)}" class="text-danger mb-0 mt-2">Votre dossier travailleur doit être préparé par le RH avant la création du contrat.</p>
+            </th:block>
+            <th:block th:unless="${proposition != null}">
                 <label class="form-label" for="candidatureChoix">Candidature acceptée<span class="req">*</span></label>
                 <select class="form-select" id="candidatureChoix" required>
                     <option value="" th:if="${#lists.size(candidatures) > 1}">— Choisir la candidature —</option>
@@ -68,7 +72,7 @@
     <!-- ===================== CE ===================== -->
     <div class="card-grh form-contrat d-none" id="f-CE">
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-hourglass-half"></i></span><h2 class="titre-section">Contrat d'essai (CE)</h2></div>
-        <form method="post" class="card-corps needs-validation" novalidate th:action="@{/admin/contrats/ce(candidatId=${candidat.id})}">
+        <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/ce(propositionId=${propositionId})} : @{/admin/contrats/ce(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
@@ -97,16 +101,16 @@
                     <select class="form-select" name="convention.id"><option value="">—</option>
                         <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
                     </select></div>
-                <div class="col-md-6"><label class="form-label">Poste</label><input class="form-control" type="text" name="poste"></div>
+                <div class="col-md-6"><label class="form-label">Poste</label><input class="form-control" type="text" name="poste" th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
                 <div class="col-md-6"><label class="form-label">Indice de classification</label><input class="form-control" type="text" name="indiceClassification"></div>
                 <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
                 <div class="col-md-4"><label class="form-label">Durée (mois)</label><input class="form-control" type="number" name="dureeMois" min="1"></div>
-                <div class="col-md-4"><label class="form-label">Date de début</label><input class="form-control" type="date" name="dateDebut"></div>
+                <div class="col-md-4"><label class="form-label">Date de début</label><input class="form-control" type="date" name="dateDebut" th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
                 <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="heuresHebdo" step="0.5" value="40"></div>
                 <div class="col-md-6"><label class="form-label">Rémunération nette</label>
-                    <div class="input-group"><input class="form-control" type="number" name="remunerationNette"><span class="input-group-text">Ar</span></div></div>
+                    <div class="input-group"><input class="form-control" type="number" name="remunerationNette" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
                 <div class="col-md-6"><label class="form-label">Lieu de signature</label><input class="form-control" type="text" name="lieuSignature"></div>
-                <div class="col-12"><label class="form-label">Missions</label><textarea class="form-control" name="missions" rows="3"></textarea></div>
+                <div class="col-12"><label class="form-label">Missions</label><textarea class="form-control" name="missions" rows="3" th:text="${proposition != null ? missions : ''}" th:readonly="${proposition != null}"></textarea></div>
             </div>
             <div class="mt-4"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer (statut « Créé »)</button></div>
         </form>
@@ -115,7 +119,7 @@
     <!-- ===================== CDD ===================== -->
     <div class="card-grh form-contrat d-none" id="f-CDD">
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-calendar-days"></i></span><h2 class="titre-section">Contrat à durée déterminée (CDD)</h2></div>
-        <form method="post" class="card-corps needs-validation" novalidate th:action="@{/admin/contrats/cdd(candidatId=${candidat.id})}">
+        <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/cdd(propositionId=${propositionId})} : @{/admin/contrats/cdd(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
@@ -134,7 +138,7 @@
                 <div class="col-md-6"><label class="form-label">Poste<span class="req">*</span></label>
                     <select class="form-select" name="poste.id" required>
                         <option value="">— Choisir —</option>
-                        <option th:each="x : ${postes}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                        <option th:each="x : ${postes}" th:value="${x.id}" th:text="${x.libelle}" th:selected="${proposition != null and x.libelle == propositionInfo.titreOffre}"></option>
                     </select></div>
                 <div class="col-md-6"><label class="form-label">Motif du CDD<span class="req">*</span></label>
                     <select class="form-select" name="motif.id" required>
@@ -151,7 +155,7 @@
                     <select class="form-select" name="convention.id"><option value="">—</option>
                         <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
                     </select></div>
-                <div class="col-md-4"><label class="form-label">Date de début<span class="req">*</span></label><input class="form-control" type="date" name="dateDebut" required></div>
+                <div class="col-md-4"><label class="form-label">Date de début<span class="req">*</span></label><input class="form-control" type="date" name="dateDebut" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
                 <div class="col-md-4"><label class="form-label">Date de fin<span class="req">*</span></label><input class="form-control" type="date" name="dateFin" required></div>
                 <div class="col-md-4"><label class="form-label">Durée de l'essai (jours)</label><input class="form-control" type="number" name="essaiDuree"></div>
                 <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
@@ -159,7 +163,7 @@
                 <div class="col-md-4"><label class="form-label">Jours travaillés / semaine</label><input class="form-control" type="number" name="joursTravailSemaine"></div>
                 <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
                 <div class="col-md-6"><label class="form-label">Salaire de base<span class="req">*</span></label>
-                    <div class="input-group"><input class="form-control" type="number" name="salaireBase" required><span class="input-group-text">Ar</span></div></div>
+                    <div class="input-group"><input class="form-control" type="number" name="salaireBase" required th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
                 <div class="col-md-4"><label class="form-label">Indice de classification</label><input class="form-control" type="text" name="indiceClassification"></div>
                 <div class="col-md-4"><label class="form-label">Congé (jours / mois)</label><input class="form-control" type="number" name="congeJoursParMois" step="0.5"></div>
                 <div class="col-md-4"><label class="form-label">Lieu de conclusion</label><input class="form-control" type="text" name="lieuConclusion"></div>
@@ -171,7 +175,7 @@
     <!-- ===================== CDI ===================== -->
     <div class="card-grh form-contrat d-none" id="f-CDI">
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-infinity"></i></span><h2 class="titre-section">Contrat à durée indéterminée (CDI)</h2></div>
-        <form method="post" class="card-corps needs-validation" novalidate th:action="@{/admin/contrats/cdi(candidatId=${candidat.id})}">
+        <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/cdi(propositionId=${propositionId})} : @{/admin/contrats/cdi(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
@@ -187,8 +191,8 @@
                         </select>
                         <a class="btn btn-light border" th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}" title="Créer un travailleur"><i class="fa-solid fa-plus"></i></a>
                     </div></div>
-                <div class="col-md-6"><label class="form-label">Emploi<span class="req">*</span></label><input class="form-control" type="text" name="emploi" required></div>
-                <div class="col-md-6"><label class="form-label">Date de prise de fonction<span class="req">*</span></label><input class="form-control" type="date" name="datePriseFonction" required></div>
+                <div class="col-md-6"><label class="form-label">Emploi<span class="req">*</span></label><input class="form-control" type="text" name="emploi" required th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
+                <div class="col-md-6"><label class="form-label">Date de prise de fonction<span class="req">*</span></label><input class="form-control" type="date" name="datePriseFonction" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
                 <div class="col-md-6"><label class="form-label">Catégorie professionnelle</label>
                     <select class="form-select" name="categorie.id"><option value="">—</option>
                         <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
@@ -198,7 +202,7 @@
                         <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
                     </select></div>
                 <div class="col-md-6"><label class="form-label">Salaire brut mensuel</label>
-                    <div class="input-group"><input class="form-control" type="number" name="salaireBrutMensuel"><span class="input-group-text">Ar</span></div></div>
+                    <div class="input-group"><input class="form-control" type="number" name="salaireBrutMensuel" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
                 <div class="col-md-6"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
                 <div class="col-md-4"><label class="form-label">Établissement</label><input class="form-control" type="text" name="etablissement"></div>
                 <div class="col-md-4"><label class="form-label">Région</label><input class="form-control" type="text" name="region"></div>

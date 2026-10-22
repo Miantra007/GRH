@@ -61,14 +61,4 @@ public class ContratCandidatController {
     }
 
     // ---- 2) Candidat : signature (statut Signé)
-    @PutMapping("/{id}/signer")
-    public ContratCandidat signer(@PathVariable Integer id, @RequestParam Integer candidatId) {
-        return service.signer(id, candidatId);
-    }
-
-    // ---- 3) Direction générale : validation (statut Validé)
-    @PutMapping("/{id}/valider")
-    public ContratCandidat valider(@PathVariable Integer id) {
-        return service.valider(id);
-    }
 }

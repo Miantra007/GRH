@@ -66,6 +66,10 @@ public class PropositionService {
         return construireVue(info(idProposition));
     }
 
+    public boolean estRhTraitant(Integer idProposition, Integer idRh) {
+        return Objects.equals(info(idProposition).getIdRhTraitant(), idRh);
+    }
+
     /** Crée, si besoin, la proposition issue d’une candidature retenue. */
     @Transactional
     public PropositionEmbauche creerPourCandidature(Integer idCandidature) {
@@ -140,6 +144,8 @@ public class PropositionService {
                 p.setSalaireFinal(salaireInitial(info));
                 notifierRh(info, "Proposition acceptée",
                         nom + " a accepté la proposition d'embauche pour « " + info.getTitreOffre() + " ».");
+                notifierCandidat(info, "Formulaire d'acceptation validé",
+                        "Votre accord est enregistré. Vous pouvez choisir votre contrat depuis cette notification.");
             }
             case "REFUSER" -> {
                 if (!non || autre) {

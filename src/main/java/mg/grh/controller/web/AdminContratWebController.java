@@ -1,6 +1,8 @@
 package mg.grh.controller.web;
 
 import mg.grh.model.*;
+import mg.grh.web.SessionUser;
+import jakarta.servlet.http.HttpSession;
 import mg.grh.service.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -82,6 +84,18 @@ public class AdminContratWebController {
         model.addAttribute("besoin", embaucheService.apercu(cc));
         model.addAttribute("embauche", embaucheService.embauchePour(id).orElse(null));
         return "contrat-detail";
+    }
+
+    @PostMapping("/contrats/{id}/valider")
+    public String valider(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
+        try {
+            SessionUser rh = (SessionUser) session.getAttribute("user");
+            contratService.valider(id, rh.getId());
+            ra.addFlashAttribute("succes", "Contrat validé par le RH. Le candidat a été notifié.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", e.getMessage());
+        }
+        return "redirect:/admin/contrats/" + id;
     }
 
     // ------------------------------------------------------------ formulaire de création (CE par défaut)

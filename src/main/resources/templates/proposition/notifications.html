@@ -25,6 +25,10 @@
         <p class="mb-2" th:text="${n.message}">Message</p>
         <a class="btn btn-outline-primary btn-sm" th:if="${n.idProposition != null and candidat}"
            th:href="@{/candidats/{c}/propositions/{p}(c=${proprietaire},p=${n.idProposition})}"><i class="fa-solid fa-arrow-right me-1"></i> Ouvrir la proposition</a>
+        <a class="btn btn-primary btn-sm" th:if="${candidat and n.idProposition != null and (n.titre.contains('validé') or n.titre.contains('acceptée'))}"
+           th:href="@{/candidat/contrats/nouveau(propositionId=${n.idProposition})}"><i class="fa-solid fa-file-signature me-1"></i> Choisir mon contrat</a>
+        <a class="btn btn-primary btn-sm" th:if="${candidat and n.titre == 'Contrat validé par le RH'}"
+           th:href="@{/candidat/integration}"><i class="fa-solid fa-list-check me-1"></i> Voir Mon intégration</a>
         <a class="btn btn-outline-primary btn-sm" th:if="${n.idProposition != null and !candidat}"
            th:href="@{/rh/propositions/{p}(p=${n.idProposition})}"><i class="fa-solid fa-arrow-right me-1"></i> Examiner la réponse</a>
     </div>

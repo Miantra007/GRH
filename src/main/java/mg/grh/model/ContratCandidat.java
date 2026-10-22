@@ -23,6 +23,10 @@ public class ContratCandidat implements Identifiable {
     @JoinColumn(name = "id_candidat", nullable = false)
     private Candidat candidat;
 
+    @ManyToOne
+    @JoinColumn(name = "id_proposition", unique = true)
+    private PropositionEmbauche proposition;
+
     @Column(name = "type_contrat", length = 3)
     private String typeContrat;
 
