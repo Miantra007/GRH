@@ -1,6 +1,6 @@
 -- DEV UNIQUEMENT : remplace les faux hash du jeu de test par un vrai hash BCrypt.
 -- Mot de passe de TOUS les comptes de test : motdepasse123
-\ c grh
+\c grh
 UPDATE
     responsable
 SET

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Décision RH</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+        }
+
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: #fff;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: .6rem;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #eef0f4;
+        }
+
+        .autre {
+            background: #fff6e0;
+        }
+
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+            padding: .5rem;
+            margin-top: .5rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: .75rem;
+            margin-top: 1rem;
+        }
+
+        .actions button {
+            padding: .6rem 1.4rem;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .valider {
+            background: #1f8f4e;
+        }
+
+        .refuser {
+            background: #c0392b;
+        }
+
+        .ok {
+            background: #e6f6ec;
+            color: #17653a;
+            padding: .75rem;
+            border-radius: 6px;
+        }
+
+        .ko {
+            background: #fdecea;
+            color: #922;
+            padding: .75rem;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Réponse du candidat</h1>
+        <p><strong th:text="${vue.titreOffre()}"></strong> — <span th:text="${vue.nomComplet()}"></span></p>
+        <p>Statut : <strong th:text="${vue.statutLibelle()}"></strong></p>
+
+        <p class="ok" th:if="${succes}" th:text="${succes}"></p>
+        <p class="ko" th:if="${erreur}" th:text="${erreur}"></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Critère</th>
+                    <th>Proposition du RH</th>
+                    <th>Réponse</th>
+                    <th>Contre-proposition</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="l : ${vue.lignes()}" th:classappend="${l.reponse() == 'AUTRE'} ? 'autre'">
+                    <td th:text="${l.label()}"></td>
+                    <td th:text="${l.valeurProposee()}"></td>
+                    <td th:text="${l.reponse() != null} ? ${l.reponse()} : '—'"></td>
+                    <td th:text="${l.contre() != null} ? ${l.contre()} : ''"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <p th:if="${vue.commentaireRh() != null}">Commentaire du RH : <em th:text="${vue.commentaireRh()}"></em></p>
+
+        <form method="post" th:action="@{/rh/propositions/{id}/decision(id=${vue.idProposition()})}"
+            th:if="${vue.attenteRh()}">
+            <label for="commentaire">Message au candidat (facultatif)</label>
+            <textarea id="commentaire" name="commentaire" rows="3"></textarea>
+            <div class="actions">
+                <button class="valider" type="submit" name="decision" value="VALIDER">Valider</button>
+                <button class="refuser" type="submit" name="decision" value="REFUSER">Refuser</button>
+            </div>
+        </form>
+    </main>
+</body>
+
+</html>

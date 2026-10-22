@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Proposition d'embauche</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f5f6f8;
+            margin: 0;
+        }
+
+        main {
+            max-width: 760px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .critere {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .critere h3 {
+            margin: 0 0 .25rem;
+            font-size: 1rem;
+        }
+
+        .valeur {
+            background: #eef3ff;
+            padding: .5rem .75rem;
+            border-radius: 6px;
+            margin: .25rem 0 .75rem;
+            white-space: pre-line;
+        }
+
+        .choix label {
+            margin-right: 1.25rem;
+            cursor: pointer;
+        }
+
+        .contre {
+            display: block;
+            width: 100%;
+            box-sizing: border-box;
+            margin-top: .75rem;
+            padding: .5rem;
+        }
+
+        .contre[hidden] {
+            display: none;
+        }
+
+        .actions {
+            display: flex;
+            gap: .75rem;
+            margin-top: 1.5rem;
+        }
+
+        .actions button {
+            padding: .6rem 1.4rem;
+            border: 0;
+            border-radius: 6px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .actions button:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        #btn-valider {
+            background: #1f8f4e;
+        }
+
+        #btn-attendre {
+            background: #d98a00;
+        }
+
+        #btn-refuser {
+            background: #c0392b;
+        }
+
+        .ok {
+            background: #e6f6ec;
+            color: #17653a;
+            padding: .75rem;
+            border-radius: 6px;
+        }
+
+        .ko {
+            background: #fdecea;
+            color: #922;
+            padding: .75rem;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+
+<body>
+    <main>
+        <h1>Proposition d'embauche</h1>
+        <p><strong th:text="${vue.titreOffre()}"></strong> — <span th:text="${vue.nomComplet()}"></span></p>
+        <p>Statut : <strong th:text="${vue.statutLibelle()}"></strong></p>
+
+        <p class="ok" th:if="${succes}" th:text="${succes}"></p>
+        <p class="ko" th:if="${erreur}" th:text="${erreur}"></p>
+
+        <form method="post" id="form">
+            <div class="critere" th:each="l : ${vue.lignes()}">
+                <h3 th:text="${l.label()}"></h3>
+                <div class="valeur" th:text="${l.valeurProposee()}"></div>
+
+                <div class="choix">
+                    <label>
+                        <input type="radio" th:name="|reponse[${l.code()}]|" value="OUI"
+                            th:checked="${l.reponse() == 'OUI'}" th:disabled="${!vue.modifiable()}"> Oui
+                    </label>
+                    <label>
+                        <input type="radio" th:name="|reponse[${l.code()}]|" value="NON"
+                            th:checked="${l.reponse() == 'NON'}" th:disabled="${!vue.modifiable()}"> Non
+                    </label>
+                    <label>
+                        <input type="radio" th:name="|reponse[${l.code()}]|" value="AUTRE"
+                            th:checked="${l.reponse() == 'AUTRE'}" th:disabled="${!vue.modifiable()}"> Autre
+                    </label>
+                </div>
+
+                <input class="contre" hidden placeholder="Entrez votre proposition"
+                    th:type="${l.code() == 'SALAIRE'} ? 'number' : 'text'"
+                    th:min="${l.code() == 'SALAIRE'} ? '1' : null" th:name="|contre[${l.code()}]|"
+                    th:value="${l.contre()}" th:disabled="${!vue.modifiable()}">
+            </div>
+
+            <div class="actions" th:if="${vue.modifiable()}">
+                <button type="submit" name="action" value="VALIDER" id="btn-valider">Valider</button>
+                <button type="submit" name="action" value="ATTENDRE" id="btn-attendre">Attendre</button>
+                <button type="submit" name="action" value="REFUSER" id="btn-refuser">Refuser</button>
+            </div>
+        </form>
+
+        <p><a th:href="@{/candidats/{id}/notifications(id=${vue.idCandidat()})}">Mes notifications</a></p>
+    </main>
+
+    <script>
+        const form = document.getElementById('form');
+        const lignes = [...document.querySelectorAll('.critere')];
+        const btnValider = document.getElementById('btn-valider');
+        const btnAttendre = document.getElementById('btn-attendre');
+        const btnRefuser = document.getElementById('btn-refuser');
+
+        function majEtat() {
+            let complet = true, autre = false, non = false;
+
+            lignes.forEach(l => {
+                const choix = l.querySelector('input[type=radio]:checked');
+                const contre = l.querySelector('.contre');
+                const v = choix ? choix.value : null;
+
+                contre.hidden = (v !== 'AUTRE');
+                contre.required = (v === 'AUTRE');
+
+                if (!v) { complet = false; return; }
+                if (v === 'AUTRE') {
+                    autre = true;
+                    if (!contre.value.trim()) complet = false;
+                }
+                if (v === 'NON') non = true;
+            });
+
+            if (btnValider) {
+                btnValider.disabled = !(complet && !autre && !non);
+                btnAttendre.disabled = !(complet && autre);
+                btnRefuser.disabled = !(complet && non && !autre);
+            }
+        }
+
+        form.addEventListener('input', majEtat);
+        form.addEventListener('change', majEtat);
+        majEtat();
+    </script>
+</body>
+
+</html>

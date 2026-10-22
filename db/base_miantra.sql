@@ -14,13 +14,20 @@ CREATE TABLE IF NOT EXISTS type_contrat (
 );
 
 -- ============================================================
+-- 1 BIS. TABLE TYPE_BESOIN (CREATION ou REMPLACEMENT)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS type_besoin (
+    id_type_besoin SERIAL PRIMARY KEY,
+    libelle VARCHAR(30) NOT NULL UNIQUE
+);
+
+-- ============================================================
 -- 2. TABLE STATUT_BESOIN
 -- ============================================================
 CREATE TABLE IF NOT EXISTS statut_besoin (
     id_statut_besoin SERIAL PRIMARY KEY,
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
-
 
 -- ============================================================
 -- 3. TABLE STATUT_OFFRE
@@ -30,13 +37,6 @@ CREATE TABLE IF NOT EXISTS statut_offre (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-CREATE TABLE IF NOT EXISTS type_besoin (
-    id_type_besoin SERIAL PRIMARY KEY,
-    libelle VARCHAR(20) NOT NULL UNIQUE
-);
-
-
-
 -- ============================================================
 -- 4. TABLE STATUT_CANDIDATURE
 -- ============================================================
@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS statut_candidature (
     id_statut_candidature SERIAL PRIMARY KEY,
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
-
 
 -- ============================================================
 -- 5. TABLE REPONSE_CANDIDAT
@@ -54,7 +53,6 @@ CREATE TABLE IF NOT EXISTS reponse_candidat (
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
 
-
 -- ============================================================
 -- 6. TABLE DECISION_RH
 -- ============================================================
@@ -63,7 +61,7 @@ CREATE TABLE IF NOT EXISTS decision_rh (
     libelle VARCHAR(10) NOT NULL UNIQUE
 );
 
---==================================================
+-- ============================================================
 -- 7. TABLE STATUT_PROPOSITION
 -- ============================================================
 CREATE TABLE IF NOT EXISTS statut_proposition (
@@ -71,58 +69,31 @@ CREATE TABLE IF NOT EXISTS statut_proposition (
     libelle VARCHAR(30) NOT NULL UNIQUE
 );
 
-
-
 -- ============================================================
 -- 8. TABLE BESOIN
 -- Dépend de :
--- direction, departement, responsable, statut_besoin
+-- direction, departement, responsable, type_besoin, statut_besoin
 -- ============================================================
--- ============================================================
--- 2. TABLE BESOIN
--- ============================================================
-
 CREATE TABLE IF NOT EXISTS besoin (
     id_besoin SERIAL PRIMARY KEY,
-
-    id_direction INTEGER NOT NULL
-        REFERENCES direction(id_direction),
-
-    id_dept INTEGER NOT NULL
-        REFERENCES departement(id_dept),
-
-    id_directeur_demandeur INTEGER NOT NULL
-        REFERENCES responsable(id_responsable),
-
+    id_direction INTEGER NOT NULL REFERENCES direction(id_direction),
+    id_dept INTEGER NOT NULL REFERENCES departement(id_dept),
+    id_directeur_demandeur INTEGER NOT NULL REFERENCES responsable(id_responsable),
     -- Type de besoin : CREATION ou REMPLACEMENT
-    id_type_besoin INTEGER NOT NULL
-        REFERENCES type_besoin(id_type_besoin),
-
+    id_type_besoin INTEGER NOT NULL REFERENCES type_besoin(id_type_besoin),
     motif TEXT,
-
-    id_statut_besoin INTEGER NOT NULL
-        REFERENCES statut_besoin(id_statut_besoin),
-
-    id_rh_traitant INTEGER
-        REFERENCES responsable(id_responsable),
-
-    id_finance_validateur INTEGER
-        REFERENCES responsable(id_responsable),
-
-    id_dg_validateur INTEGER
-        REFERENCES responsable(id_responsable),
-
+    id_statut_besoin INTEGER NOT NULL REFERENCES statut_besoin(id_statut_besoin),
+    id_rh_traitant INTEGER REFERENCES responsable(id_responsable),
+    id_finance_validateur INTEGER REFERENCES responsable(id_responsable),
+    id_dg_validateur INTEGER REFERENCES responsable(id_responsable),
     date_demande TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-
     date_traitement_rh TIMESTAMP,
     date_validation_finance TIMESTAMP,
     date_validation_dg TIMESTAMP,
     date_publication_client TIMESTAMP,
-
     commentaire_rh TEXT,
     commentaire_finance TEXT,
     commentaire_dg TEXT,
-
     visible_client BOOLEAN NOT NULL DEFAULT FALSE
 );
 
@@ -139,6 +110,10 @@ CREATE TABLE IF NOT EXISTS besoin_poste (
     id_type_contrat INTEGER REFERENCES type_contrat(id_type_contrat),
     salaire_propose_rh NUMERIC(12, 0) CHECK (salaire_propose_rh >= 0),
     salaire_valide_finance NUMERIC(12, 0) CHECK (salaire_valide_finance >= 0),
+    -- Conditions décidées par le RH lors du besoin
+    horaire_travail VARCHAR(150),
+    responsable_hierarchique VARCHAR(150),
+    date_prise_poste DATE,
     UNIQUE (id_besoin, id_poste)
 );
 
@@ -249,17 +224,11 @@ ALTER TABLE entretien ADD COLUMN IF NOT EXISTS message_candidat TEXT;
 -- Dépend de :
 -- candidature, reponse_candidat, decision_rh,
 -- statut_proposition
+-- Le salaire et les conditions viennent de besoin_poste
 -- ============================================================
 CREATE TABLE IF NOT EXISTS proposition_embauche (
     id_proposition SERIAL PRIMARY KEY,
     id_candidature INTEGER NOT NULL UNIQUE REFERENCES candidature(id_candidature),
-    -- Proposition salariale du RH
-    salaire_propose NUMERIC(12, 0) NOT NULL CHECK (salaire_propose >= 0),
-    -- Autres conditions proposées par le RH
-    horaire_travail VARCHAR(150),
-    responsable_hierarchique VARCHAR(150),
-    travail_a_effectuer TEXT,
-    date_prise_poste DATE,
     -- Date d'envoi de la proposition
     date_envoi TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     -- Réponse générale du candidat
@@ -318,7 +287,7 @@ CREATE TABLE IF NOT EXISTS type_critere_proposition (
 
 -- ============================================================
 -- 17. TABLE REPONSE_CRITERE
--- (manquait : référencée par critere_proposition)
+-- (référencée par critere_proposition)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS reponse_critere (
     id_reponse_critere SERIAL PRIMARY KEY,
@@ -360,6 +329,7 @@ WHERE
     table_schema = 'public'
     AND table_name IN (
         'type_contrat',
+        'type_besoin',
         'statut_besoin',
         'statut_offre',
         'statut_candidature',

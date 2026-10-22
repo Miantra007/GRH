@@ -1,5 +1,6 @@
 package mg.grh.repository;
 
+
 import mg.grh.model.DecisionRh;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
