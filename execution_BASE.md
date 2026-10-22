@@ -4,7 +4,7 @@ psql -U postgres -d grh -f db/grh_donnees_test.sql
 
 psql -U postgres -d grh -f db/grh_donnees_complement.sql
 
-psql -U postgres -d grh -f db/base_miantra.sql
+psql -U postgres -d grh -f db/base_Mitia.sql
 
 psql -U postgres -d grh -f db/donnee_test_acceptation.sql
 
