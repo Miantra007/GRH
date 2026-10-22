@@ -16,6 +16,9 @@ psql -U postgres -d grh -f db/grh_integration.sql
 
 psql -U postgres -d grh -f db/grh_mots_de_passe_dev.sql
 
+psql -U postgres -d grh -f db/grh_offres_exemple.sql
+
+
 
 
 psql -U postgres -c "DROP DATABASE grh;"
