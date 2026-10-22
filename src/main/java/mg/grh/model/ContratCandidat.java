@@ -38,6 +38,10 @@ public class ContratCandidat implements Identifiable {
     @JoinColumn(name = "id_contrat_cdi")
     private ContratCdi contratCdi;
 
+    /** Candidature (donc offre, poste et besoin) qui a abouti à ce contrat ; null pour un contrat sans besoin. */
+    @Column(name = "id_candidature")
+    private Integer idCandidature;
+
     /** Statut courant = statut du contrat (CE, CDD ou CDI) sous-jacent. */
     @Transient
     public StatutContrat getStatutActuel() {

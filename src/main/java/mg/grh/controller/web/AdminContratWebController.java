@@ -29,6 +29,7 @@ public class AdminContratWebController {
     private final CiviliteService civiliteService;
     private final NationaliteService nationaliteService;
     private final SituationFamilleService situationService;
+    private final EmbaucheService embaucheService;
 
     public AdminContratWebController(ContratCandidatService contratService, CandidatService candidatService,
                                      EmployeurService employeurService, TravailleurService travailleurService,
@@ -36,7 +37,7 @@ public class AdminContratWebController {
                                      ConventionCollectiveService conventionService, PosteService posteService,
                                      MotifCddService motifService, StatutContratService statutService,
                                      CiviliteService civiliteService, NationaliteService nationaliteService,
-                                     SituationFamilleService situationService) {
+                                     SituationFamilleService situationService, EmbaucheService embaucheService) {
         this.contratService = contratService;
         this.candidatService = candidatService;
         this.employeurService = employeurService;
@@ -50,6 +51,7 @@ public class AdminContratWebController {
         this.civiliteService = civiliteService;
         this.nationaliteService = nationaliteService;
         this.situationService = situationService;
+        this.embaucheService = embaucheService;
     }
 
     // ------------------------------------------------------------ candidats
@@ -74,8 +76,11 @@ public class AdminContratWebController {
 
     @GetMapping("/contrats/{id}")
     public String detail(@PathVariable Integer id, Model model) {
-        model.addAttribute("cc", contratService.findById(id));
+        ContratCandidat cc = contratService.findById(id);
+        model.addAttribute("cc", cc);
         model.addAttribute("historique", contratService.historique(id));
+        model.addAttribute("besoin", embaucheService.apercu(cc));
+        model.addAttribute("embauche", embaucheService.embauchePour(id).orElse(null));
         return "contrat-detail";
     }
 
@@ -91,17 +96,19 @@ public class AdminContratWebController {
         model.addAttribute("conventions", conventionService.findAll());
         model.addAttribute("postes", posteService.findAll());
         model.addAttribute("motifs", motifService.findAll());
+        model.addAttribute("candidatures", contratService.candidaturesRetenues(candidatId));
         return "admin/contrat-form";
     }
 
     @PostMapping("/contrats/ce")
-    public String creerCe(@RequestParam Integer candidatId, @ModelAttribute ContratCe ce,
+    public String creerCe(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                           @ModelAttribute ContratCe ce,
                           BindingResult br, RedirectAttributes ra) {
         if (br.hasErrors()) return erreur(ra, candidatId, "CE", "Champ invalide : " + br.getFieldError().getField());
         if (ce.getConvention() != null && ce.getConvention().getId() == null) ce.setConvention(null);
         ce.setContratInitial(null);
         try {
-            ContratCandidat cc = contratService.creerCe(candidatId, ce);
+            ContratCandidat cc = contratService.creerCe(candidatId, ce, candidatureId);
             return succes(ra, cc);
         } catch (RuntimeException e) {
             return erreur(ra, candidatId, "CE", e.getMessage());
@@ -109,26 +116,28 @@ public class AdminContratWebController {
     }
 
     @PostMapping("/contrats/cdd")
-    public String creerCdd(@RequestParam Integer candidatId, @ModelAttribute ContratCdd cdd,
+    public String creerCdd(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                           @ModelAttribute ContratCdd cdd,
                            BindingResult br, RedirectAttributes ra) {
         if (br.hasErrors()) return erreur(ra, candidatId, "CDD", "Champ invalide : " + br.getFieldError().getField());
         if (cdd.getCategorie() != null && cdd.getCategorie().getId() == null) cdd.setCategorie(null);
         if (cdd.getConvention() != null && cdd.getConvention().getId() == null) cdd.setConvention(null);
         try {
-            return succes(ra, contratService.creerCdd(candidatId, cdd));
+            return succes(ra, contratService.creerCdd(candidatId, cdd, candidatureId));
         } catch (RuntimeException e) {
             return erreur(ra, candidatId, "CDD", e.getMessage());
         }
     }
 
     @PostMapping("/contrats/cdi")
-    public String creerCdi(@RequestParam Integer candidatId, @ModelAttribute ContratCdi cdi,
+    public String creerCdi(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                           @ModelAttribute ContratCdi cdi,
                            BindingResult br, RedirectAttributes ra) {
         if (br.hasErrors()) return erreur(ra, candidatId, "CDI", "Champ invalide : " + br.getFieldError().getField());
         if (cdi.getCategorie() != null && cdi.getCategorie().getId() == null) cdi.setCategorie(null);
         if (cdi.getConvention() != null && cdi.getConvention().getId() == null) cdi.setConvention(null);
         try {
-            return succes(ra, contratService.creerCdi(candidatId, cdi));
+            return succes(ra, contratService.creerCdi(candidatId, cdi, candidatureId));
         } catch (RuntimeException e) {
             return erreur(ra, candidatId, "CDI", e.getMessage());
         }

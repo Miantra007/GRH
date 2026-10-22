@@ -3,23 +3,57 @@
 <head th:replace="~{fragments :: head('Candidats')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1>Candidats</h1>
-<div class="card">
-<table>
-    <tr><th>Nom</th><th>Prénom</th><th>Email</th><th>Naissance</th><th></th></tr>
-    <tr th:each="c : ${candidats}">
-        <td th:text="${c.nomCandidat}"></td>
-        <td th:text="${c.prenomCandidat}"></td>
-        <td th:text="${c.email}"></td>
-        <td th:text="${#temporals.format(c.dtn, 'dd/MM/yyyy')}"></td>
-        <td><a class="btn" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">Créer un contrat</a>
-            <a class="btn sec" th:href="@{/admin/candidats/{id}/integration(id=${c.id})}">Intégration</a></td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(candidats)}"><td colspan="5">Aucun candidat.</td></tr>
-</table>
-</div>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-user-graduate"></i></span>
+        <div>
+            <h1>Candidats</h1>
+            <p class="text-muted small mb-0"><span id="compteur" th:text="${#lists.size(candidats)}">0</span> candidat(s)</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="p-3 border-bottom" th:unless="${#lists.isEmpty(candidats)}">
+            <div class="input-group" style="max-width: 380px">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="search" class="form-control" placeholder="Rechercher un candidat…" aria-label="Rechercher"
+                       data-filtre-tableau="#tableau" data-compteur="#compteur">
+            </div>
+        </div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(candidats)}">
+            <table class="table table-grh" id="tableau">
+                <thead>
+                <tr><th>Candidat</th><th>E-mail</th><th>Naissance</th><th class="col-actions"><span class="visually-hidden">Actions</span></th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${candidats}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" style="width:34px;height:34px;font-size:.8rem"
+                                  th:text="${#strings.toUpperCase(#strings.substring(c.prenomCandidat ?: c.nomCandidat ?: '?', 0, 1))}">H</span>
+                            <span class="fw-semibold" th:text="${c.prenomCandidat + ' ' + c.nomCandidat}">Nom</span>
+                        </div>
+                    </td>
+                    <td th:text="${c.email}">email</td>
+                    <td th:text="${#temporals.format(c.dtn, 'dd/MM/yyyy')} ?: '—'">date</td>
+                    <td class="col-actions">
+                        <a class="btn btn-primary btn-sm" th:href="@{/admin/contrats/nouveau(candidatId=${c.id})}">
+                            <i class="fa-solid fa-file-circle-plus me-1"></i> Créer un contrat</a>
+                        <a class="btn btn-outline-primary btn-sm" th:href="@{/admin/candidats/{id}/integration(id=${c.id})}">
+                            <i class="fa-solid fa-list-check me-1"></i> Intégration</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(candidats)}">
+            <i class="fa-solid fa-user-graduate"></i>
+            <p class="fw-semibold text-body mb-0">Aucun candidat pour le moment</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

@@ -41,20 +41,23 @@ public class ContratCandidatController {
     // ---- 1) RH : création (statut Créé). CE = choix par défaut du formulaire
     @PostMapping("/ce")
     @ResponseStatus(HttpStatus.CREATED)
-    public ContratCandidat creerCe(@RequestParam Integer candidatId, @RequestBody ContratCe contrat) {
-        return service.creerCe(candidatId, contrat);
+    public ContratCandidat creerCe(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                                   @RequestBody ContratCe contrat) {
+        return service.creerCe(candidatId, contrat, candidatureId);
     }
 
     @PostMapping("/cdd")
     @ResponseStatus(HttpStatus.CREATED)
-    public ContratCandidat creerCdd(@RequestParam Integer candidatId, @RequestBody ContratCdd contrat) {
-        return service.creerCdd(candidatId, contrat);
+    public ContratCandidat creerCdd(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                                   @RequestBody ContratCdd contrat) {
+        return service.creerCdd(candidatId, contrat, candidatureId);
     }
 
     @PostMapping("/cdi")
     @ResponseStatus(HttpStatus.CREATED)
-    public ContratCandidat creerCdi(@RequestParam Integer candidatId, @RequestBody ContratCdi contrat) {
-        return service.creerCdi(candidatId, contrat);
+    public ContratCandidat creerCdi(@RequestParam Integer candidatId, @RequestParam(required = false) Integer candidatureId,
+                                   @RequestBody ContratCdi contrat) {
+        return service.creerCdi(candidatId, contrat, candidatureId);
     }
 
     // ---- 2) Candidat : signature (statut Signé)

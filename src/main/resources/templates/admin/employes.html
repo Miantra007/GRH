@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Employés')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-users"></i></span>
+        <div class="flex-grow-1">
+            <h1>Employés</h1>
+            <p class="text-muted small mb-0">
+                <span id="compteur" th:text="${#lists.size(employes)}">0</span>
+                <span th:text="${tous} ? 'employé(s), y compris ceux qui ont quitté leur poste' : 'employé(s) en poste'">employé(s)</span>
+            </p>
+        </div>
+        <a class="btn btn-outline-primary" th:if="${!tous}" th:href="@{/admin/employes(tous=true)}"><i class="fa-solid fa-eye me-1"></i> Voir aussi ceux sans poste</a>
+        <a class="btn btn-outline-primary" th:if="${tous}" th:href="@{/admin/employes}"><i class="fa-solid fa-briefcase me-1"></i> Seulement les employés en poste</a>
+        <a class="btn btn-light border" th:href="@{/admin/employes/historique}"><i class="fa-solid fa-clock-rotate-left me-1"></i> Historique</a>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="p-3 border-bottom" th:unless="${#lists.isEmpty(employes)}">
+            <div class="input-group" style="max-width: 380px">
+                <span class="input-group-text"><i class="fa-solid fa-magnifying-glass"></i></span>
+                <input type="search" class="form-control" placeholder="Rechercher un employé, un poste…" aria-label="Rechercher"
+                       data-filtre-tableau="#tableau" data-compteur="#compteur">
+            </div>
+        </div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(employes)}">
+            <table class="table table-grh" id="tableau">
+                <thead>
+                <tr><th>Employé</th><th>Poste</th><th>Département</th><th>Statut</th><th>Embauché le</th></tr>
+                </thead>
+                <tbody>
+                <tr th:each="e : ${employes}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" style="width:34px;height:34px;font-size:.8rem"
+                                  th:text="${#strings.toUpperCase(#strings.substring(e.nomEmploye, 0, 1))}">J</span>
+                            <span class="fw-semibold" th:text="${e.nomEmploye}">Nom</span>
+                        </div>
+                    </td>
+                    <td th:text="${e.posteFille?.poste?.libelle} ?: '—'">Poste</td>
+                    <td th:text="${e.posteFille?.dept?.nomDept} ?: '—'">Département</td>
+                    <td><span th:replace="~{fragments :: statutEmploye(${e.statut?.libelle})}"></span></td>
+                    <td th:text="${#temporals.format(e.dateEmbauche, 'dd/MM/yyyy')} ?: '—'">date</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(employes)}">
+            <i class="fa-solid fa-users"></i>
+            <p class="fw-semibold text-body mb-1">Aucun employé</p>
+            <p class="small mb-0">Un candidat devient employé quand son contrat est validé.</p>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
+</body>
+</html>

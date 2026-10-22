@@ -110,17 +110,21 @@ Les scripts sont dans `db/` et s'exécutent **dans cet ordre** :
 | # | Script | Contenu |
 |---|---|---|
 | 1 | `grh_schema.sql` | `CREATE DATABASE grh` + toutes les tables |
-| 2 | `grh_donnees_test.sql` | Référentiels et données de démonstration |
+| 2 | `grh_donnees_test.sql` | Référentiels, organisation et 8 employés de démonstration |
 | 3 | `grh_donnees_complement.sql` | Compte DG, employeur, candidat et travailleur de test |
-| 4 | `grh_mots_de_passe_dev.sql` | Hash BCrypt de test + tables `statut_besoin` / `besoin` |
-| 5 | `grh_integration.sql` | Tables `type_consigne` / `consigne_integration` + 3 consignes de test |
+| 4 | `base_miantra.sql` | Besoins, offres d'emploi, candidatures, propositions d'embauche |
+| 5 | `donnee_test_acceptation.sql` | Besoin CREATION et proposition de Hery Rabe |
+| 6 | `grh_embauche.sql` | Colonne `contrat_candidat.id_candidature` (lien contrat → besoin) |
+| 7 | `donnee_test_embauche.sql` | Besoin REMPLACEMENT : Nirina Rakoto remplace Fara Randrianarisoa (Comptable, Marketing) |
+| 8 | `grh_integration.sql` | Tables `type_consigne` / `consigne_integration` + 3 consignes de test |
+| 9 | `grh_mots_de_passe_dev.sql` | Hash BCrypt de test (mot de passe `motdepasse123`) |
 
 ```bash
 psql -U postgres -f db/grh_schema.sql
-psql -U postgres -f db/grh_donnees_test.sql
-psql -U postgres -f db/grh_donnees_complement.sql
-psql -U postgres -f db/grh_mots_de_passe_dev.sql
-psql -U postgres -f db/grh_integration.sql
+for f in grh_donnees_test grh_donnees_complement base_miantra donnee_test_acceptation \
+         grh_embauche donnee_test_embauche grh_integration grh_mots_de_passe_dev; do
+  psql -U postgres -d grh -f db/$f.sql
+done
 ```
 
 Chaque script commence par `\c grh` : inutile de préciser `-d grh`. Les identifiants des données de test
@@ -131,7 +135,7 @@ supposent une base **vide** (les commentaires `-- id 1`, `-- id 2`… en dépend
 ```bash
 psql -U postgres -c "DROP DATABASE grh;"
 ```
-puis relancer les 5 scripts. **Toutes les données sont perdues.**
+puis relancer les scripts de 2.1. **Toutes les données sont perdues.**
 
 ### 2.3 Brancher l'application
 
@@ -161,6 +165,32 @@ les scripts SQL **et** dans l'entité Java correspondante (`model/`).
 
 Cycle de vie d'un contrat : **Créé** (RH) → **Signé** (candidat) → **Validé** (DG). Chaque changement est
 tracé dans `historique_statut_contrat`.
+
+### 2.4 bis Embauche à la validation d'un contrat
+
+Quand le DG valide un contrat, `EmbaucheService` regarde le **type du besoin** auquel il répond
+(`besoin.id_type_besoin` : `CREATION` ou `REMPLACEMENT`) et met à jour les employés. Le contrat connaît son besoin
+par `contrat_candidat.id_candidature` → `candidature` → `offre_emploi` → `besoin_poste` → `besoin`. Le RH choisit
+la candidature acceptée (proposition à l'état `ACCORD_FINAL`) en créant le contrat.
+
+Un **siège** est une ligne de `poste_fille` (un poste dans un département) ; il est occupé s'il a un employé rattaché.
+
+| Type du besoin | Effet de la validation |
+|---|---|
+| `CREATION` | Le candidat est ajouté à `employe` (statut `ACTIF`, date d'embauche = début du contrat) sur un siège libre du poste dans le département, ou sur un **nouveau siège** s'il n'y en a pas ; le siège passe à « Occupé ». |
+| `REMPLACEMENT` | L'occupant du poste passe au statut `SUSPENDU` et **quitte son siège** ; il est inscrit dans `historique_employe` (motif : « Remplacé(e) par … au poste … ») ; le candidat prend le siège. |
+
+Cas particuliers :
+
+- **Contrat sans besoin** (anciens contrats) : il est validé, la liste des employés n'est pas modifiée, un message le dit.
+- **Contrat d'essai puis CDI** pour la même candidature : le second contrat est rattaché à l'employé existant, sans doublon.
+- **Données incohérentes** (remplacement sans occupant, ou avec plusieurs occupants du même poste dans le département) :
+  la validation est **refusée**, le contrat reste « Signé » et rien n'est modifié. Le message dit quoi corriger.
+- Tout est fait dans **une seule transaction** : si l'embauche échoue, le statut « Validé » est annulé aussi.
+
+Le contrat est relié à l'employé par `historique_contrat_employe`. Le RH consulte les résultats dans les menus
+**Employés** (`/admin/employes`, avec l'option « voir aussi ceux sans poste ») et **Historique**
+(`/admin/employes/historique`).
 
 ### 2.5 Consignes d'intégration
 

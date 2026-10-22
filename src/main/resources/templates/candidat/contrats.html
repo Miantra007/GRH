@@ -3,21 +3,39 @@
 <head th:replace="~{fragments :: head('Mes contrats')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1>Mes contrats</h1>
-<div class="card">
-<table>
-    <tr><th>N°</th><th>Type</th><th>Statut</th><th></th></tr>
-    <tr th:each="cc : ${contrats}">
-        <td th:text="${cc.id}"></td><td th:text="${cc.typeContrat}"></td>
-        <td><span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
-      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></td>
-        <td><a class="btn" th:href="@{/candidat/contrats/{id}(id=${cc.id})}">Consulter</a></td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(contrats)}"><td colspan="4">Aucun contrat pour le moment.</td></tr>
-</table>
-</div>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-file-signature"></i></span>
+        <div>
+            <h1>Mes contrats</h1>
+            <p class="text-muted small mb-0">Consultez et signez vos contrats.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="table-responsive" th:unless="${#lists.isEmpty(contrats)}">
+            <table class="table table-grh">
+                <thead><tr><th>N°</th><th>Type</th><th>Statut</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="cc : ${contrats}">
+                    <td class="col-id" th:text="${cc.id}">1</td>
+                    <td><span class="badge-type" th:text="${cc.typeContrat}">CE</span></td>
+                    <td><span th:replace="~{fragments :: statut(${cc.statutActuel?.libelle})}"></span></td>
+                    <td class="col-actions">
+                        <a class="btn btn-primary btn-sm" th:href="@{/candidat/contrats/{id}(id=${cc.id})}"><i class="fa-regular fa-eye me-1"></i> Consulter</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(contrats)}">
+            <i class="fa-solid fa-file-contract"></i>
+            <p class="fw-semibold text-body mb-0">Aucun contrat pour le moment</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

@@ -29,4 +29,8 @@ public class Employe implements Identifiable {
 
     @Column(name = "date_embauche")
     private LocalDate dateEmbauche;
+
+    @ManyToOne
+    @JoinColumn(name = "id_statut_employe", nullable = false)
+    private StatutEmploye statut;
 }

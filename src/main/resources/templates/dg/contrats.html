@@ -3,25 +3,43 @@
 <head th:replace="~{fragments :: head('Contrats à valider')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1 th:text="${tous} ? 'Tous les contrats' : 'Contrats signés à valider'"></h1>
-<p><a th:if="${!tous}" th:href="@{/dg/contrats(tous=true)}">Voir tous les contrats</a>
-   <a th:if="${tous}" th:href="@{/dg/contrats}">Voir seulement les contrats à valider</a></p>
-<div class="card">
-<table>
-    <tr><th>N°</th><th>Candidat</th><th>Type</th><th>Statut</th><th></th></tr>
-    <tr th:each="cc : ${contrats}">
-        <td th:text="${cc.id}"></td>
-        <td th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}"></td>
-        <td th:text="${cc.typeContrat}"></td>
-        <td><span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
-      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></td>
-        <td><a class="btn" th:href="@{/dg/contrats/{id}(id=${cc.id})}">Examiner</a></td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(contrats)}"><td colspan="5">Aucun contrat.</td></tr>
-</table>
-</div>
+<main class="container-xl py-4">
+    <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-stamp"></i></span>
+        <div class="flex-grow-1">
+            <h1 th:text="${tous} ? 'Tous les contrats' : 'Contrats signés à valider'">Contrats</h1>
+            <p class="text-muted small mb-0"><span th:text="${#lists.size(contrats)}">0</span> contrat(s)</p>
+        </div>
+        <a class="btn btn-outline-primary" th:if="${!tous}" th:href="@{/dg/contrats(tous=true)}"><i class="fa-solid fa-list me-1"></i> Voir tous les contrats</a>
+        <a class="btn btn-outline-primary" th:if="${tous}" th:href="@{/dg/contrats}"><i class="fa-solid fa-hourglass-half me-1"></i> Seulement ceux à valider</a>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="table-responsive" th:unless="${#lists.isEmpty(contrats)}">
+            <table class="table table-grh">
+                <thead><tr><th>N°</th><th>Candidat</th><th>Type</th><th>Statut</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="cc : ${contrats}">
+                    <td class="col-id" th:text="${cc.id}">1</td>
+                    <td class="fw-semibold" th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}">Candidat</td>
+                    <td><span class="badge-type" th:text="${cc.typeContrat}">CE</span></td>
+                    <td><span th:replace="~{fragments :: statut(${cc.statutActuel?.libelle})}"></span></td>
+                    <td class="col-actions">
+                        <a class="btn btn-primary btn-sm" th:href="@{/dg/contrats/{id}(id=${cc.id})}"><i class="fa-solid fa-magnifying-glass me-1"></i> Examiner</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(contrats)}">
+            <i class="fa-solid fa-circle-check"></i>
+            <p class="fw-semibold text-body mb-1" th:text="${tous} ? 'Aucun contrat' : 'Aucun contrat en attente'">Aucun contrat</p>
+            <p class="small mb-0" th:unless="${tous}">Les contrats apparaissent ici une fois signés par le candidat.</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

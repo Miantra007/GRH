@@ -3,48 +3,62 @@
 <head th:replace="~{fragments :: head('Mon intégration')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1>Mon intégration</h1>
-<p class="muted">Ce que le service RH vous demande de faire pour préparer votre arrivée.</p>
-
-<div class="card" th:if="${total > 0}">
-    <strong th:text="${#lists.size(faites) + ' sur ' + total + ' consigne(s) faite(s)'}"></strong>
-    <div class="progress"><div th:style="'width:' + ${#lists.size(faites) * 100 / total} + '%'"></div></div>
-</div>
-
-<div class="card">
-    <h2>À faire</h2>
-    <div class="consigne" th:each="c : ${aFaire}" th:classappend="${c.enRetard} ? 'retard'">
-        <div class="consigne-tete">
-            <span class="badge b-type" th:text="${c.typeConsigne.libelle}"></span>
-            <strong th:text="${c.titre}"></strong>
-            <span class="badge b-retard" th:if="${c.enRetard}">En retard</span>
-            <span class="muted" th:if="${c.dateLimite}" th:text="'avant le ' + ${#temporals.format(c.dateLimite, 'dd/MM/yyyy')}"></span>
+<main class="container-xl py-4" style="max-width: 900px">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-list-check"></i></span>
+        <div>
+            <h1>Mon intégration</h1>
+            <p class="text-muted small mb-0">Ce que le service RH vous demande de faire pour préparer votre arrivée.</p>
         </div>
-        <p th:if="${c.description}" th:text="${c.description}"></p>
-        <form th:action="@{/candidat/integration/{id}/faite(id=${c.id})}" method="post" class="consigne-action">
-            <input name="commentaire" maxlength="500" placeholder="Commentaire pour RH (facultatif)">
-            <button class="btn ok" type="submit">C'est fait</button>
-        </form>
     </div>
-    <p th:if="${#lists.isEmpty(aFaire)}">Rien à faire pour le moment.</p>
-</div>
 
-<div class="card" th:unless="${#lists.isEmpty(faites)}">
-    <h2>Déjà fait</h2>
-    <div class="consigne faite" th:each="c : ${faites}">
-        <div class="consigne-tete">
-            <span class="badge b-type" th:text="${c.typeConsigne.libelle}"></span>
-            <strong th:text="${c.titre}"></strong>
-            <span class="muted" th:text="'fait le ' + ${#temporals.format(c.dateRealisation, 'dd/MM/yyyy')}"></span>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh card-corps mb-4" th:if="${total > 0}">
+        <div class="d-flex justify-content-between mb-2">
+            <strong th:text="${#lists.size(faites) + ' sur ' + total + ' consigne(s) faite(s)'}">0 sur 0</strong>
+            <span class="text-muted" th:text="${#lists.size(faites) * 100 / total} + ' %'">0 %</span>
         </div>
-        <p class="muted" th:if="${c.commentaireCandidat}" th:text="'Votre commentaire : ' + ${c.commentaireCandidat}"></p>
-        <form th:action="@{/candidat/integration/{id}/rouvrir(id=${c.id})}" method="post">
-            <button class="btn sec" type="submit">Remettre à faire</button>
-        </form>
+        <div class="progress"><div class="progress-bar" th:style="'width:' + ${#lists.size(faites) * 100 / total} + '%'"></div></div>
     </div>
-</div>
+
+    <div class="card-grh mb-4">
+        <div class="card-tete"><span class="section-icon"><i class="fa-regular fa-clock"></i></span><h2 class="titre-section">À faire</h2></div>
+        <div class="card-corps">
+            <div class="consigne" th:each="c : ${aFaire}" th:classappend="${c.enRetard} ? 'retard'">
+                <div class="consigne-tete">
+                    <span class="badge-type" th:text="${c.typeConsigne.libelle}">Type</span>
+                    <strong th:text="${c.titre}">Titre</strong>
+                    <span class="badge-statut retard" th:if="${c.enRetard}"><i class="fa-solid fa-triangle-exclamation"></i> En retard</span>
+                    <span class="text-muted small" th:if="${c.dateLimite}"><i class="fa-regular fa-calendar me-1"></i>avant le <span th:text="${#temporals.format(c.dateLimite, 'dd/MM/yyyy')}">date</span></span>
+                </div>
+                <p th:if="${c.description}" th:text="${c.description}">Détails</p>
+                <form th:action="@{/candidat/integration/{id}/faite(id=${c.id})}" method="post" class="consigne-action">
+                    <input class="form-control" name="commentaire" maxlength="500" placeholder="Commentaire pour le RH (facultatif)">
+                    <button class="btn btn-success text-nowrap" type="submit"><i class="fa-solid fa-check me-1"></i> C'est fait</button>
+                </form>
+            </div>
+            <p class="text-muted mb-0" th:if="${#lists.isEmpty(aFaire)}"><i class="fa-solid fa-circle-check text-success me-1"></i> Rien à faire pour le moment.</p>
+        </div>
+    </div>
+
+    <div class="card-grh" th:unless="${#lists.isEmpty(faites)}">
+        <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-circle-check"></i></span><h2 class="titre-section">Déjà fait</h2></div>
+        <div class="card-corps">
+            <div class="consigne faite" th:each="c : ${faites}">
+                <div class="consigne-tete">
+                    <span class="badge-type" th:text="${c.typeConsigne.libelle}">Type</span>
+                    <strong th:text="${c.titre}">Titre</strong>
+                    <span class="text-muted small">fait le <span th:text="${#temporals.format(c.dateRealisation, 'dd/MM/yyyy')}">date</span></span>
+                </div>
+                <p class="text-muted small" th:if="${c.commentaireCandidat}" th:text="'Votre commentaire : ' + ${c.commentaireCandidat}"></p>
+                <form th:action="@{/candidat/integration/{id}/rouvrir(id=${c.id})}" method="post" class="mt-2">
+                    <button class="btn btn-light border btn-sm" type="submit"><i class="fa-solid fa-rotate-left me-1"></i> Remettre à faire</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

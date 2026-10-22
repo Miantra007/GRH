@@ -3,33 +3,48 @@
 <head th:replace="~{fragments :: head('Contrats')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1>Contrats</h1>
-<div class="card">
-<form method="get" th:action="@{/admin/contrats}" style="display:flex;gap:1rem;align-items:end">
-    <div style="max-width:260px"><label>Filtrer par statut</label>
-    <select name="statut" onchange="this.form.submit()">
-        <option value="">Tous</option>
-        <option th:each="s : ${statuts}" th:value="${s.libelle}" th:text="${s.libelle}" th:selected="${s.libelle == statutFiltre}"></option>
-    </select></div>
-    <a class="btn" th:href="@{/admin/candidats}">+ Nouveau contrat</a>
-</form>
-</div>
-<div class="card">
-<table>
-    <tr><th>N°</th><th>Candidat</th><th>Type</th><th>Statut</th><th></th></tr>
-    <tr th:each="cc : ${contrats}">
-        <td th:text="${cc.id}"></td>
-        <td th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}"></td>
-        <td th:text="${cc.typeContrat}"></td>
-        <td><span class="badge" th:if="${cc.statutActuel != null}" th:text="${cc.statutActuel.libelle}"
-      th:classappend="${cc.statutActuel.libelle == 'Créé'} ? 'b-cree' : (${cc.statutActuel.libelle == 'Signé'} ? 'b-signe' : 'b-valide')"></span></td>
-        <td><a th:href="@{/admin/contrats/{id}(id=${cc.id})}">Voir</a></td>
-    </tr>
-    <tr th:if="${#lists.isEmpty(contrats)}"><td colspan="5">Aucun contrat.</td></tr>
-</table>
-</div>
+<main class="container-xl py-4">
+    <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-file-contract"></i></span>
+        <div class="flex-grow-1">
+            <h1>Contrats</h1>
+            <p class="text-muted small mb-0"><span th:text="${#lists.size(contrats)}">0</span> contrat(s)</p>
+        </div>
+        <a class="btn btn-primary" th:href="@{/admin/candidats}"><i class="fa-solid fa-plus me-1"></i> Nouveau contrat</a>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <form method="get" th:action="@{/admin/contrats}" class="p-3 border-bottom d-flex align-items-center gap-2 flex-wrap">
+            <label class="form-label mb-0" for="statut"><i class="fa-solid fa-filter me-1"></i> Statut</label>
+            <select class="form-select w-auto" id="statut" name="statut" onchange="this.form.submit()">
+                <option value="">Tous</option>
+                <option th:each="s : ${statuts}" th:value="${s.libelle}" th:text="${s.libelle}" th:selected="${s.libelle == statutFiltre}"></option>
+            </select>
+        </form>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(contrats)}">
+            <table class="table table-grh">
+                <thead><tr><th>N°</th><th>Candidat</th><th>Type</th><th>Statut</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="cc : ${contrats}">
+                    <td class="col-id" th:text="${cc.id}">1</td>
+                    <td class="fw-semibold" th:text="${cc.candidat.prenomCandidat + ' ' + cc.candidat.nomCandidat}">Candidat</td>
+                    <td><span class="badge-type" th:text="${cc.typeContrat}">CE</span></td>
+                    <td><span th:replace="~{fragments :: statut(${cc.statutActuel?.libelle})}"></span></td>
+                    <td class="col-actions">
+                        <a class="btn btn-light border btn-sm" th:href="@{/admin/contrats/{id}(id=${cc.id})}"><i class="fa-regular fa-eye me-1"></i> Voir</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(contrats)}">
+            <i class="fa-solid fa-file-contract"></i>
+            <p class="fw-semibold text-body mb-0">Aucun contrat</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

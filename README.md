@@ -2,10 +2,14 @@
 
 ## Lancer
 1. psql -U postgres -f db/grh_schema.sql
-2. psql -U postgres -f db/grh_donnees_test.sql
-3. psql -U postgres -f db/grh_donnees_complement.sql
-3 bis. psql -U postgres -f db/grh_mots_de_passe_dev.sql   (vrais hash BCrypt, mot de passe de test : motdepasse123)
-3 ter. psql -U postgres -f db/grh_integration.sql        (consignes d'intégration RH -> candidat)
+2. psql -U postgres -d grh -f db/grh_donnees_test.sql
+3. psql -U postgres -d grh -f db/grh_donnees_complement.sql
+3 bis. psql -U postgres -d grh -f db/base_miantra.sql              (besoins, offres, candidatures, propositions)
+3 ter. psql -U postgres -d grh -f db/donnee_test_acceptation.sql
+3 quater. psql -U postgres -d grh -f db/grh_embauche.sql           (lien contrat -> besoin)
+3 quinquies. psql -U postgres -d grh -f db/donnee_test_embauche.sql  (besoin REMPLACEMENT de test)
+3 sexies. psql -U postgres -d grh -f db/grh_integration.sql        (consignes d'intégration RH -> candidat)
+3 septies. psql -U postgres -d grh -f db/grh_mots_de_passe_dev.sql (vrais hash BCrypt, mot de passe de test : motdepasse123)
 4. Mettre ton mot de passe dans src/main/resources/application.properties
 5. mvn spring-boot:run   (IDE : activer le plugin Lombok + "annotation processing")
 6. Ouvrir http://localhost:8080  (interface Thymeleaf)
@@ -19,11 +23,14 @@ hery.rabe@mail.mg         -> Candidat          : consulte et signe      (/candid
 dg@entreprise.mg          -> Direction générale: valide les contrats    (/dg/...)
 
 ## Front Thymeleaf
-controller/web/   AuthWeb, AdminContratWeb, CandidatContratWeb, DgContratWeb (@Controller)
+controller/web/   AuthWeb, AdminContratWeb, AdminEmployeWeb, AdminIntegrationWeb,
+                  CandidatContratWeb, CandidatIntegrationWeb, DgContratWeb (@Controller)
 web/              SessionUser + AuthInterceptor (accès par rôle)
-templates/        login, fragments (nav/messages), contrat-detail (commun),
-                  admin/{candidats,contrats,contrat-form,travailleur-form}, candidat/contrats, dg/contrats
-static/css/       style.css
+templates/        login, fragments (en-tête, menu par rôle, messages, badges, confirmation), contrat-detail (commun),
+                  admin/{candidats,contrats,contrat-form,travailleur-form,employes,historique-employes,integration},
+                  candidat/{contrats,integration}, dg/contrats, proposition/*
+static/css/       app.css  (Bootstrap 5 + Open Sans + Font Awesome, chargés par CDN dans fragments.html)
+static/js/        app.js   (confirmations, recherche dans les tableaux, validation)
 
 ## Architecture (par table : 5 fichiers)
 model/       entité JPA (@Entity)            -> 46 classes + Identifiable
@@ -35,4 +42,5 @@ exception/   404 / 409 / 403 / 400 centralisés
 config/      CORS
 
 Écrits à la main : service/ContratCandidatService + controller/ContratCandidatController
-(workflow Créé -> Signé -> Validé).
+(workflow Créé -> Signé -> Validé) et service/EmbaucheService (embauche à la validation du contrat :
+création -> le candidat devient employé ; remplacement -> l'occupant est suspendu et archivé, le candidat prend sa place).

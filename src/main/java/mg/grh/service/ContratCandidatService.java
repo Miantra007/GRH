@@ -1,5 +1,7 @@
 package mg.grh.service;
 
+import mg.grh.dto.ResultatEmbauche;
+import mg.grh.dto.ResultatValidation;
 import mg.grh.exception.ResourceNotFoundException;
 import mg.grh.model.*;
 import mg.grh.repository.*;
@@ -31,11 +33,12 @@ public class ContratCandidatService {
     private final CandidatRepository candidatRepo;
     private final StatutContratRepository statutRepo;
     private final HistoriqueStatutContratRepository historiqueRepo;
+    private final EmbaucheService embaucheService;
 
     public ContratCandidatService(ContratCandidatRepository contratCandidatRepo, ContratCeRepository ceRepo,
                                   ContratCddRepository cddRepo, ContratCdiRepository cdiRepo,
                                   CandidatRepository candidatRepo, StatutContratRepository statutRepo,
-                                  HistoriqueStatutContratRepository historiqueRepo) {
+                                  HistoriqueStatutContratRepository historiqueRepo, EmbaucheService embaucheService) {
         this.contratCandidatRepo = contratCandidatRepo;
         this.ceRepo = ceRepo;
         this.cddRepo = cddRepo;
@@ -43,6 +46,7 @@ public class ContratCandidatService {
         this.candidatRepo = candidatRepo;
         this.statutRepo = statutRepo;
         this.historiqueRepo = historiqueRepo;
+        this.embaucheService = embaucheService;
     }
 
     // ------------------------------------------------------------ lecture
@@ -70,6 +74,12 @@ public class ContratCandidatService {
                 .toList();
     }
 
+    /** Candidatures du candidat dont la proposition d'embauche est acceptée : un contrat peut y répondre. */
+    @Transactional(readOnly = true)
+    public List<CandidatureRetenueInfo> candidaturesRetenues(Integer candidatId) {
+        return contratCandidatRepo.findCandidaturesRetenues(candidatId);
+    }
+
     @Transactional(readOnly = true)
     public List<HistoriqueStatutContrat> historique(Integer contratCandidatId) {
         return historiqueRepo.findByContratCandidatIdOrderByDateChangementAsc(contratCandidatId);
@@ -77,21 +87,37 @@ public class ContratCandidatService {
 
     // ------------------------------------------------------------ 1) création (statut Créé)
     public ContratCandidat creerCe(Integer candidatId, ContratCe ce) {
-        ce.setId(null);
-        ce.setStatut(statut(CREE));
-        return lier(candidatId, "CE", ceRepo.save(ce), null, null);
+        return creerCe(candidatId, ce, null);
     }
 
     public ContratCandidat creerCdd(Integer candidatId, ContratCdd cdd) {
-        cdd.setId(null);
-        cdd.setStatut(statut(CREE));
-        return lier(candidatId, "CDD", null, cddRepo.save(cdd), null);
+        return creerCdd(candidatId, cdd, null);
     }
 
     public ContratCandidat creerCdi(Integer candidatId, ContratCdi cdi) {
+        return creerCdi(candidatId, cdi, null);
+    }
+
+    /** candidatureId : candidature (donc besoin) à laquelle répond le contrat ; null = aucun besoin lié. */
+    public ContratCandidat creerCe(Integer candidatId, ContratCe ce, Integer candidatureId) {
+        verifierCandidature(candidatId, candidatureId);
+        ce.setId(null);
+        ce.setStatut(statut(CREE));
+        return lier(candidatId, "CE", ceRepo.save(ce), null, null, candidatureId);
+    }
+
+    public ContratCandidat creerCdd(Integer candidatId, ContratCdd cdd, Integer candidatureId) {
+        verifierCandidature(candidatId, candidatureId);
+        cdd.setId(null);
+        cdd.setStatut(statut(CREE));
+        return lier(candidatId, "CDD", null, cddRepo.save(cdd), null, candidatureId);
+    }
+
+    public ContratCandidat creerCdi(Integer candidatId, ContratCdi cdi, Integer candidatureId) {
+        verifierCandidature(candidatId, candidatureId);
         cdi.setId(null);
         cdi.setStatut(statut(CREE));
-        return lier(candidatId, "CDI", null, null, cdiRepo.save(cdi));
+        return lier(candidatId, "CDI", null, null, cdiRepo.save(cdi), candidatureId);
     }
 
     // ------------------------------------------------------------ 2) signature par le candidat (statut Signé)
@@ -108,14 +134,35 @@ public class ContratCandidatService {
 
     // ------------------------------------------------------------ 3) validation par la Direction générale (statut Validé)
     public ContratCandidat valider(Integer contratCandidatId) {
+        return validerEtEmbaucher(contratCandidatId).contrat();
+    }
+
+    /**
+     * Valide le contrat puis applique la règle du besoin (création : le candidat devient employé ;
+     * remplacement : l'occupant est suspendu et archivé, le candidat prend sa place).
+     * Tout est annulé si l'embauche est impossible : le contrat reste "Signé".
+     */
+    public ResultatValidation validerEtEmbaucher(Integer contratCandidatId) {
         ContratCandidat cc = findById(contratCandidatId);
         exigerStatut(cc, SIGNE, "valider");
         changerStatut(cc, VALIDE);
-        return cc;
+        ResultatEmbauche embauche = embaucheService.embaucher(cc);
+        return new ResultatValidation(cc, embauche);
     }
 
     // ------------------------------------------------------------ utilitaires privés
-    private ContratCandidat lier(Integer candidatId, String type, ContratCe ce, ContratCdd cdd, ContratCdi cdi) {
+    private void verifierCandidature(Integer candidatId, Integer candidatureId) {
+        if (candidatureId == null) return;
+        boolean retenue = contratCandidatRepo.findCandidaturesRetenues(candidatId).stream()
+                .anyMatch(c -> c.getIdCandidature().equals(candidatureId));
+        if (!retenue) {
+            throw new IllegalArgumentException("Cette candidature n'est pas retenue pour ce candidat "
+                    + "(proposition d'embauche sans accord final).");
+        }
+    }
+
+    private ContratCandidat lier(Integer candidatId, String type, ContratCe ce, ContratCdd cdd, ContratCdi cdi,
+                                 Integer candidatureId) {
         Candidat candidat = candidatRepo.findById(candidatId)
                 .orElseThrow(() -> new ResourceNotFoundException("Candidat introuvable : id=" + candidatId));
         ContratCandidat cc = new ContratCandidat();
@@ -124,6 +171,7 @@ public class ContratCandidatService {
         cc.setContratCe(ce);
         cc.setContratCdd(cdd);
         cc.setContratCdi(cdi);
+        cc.setIdCandidature(candidatureId);
         cc = contratCandidatRepo.save(cc);
         historiser(cc, statut(CREE));
         return cc;

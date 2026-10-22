@@ -3,33 +3,53 @@
 <head th:replace="~{fragments :: head('Nouveau travailleur')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<h1>Nouveau travailleur</h1>
-<div class="card">
-<form method="post" th:action="@{/admin/travailleurs(candidatId=${candidatId})}">
-<div class="grid">
-    <div><label>Civilité</label><select name="civilite.id"><option value="">—</option>
-        <option th:each="x : ${civilites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
-    <div><label>Nom et prénoms *</label><input name="nomPrenoms" required></div>
-    <div><label>Date de naissance *</label><input type="date" name="dateNaissance" required></div>
-    <div><label>Lieu de naissance *</label><input name="lieuNaissance" required></div>
-    <div><label>Nationalité *</label><select name="nationalite.id" required>
-        <option th:each="x : ${nationalites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
-    <div><label>Situation de famille</label><select name="situationFamille.id"><option value="">—</option>
-        <option th:each="x : ${situations}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
-    <div><label>Nombre d'enfants</label><input type="number" name="nombreEnfants" min="0"></div>
-    <div><label>Adresse de résidence</label><input name="adresseResidence"></div>
-    <div><label>Profession</label><input name="profession"></div>
-    <div><label>Téléphone</label><input name="telephone"></div>
-    <div><label>Email</label><input type="email" name="email"></div>
-    <div><label>N° CIN</label><input name="cinNumero"></div>
-    <div><label>N° CNaPS</label><input name="numeroCnaps"></div>
-</div>
-<p><button class="btn ok" type="submit">Enregistrer</button>
-   <a class="btn sec" th:href="@{/admin/contrats/nouveau(candidatId=${candidatId})}">Annuler</a></p>
-</form>
-</div>
+<main class="container-xl py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a th:href="@{/admin/candidats}">Candidats</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/contrats/nouveau(candidatId=${candidatId})}">Nouveau contrat</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Nouveau travailleur</li>
+        </ol>
+    </nav>
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-id-card"></i></span>
+        <div>
+            <h1>Nouveau travailleur</h1>
+            <p class="text-muted small mb-0">Les champs marqués <span class="text-danger">*</span> sont obligatoires.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <form method="post" class="card-grh card-corps needs-validation" novalidate th:action="@{/admin/travailleurs(candidatId=${candidatId})}">
+        <div class="row g-3">
+            <div class="col-md-3"><label class="form-label">Civilité</label>
+                <select class="form-select" name="civilite.id"><option value="">—</option>
+                    <option th:each="x : ${civilites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
+            <div class="col-md-9"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" name="nomPrenoms" required></div>
+            <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="dateNaissance" required></div>
+            <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" name="lieuNaissance" required></div>
+            <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                <div class="input-group"><span class="input-group-text"><i class="fa-solid fa-flag"></i></span>
+                    <select class="form-select" name="nationalite.id" required>
+                        <option th:each="x : ${nationalites}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div></div>
+            <div class="col-md-6"><label class="form-label">Situation de famille</label>
+                <select class="form-select" name="situationFamille.id"><option value="">—</option>
+                    <option th:each="x : ${situations}" th:value="${x.id}" th:text="${x.libelle}"></option></select></div>
+            <div class="col-md-4"><label class="form-label">Nombre d'enfants</label><input class="form-control" type="number" name="nombreEnfants" min="0"></div>
+            <div class="col-md-8"><label class="form-label">Adresse de résidence</label><input class="form-control" name="adresseResidence"></div>
+            <div class="col-md-4"><label class="form-label">Profession</label><input class="form-control" name="profession"></div>
+            <div class="col-md-4"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="telephone"></div>
+            <div class="col-md-4"><label class="form-label">E-mail</label><input class="form-control" type="email" name="email"></div>
+            <div class="col-md-6"><label class="form-label">N° CIN</label><input class="form-control" name="cinNumero"></div>
+            <div class="col-md-6"><label class="form-label">N° CNaPS</label><input class="form-control" name="numeroCnaps"></div>
+        </div>
+        <div class="mt-4 d-flex gap-2">
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer</button>
+            <a class="btn btn-light border" th:href="@{/admin/contrats/nouveau(candidatId=${candidatId})}">Annuler</a>
+        </div>
+    </form>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

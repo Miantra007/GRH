@@ -3,76 +3,96 @@
 <head th:replace="~{fragments :: head('Intégration du candidat')}"></head>
 <body>
 <header th:replace="~{fragments :: nav}"></header>
-<main>
-<div th:replace="~{fragments :: messages}"></div>
-<p><a th:href="@{/admin/candidats}">&larr; Candidats</a></p>
-<h1>Intégration : <span th:text="${candidat.prenomCandidat + ' ' + candidat.nomCandidat}"></span></h1>
-
-<div class="card">
-    <h2>Envoyer une consigne</h2>
-    <form th:action="@{/admin/candidats/{id}/integration(id=${candidat.id})}" method="post">
-        <div class="grid">
-            <div>
-                <label for="typeId">Type</label>
-                <select id="typeId" name="typeId" required>
-                    <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.libelle}"></option>
-                </select>
-            </div>
-            <div>
-                <label for="titre">Titre</label>
-                <input id="titre" name="titre" maxlength="150" required placeholder="Ex. Formation sécurité au travail">
-            </div>
-            <div>
-                <label for="dateLimite">À faire avant le</label>
-                <input id="dateLimite" name="dateLimite" type="date">
-            </div>
-            <div>
-                <label for="contratCandidatId">Contrat concerné</label>
-                <select id="contratCandidatId" name="contratCandidatId">
-                    <option value="">Aucun</option>
-                    <option th:each="cc : ${contrats}" th:value="${cc.id}"
-                            th:text="${cc.typeContrat + ' n°' + cc.id + (cc.statutActuel != null ? ' (' + cc.statutActuel.libelle + ')' : '')}"></option>
-                </select>
-            </div>
+<main class="container-xl py-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb mb-2">
+            <li class="breadcrumb-item"><a th:href="@{/admin/candidats}">Candidats</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Intégration</li>
+        </ol>
+    </nav>
+    <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-list-check"></i></span>
+        <div class="flex-grow-1">
+            <h1>Intégration : <span th:text="${candidat.prenomCandidat + ' ' + candidat.nomCandidat}">Candidat</span></h1>
+            <p class="text-muted small mb-0" th:unless="${#lists.isEmpty(consignes)}"
+               th:text="${#lists.size(consignes.?[faite])} + ' sur ' + ${#lists.size(consignes)} + ' consigne(s) faite(s)'">0 sur 0</p>
         </div>
-        <label for="description">Détails pour le candidat</label>
-        <textarea id="description" name="description" rows="3" placeholder="Où, quand, quoi apporter…"></textarea>
-        <p><button class="btn" type="submit">Envoyer au candidat</button></p>
-    </form>
-</div>
+    </div>
 
-<div class="card">
-    <h2>Consignes envoyées
-        <small class="muted" th:unless="${#lists.isEmpty(consignes)}"
-               th:text="${#lists.size(consignes.?[faite]) + ' / ' + #lists.size(consignes) + ' faites'}"></small>
-    </h2>
-    <table>
-        <tr><th>Type</th><th>Consigne</th><th>Avant le</th><th>État</th><th>Envoyée le</th><th></th></tr>
-        <tr th:each="c : ${consignes}">
-            <td th:text="${c.typeConsigne.libelle}"></td>
-            <td>
-                <strong th:text="${c.titre}"></strong>
-                <div class="muted" th:if="${c.description}" th:text="${c.description}"></div>
-                <div class="muted" th:if="${c.commentaireCandidat}">Réponse du candidat : <em th:text="${c.commentaireCandidat}"></em></div>
-            </td>
-            <td th:text="${c.dateLimite != null} ? ${#temporals.format(c.dateLimite, 'dd/MM/yyyy')} : '—'"></td>
-            <td>
-                <span class="badge b-valide" th:if="${c.faite}"
-                      th:text="'Faite le ' + ${#temporals.format(c.dateRealisation, 'dd/MM/yyyy')}"></span>
-                <span class="badge b-retard" th:if="${c.enRetard}">En retard</span>
-                <span class="badge b-cree" th:if="${!c.faite and !c.enRetard}">À faire</span>
-            </td>
-            <td th:text="${#temporals.format(c.dateEnvoi, 'dd/MM/yyyy HH:mm')}"></td>
-            <td>
-                <form th:action="@{/admin/integration/{id}/supprimer(id=${c.id})}" method="post"
-                      onsubmit="return confirm('Retirer cette consigne ?')">
-                    <button class="btn sec" type="submit">Retirer</button>
-                </form>
-            </td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(consignes)}"><td colspan="6">Aucune consigne envoyée à ce candidat.</td></tr>
-    </table>
-</div>
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh mb-4">
+        <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-paper-plane"></i></span><h2 class="titre-section">Envoyer une consigne</h2></div>
+        <form class="card-corps needs-validation" novalidate th:action="@{/admin/candidats/{id}/integration(id=${candidat.id})}" method="post">
+            <div class="row g-3">
+                <div class="col-md-6 col-lg-3">
+                    <label class="form-label" for="typeId">Type<span class="req">*</span></label>
+                    <select class="form-select" id="typeId" name="typeId" required>
+                        <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.libelle}"></option>
+                    </select>
+                </div>
+                <div class="col-md-6 col-lg-5">
+                    <label class="form-label" for="titre">Titre<span class="req">*</span></label>
+                    <input class="form-control" id="titre" name="titre" maxlength="150" required placeholder="Ex. Formation sécurité au travail">
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    <label class="form-label" for="dateLimite">À faire avant le</label>
+                    <input class="form-control" id="dateLimite" name="dateLimite" type="date">
+                </div>
+                <div class="col-md-6 col-lg-2">
+                    <label class="form-label" for="contratCandidatId">Contrat concerné</label>
+                    <select class="form-select" id="contratCandidatId" name="contratCandidatId">
+                        <option value="">Aucun</option>
+                        <option th:each="cc : ${contrats}" th:value="${cc.id}"
+                                th:text="${cc.typeContrat + ' n°' + cc.id + (cc.statutActuel != null ? ' (' + cc.statutActuel.libelle + ')' : '')}"></option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label" for="description">Détails pour le candidat</label>
+                    <textarea class="form-control" id="description" name="description" rows="3" placeholder="Où, quand, quoi apporter…"></textarea>
+                </div>
+            </div>
+            <div class="mt-3"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane me-1"></i> Envoyer au candidat</button></div>
+        </form>
+    </div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-clipboard-check"></i></span><h2 class="titre-section">Consignes envoyées</h2></div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(consignes)}">
+            <table class="table table-grh">
+                <thead><tr><th>Type</th><th>Consigne</th><th>Avant le</th><th>État</th><th>Envoyée le</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${consignes}">
+                    <td><span class="badge-type" th:text="${c.typeConsigne.libelle}">Type</span></td>
+                    <td>
+                        <strong th:text="${c.titre}">Titre</strong>
+                        <div class="text-muted small" th:if="${c.description}" th:text="${c.description}"></div>
+                        <div class="small mt-1" th:if="${c.commentaireCandidat}"><i class="fa-regular fa-comment me-1"></i>Réponse du candidat : <em th:text="${c.commentaireCandidat}"></em></div>
+                    </td>
+                    <td class="text-nowrap" th:text="${c.dateLimite != null} ? ${#temporals.format(c.dateLimite, 'dd/MM/yyyy')} : '—'">date</td>
+                    <td>
+                        <span class="badge-statut valide" th:if="${c.faite}"><i class="fa-solid fa-circle-check"></i> Faite le <span th:text="${#temporals.format(c.dateRealisation, 'dd/MM/yyyy')}">date</span></span>
+                        <span class="badge-statut retard" th:if="${c.enRetard}"><i class="fa-solid fa-triangle-exclamation"></i> En retard</span>
+                        <span class="badge-statut cree" th:if="${!c.faite and !c.enRetard}"><i class="fa-regular fa-clock"></i> À faire</span>
+                    </td>
+                    <td class="text-nowrap text-muted small" th:text="${#temporals.format(c.dateEnvoi, 'dd/MM/yyyy HH:mm')}">date</td>
+                    <td class="col-actions">
+                        <form th:action="@{/admin/integration/{id}/supprimer(id=${c.id})}" method="post"
+                              data-confirm="Cette consigne sera retirée du dossier du candidat." data-confirm-titre="Retirer la consigne"
+                              data-confirm-bouton="Retirer" data-confirm-style="btn-danger">
+                            <button class="btn btn-light border btn-icone text-danger" type="submit" title="Retirer"><i class="fa-solid fa-trash-can"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(consignes)}">
+            <i class="fa-solid fa-list-check"></i>
+            <p class="fw-semibold text-body mb-0">Aucune consigne envoyée à ce candidat</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>
