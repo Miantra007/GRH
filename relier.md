@@ -1,6 +1,6 @@
 # Relie le deroulement de notre projet qui doit se passer comme suit
 
-- Le directeur de plusieur poste (DSI) peut demander un besoin pour plusieurs postes chez lui 
+- Le directeur de plusieurs postes (ex:DSI) peut demander un besoin pour plusieurs postes chez lui 
   ex: poste pour dev , administrateur reseau 
 - Le rh recoit ce besoin puis il remplit les formulaires de recrutement pour chaque poste , 1 poste = 1 formulaire de recrutement
 - Puis le responsable financier doit valider ce que le rh a fournit notamment le salaire pour chaque poste ,il peut soit valider soit refuser , si il refuse alors le Rh doit refaire le processur pour le salaire du poste refuser , si il valide alors la direction generele doit valider en dernier
