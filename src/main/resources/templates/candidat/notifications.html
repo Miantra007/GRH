@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Mes notifications')}"></head>
+<body>
+<main class="container">
+    <h1>Mes notifications</h1>
+    <p>Messages transmis par les responsables au sujet de vos candidatures.</p>
+    <article class="card" th:each="n : ${notifications}">
+        <h2 th:text="${n.titre}"></h2>
+        <p th:text="${n.message}"></p>
+        <time th:text="${n.dateCreation}"></time>
+    </article>
+    <p th:if="${#lists.isEmpty(notifications)}">Vous n’avez pas encore reçu de notification.</p>
+    <p><a th:href="@{/api/candidat/offres}">Consulter les offres et le suivi public</a></p>
+</main>
+</body>
+</html>

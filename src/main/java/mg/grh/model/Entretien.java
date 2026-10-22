@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "entretien")
@@ -24,9 +25,21 @@ public class Entretien implements Identifiable {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "id_candidat", nullable = false)
-    private Candidat candidat;
+    @JoinColumn(name = "id_candidature", nullable = false)
+    private Candidature candidature;
 
     @Column(name = "date_entretien")
     private LocalDate dateEntretien;
+
+    @Column(name = "heure_entretien")
+    private LocalTime heureEntretien;
+
+    @Column(name = "lieu")
+    private String lieu;
+
+    @Column(name = "consignes")
+    private String consignes;
+
+    @Column(name = "message_candidat")
+    private String messageCandidat;
 }

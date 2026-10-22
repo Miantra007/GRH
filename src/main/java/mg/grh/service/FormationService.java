@@ -9,4 +9,8 @@ public class FormationService extends GenericService<Formation> {
     public FormationService(FormationRepository repository) {
         super(repository);
     }
+
+    public Formation enregistrer(Formation formation) {
+        return repository.save(formation);
+    }
 }

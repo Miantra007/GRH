@@ -66,6 +66,19 @@ public class PropositionService {
         return construireVue(info(idProposition));
     }
 
+    /** Crée, si besoin, la proposition issue d’une candidature retenue. */
+    @Transactional
+    public PropositionEmbauche creerPourCandidature(Integer idCandidature) {
+        return propositions.findByCandidatureId(idCandidature).orElseGet(() -> {
+            PropositionEmbauche proposition = new PropositionEmbauche();
+            proposition.setIdCandidature(idCandidature);
+            proposition.setDateEnvoi(LocalDateTime.now());
+            proposition.setStatut(statuts.findByLibelle("EN_ATTENTE_CANDIDAT")
+                    .orElseThrow(() -> new RegleMetierException("Statut de proposition non initialisé.")));
+            return propositions.saveAndFlush(proposition);
+        });
+    }
+
     // ------------------------------------------------------------------
     // Réponse du candidat
     // ------------------------------------------------------------------

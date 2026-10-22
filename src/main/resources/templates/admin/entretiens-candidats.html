@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Entretiens')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+    <div th:replace="~{fragments :: messages}"></div>
+    <h1>Candidats convoqués aux entretiens</h1>
+    <p>Les candidatures sont séparées par offre. La décision ne concerne que la candidature affichée.</p>
+    <section th:each="groupe : ${groupes}">
+        <h2 th:text="${groupe.offre.titre}"></h2>
+        <table>
+            <thead><tr><th>Candidat</th><th>Convocation</th><th>Décision</th></tr></thead>
+            <tbody>
+            <tr th:each="ligne : ${groupe.candidatures}">
+                <td>
+                    <a th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
+                       th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|"></a>
+                    <p th:text="${ligne.candidature.candidat.email}"></p>
+                </td>
+                <td>
+                    <p><strong>Date :</strong> <time th:text="${ligne.entretien.dateEntretien}"></time></p>
+                    <p><strong>Heure :</strong> <time th:text="${ligne.entretien.heureEntretien}"></time></p>
+                    <p><strong>Lieu :</strong> <span th:text="${ligne.entretien.lieu}"></span></p>
+                    <p><strong>Consignes :</strong> <span th:text="${ligne.entretien.consignes}"></span></p>
+                    <p><strong>Message :</strong> <span th:text="${ligne.entretien.messageCandidat}"></span></p>
+                </td>
+                <td>
+                    <form method="post" th:action="@{/admin/candidatures/{id}/decision-entretien(id=${ligne.candidature.id})}">
+                        <button type="submit" name="decision" value="ACCEPTER">Accepter et ouvrir la proposition</button>
+                        <button type="submit" name="decision" value="REFUSER">Refuser le candidat</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    <p th:if="${#lists.isEmpty(groupes)}">Aucun candidat n’est actuellement convoqué à un entretien.</p>
+</main>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package mg.grh.repository;
 
 import mg.grh.model.PropositionEmbauche;
+
 import mg.grh.model.PropositionInfo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -11,6 +12,9 @@ import java.util.Optional;
 
 public interface PropositionEmbaucheRepository extends JpaRepository<PropositionEmbauche, Integer> {
 
+    @Query("select p from PropositionEmbauche p where p.idCandidature = :candidatureId")
+    Optional<PropositionEmbauche> findByCandidatureId(@Param("candidatureId") Integer candidatureId);
+    
     @Query(nativeQuery = true, value = """
             SELECT pe.id_proposition  AS "idProposition",
                    c.id_candidat      AS "idCandidat",
@@ -32,4 +36,5 @@ public interface PropositionEmbaucheRepository extends JpaRepository<Proposition
             WHERE pe.id_proposition = :id
             """)
     Optional<PropositionInfo> findInfo(@Param("id") Integer id);
+
 }

@@ -8,4 +8,7 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     List<Notification> findByIdCandidatOrderByDateCreationDesc(Integer idCandidat);
 
     List<Notification> findByIdResponsableOrderByDateCreationDesc(Integer idResponsable);
+    
+
+    List<Notification> findByIdCandidatureOrderByDateCreationDesc(Integer candidatureId);
 }
