@@ -19,9 +19,16 @@ CREATE TABLE IF NOT EXISTS statut_employe (
 
 CREATE TABLE responsable(
     id_responsable SERIAL PRIMARY KEY,
+
     id_role INTEGER REFERENCES role(id_role),
+
+    id_statut_employe INTEGER
+        REFERENCES statut_employe(id_statut_employe),
+
     email VARCHAR(150) UNIQUE NOT NULL,
+
     mot_de_passe VARCHAR(255) NOT NULL,
+
     date_embauche DATE
 );
 
