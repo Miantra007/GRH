@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Nouveau besoin')}" ></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header mb-4">
+        <h1>Nouveau besoin de recrutement</h1>
+        <p class="text-muted mb-0">Un seul besoin peut contenir plusieurs postes à créer.</p>
+    </div>
+    <div th:replace="~{fragments :: messages}"></div>
+    <form th:action="@{/directeur/besoins}" th:object="${formulaire}" method="post" class="card-grh p-4">
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <label class="form-label" for="directionId">Direction</label>
+                <select id="directionId" class="form-select" th:field="*{directionId}" required>
+                    <option value="">Sélectionner</option>
+                    <option th:each="direction : ${directions}" th:value="${direction.id}" th:text="${direction.nomDirection}"></option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="departementId">Département</label>
+                <select id="departementId" class="form-select" th:field="*{departementId}" required>
+                    <option value="">Sélectionner</option>
+                    <option th:each="departement : ${departements}" th:value="${departement.id}" th:text="${departement.nomDept}"></option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label" for="typeBesoinId">Type de besoin</label>
+                <select id="typeBesoinId" class="form-select" th:field="*{typeBesoinId}" required>
+                    <option value="">Sélectionner</option>
+                    <option th:each="type : ${typesBesoin}" th:value="${type.id}" th:text="${type.libelle}"></option>
+                </select>
+            </div>
+            <div class="col-12">
+                <label class="form-label" for="motif">Motif</label>
+                <textarea id="motif" class="form-control" rows="3" th:field="*{motif}" required></textarea>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">Postes demandés</h2>
+            <button class="btn btn-outline-primary btn-sm" type="button" id="ajouter-poste">Ajouter un poste</button>
+        </div>
+        <div id="postes">
+            <section class="border rounded p-3 mb-3 poste" th:each="poste, statut : *{postes}">
+                <div class="row g-3">
+                    <div class="col-md-5"><label class="form-label">Libellé</label><input class="form-control" th:field="*{postes[__${statut.index}__].libelle}" required></div>
+                    <div class="col-md-2"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" th:field="*{postes[__${statut.index}__].nombrePostes}" required></div>
+                    <div class="col-md-5"><label class="form-label">Type de contrat</label><select class="form-select" th:field="*{postes[__${statut.index}__].typeContratId}" required><option value="">Sélectionner</option><option th:each="type : ${typesContrat}" th:value="${type.id}" th:text="${type.libelle}"></option></select></div>
+                    <div class="col-md-6"><label class="form-label">Missions</label><textarea class="form-control" rows="2" th:field="*{postes[__${statut.index}__].missions}"></textarea></div>
+                    <div class="col-md-3"><label class="form-label">Horaire</label><input class="form-control" th:field="*{postes[__${statut.index}__].horaireTravail}"></div>
+                    <div class="col-md-3"><label class="form-label">Prise de poste</label><input class="form-control" type="date" th:field="*{postes[__${statut.index}__].datePrisePoste}"></div>
+                    <div class="col-md-9"><label class="form-label">Responsable hiérarchique</label><input class="form-control" th:field="*{postes[__${statut.index}__].responsableHierarchique}"></div>
+                    <div class="col-md-3 d-flex align-items-end"><button class="btn btn-outline-danger w-100 supprimer-poste" type="button">Retirer</button></div>
+                </div>
+            </section>
+        </div>
+        <button class="btn btn-primary" type="submit">Envoyer le besoin</button>
+    </form>
+</main>
+<template id="poste-template">
+    <section class="border rounded p-3 mb-3 poste">
+        <div class="row g-3">
+            <div class="col-md-5"><label class="form-label">Libellé</label><input class="form-control" name="postes[__index__].libelle" required></div>
+            <div class="col-md-2"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" name="postes[__index__].nombrePostes" required></div>
+            <div class="col-md-5"><label class="form-label">Type de contrat</label><select class="form-select" name="postes[__index__].typeContratId" required><option value="">Sélectionner</option><option th:each="type : ${typesContrat}" th:value="${type.id}" th:text="${type.libelle}"></option></select></div>
+            <div class="col-md-6"><label class="form-label">Missions</label><textarea class="form-control" rows="2" name="postes[__index__].missions"></textarea></div>
+            <div class="col-md-3"><label class="form-label">Horaire</label><input class="form-control" name="postes[__index__].horaireTravail"></div>
+            <div class="col-md-3"><label class="form-label">Prise de poste</label><input class="form-control" type="date" name="postes[__index__].datePrisePoste"></div>
+            <div class="col-md-9"><label class="form-label">Responsable hiérarchique</label><input class="form-control" name="postes[__index__].responsableHierarchique"></div>
+            <div class="col-md-3 d-flex align-items-end"><button class="btn btn-outline-danger w-100 supprimer-poste" type="button">Retirer</button></div>
+        </div>
+    </section>
+</template>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
+<script>
+    const postes = document.getElementById('postes');
+    const template = document.getElementById('poste-template');
+    document.getElementById('ajouter-poste').addEventListener('click', () => {
+        const index = postes.querySelectorAll('.poste').length;
+        postes.insertAdjacentHTML('beforeend', template.innerHTML.replaceAll('__index__', index));
+    });
+    postes.addEventListener('click', (event) => {
+        if (event.target.closest('.supprimer-poste') && postes.querySelectorAll('.poste').length > 1) {
+            event.target.closest('.poste').remove();
+            postes.querySelectorAll('.poste').forEach((poste, index) => poste.querySelectorAll('[name]').forEach((field) => {
+                field.name = field.name.replace(/postes\[\d+]/, `postes[${index}]`);
+            }));
+        }
+    });
+</script>
+</body>
+</html>

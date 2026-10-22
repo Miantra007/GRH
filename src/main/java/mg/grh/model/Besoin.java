@@ -82,4 +82,15 @@ public class Besoin implements Identifiable {
 
     @Column(name = "visible_client", nullable = false)
     private Boolean visibleClient = false;
+
+    /** Vérifie les données obligatoires avant l'enregistrement d'un nouveau besoin. */
+    public void validerPourCreation() {
+        if (direction == null || departement == null || directeurDemandeur == null
+                || typeBesoin == null || statutBesoin == null || dateDemande == null) {
+            throw new IllegalArgumentException("Les informations obligatoires du besoin sont incomplètes.");
+        }
+        if (motif == null || motif.isBlank()) {
+            throw new IllegalArgumentException("Le motif du besoin est obligatoire.");
+        }
+    }
 }

@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Formulaires de recrutement')}"></head>
+<body><header th:replace="~{fragments :: nav}"></header><main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4"><span class="icone"><i class="fa-solid fa-file-pen"></i></span><div><h1 th:text="'Besoin n°' + ${besoin.id}"></h1><p class="text-muted mb-0" th:text="${besoin.motif}"></p></div></div>
+    <div th:replace="~{fragments :: messages}"></div>
+    <form th:action="@{/admin/besoins/{id}(id=${besoin.id})}" th:object="${formulaire}" method="post">
+        <section class="card-grh card-corps mb-3" th:each="poste, statut : ${postes}"><h2 class="titre-section mb-3" th:text="${poste.poste.libelle}"></h2><input type="hidden" th:field="*{lignes[__${statut.index}__].besoinPosteId}"><p class="text-muted">Nombre demandé : <span th:text="${poste.nombrePostes}"></span></p><div class="row g-3"><div class="col-md-4"><label class="form-label">Salaire proposé RH</label><input class="form-control" type="number" min="0" th:field="*{lignes[__${statut.index}__].salaireProposeRh}" required></div><div class="col-md-8"><label class="form-label">Titre de l'offre</label><input class="form-control" th:field="*{lignes[__${statut.index}__].titre}" required></div><div class="col-md-6"><label class="form-label">Description</label><textarea class="form-control" rows="4" th:field="*{lignes[__${statut.index}__].description}"></textarea></div><div class="col-md-6"><label class="form-label">Profil recherché</label><textarea class="form-control" rows="4" th:field="*{lignes[__${statut.index}__].profilRecherche}"></textarea></div><div class="col-md-4"><label class="form-label">Date limite</label><input class="form-control" type="date" th:field="*{lignes[__${statut.index}__].dateLimite}"></div></div></section>
+        <section class="card-grh card-corps mb-3"><label class="form-label">Commentaire RH</label><textarea class="form-control" rows="3" th:field="*{commentaireRh}"></textarea></section><div class="d-flex gap-2"><a class="btn btn-light border" th:href="@{/admin/besoins}">Retour</a><button class="btn btn-primary" type="submit">Envoyer à la Finance</button></div>
+    </form>
+</main><th:block th:replace="~{fragments :: scripts}"></th:block></body></html>

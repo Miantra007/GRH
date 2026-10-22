@@ -14,8 +14,6 @@
     <link rel="stylesheet" th:href="@{/css/app.css}">
 </head>
 <body>
-<<<<<<< HEAD
-
 <!-- ===================== Barre de navigation (menu selon le rôle) ===================== -->
 <header th:fragment="nav" class="topbar navbar navbar-expand-lg py-2 sticky-top">
     <div class="container-xl">
@@ -29,6 +27,7 @@
         <div class="collapse navbar-collapse" id="menuPrincipal" th:if="${session.user != null}">
             <ul class="navbar-nav me-auto ms-lg-3 gap-lg-1">
                 <th:block th:if="${session.user.type == 'RH'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/besoins}"><i class="fa-solid fa-clipboard-list me-1"></i> Besoins</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/candidats}"
                                             th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/candidats')} ? 'active'">
                         <i class="fa-solid fa-user-graduate me-1"></i> Candidats</a></li>
@@ -46,6 +45,15 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/dg/contrats}"
                                             th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/dg/contrats')} ? 'active'">
                         <i class="fa-solid fa-stamp me-1"></i> Contrats à valider</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dg/besoins}"><i class="fa-solid fa-clipboard-check me-1"></i> Besoins à valider</a></li>
+                </th:block>
+                <th:block th:if="${session.user.type == 'DIRECTEUR'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/directeur/besoins/nouveau}"
+                                            th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/directeur/besoins')} ? 'active'">
+                        <i class="fa-solid fa-clipboard-list me-1"></i> Mes besoins</a></li>
+                </th:block>
+                <th:block th:if="${session.user.type == 'FINANCE'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/finance/besoins}"><i class="fa-solid fa-coins me-1"></i> Besoins à valider</a></li>
                 </th:block>
                 <th:block th:if="${session.user.type == 'CANDIDAT'}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/candidat/contrats}"
@@ -68,25 +76,6 @@
             </form>
         </div>
     </div>
-=======
-<header th:fragment="nav" class="nav">
-    <span class="brand">GRH</span>
-    <nav>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidats}">Candidats</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures}">Candidatures</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures/tests}">Tests techniques</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/candidatures/entretiens}">Entretiens</a>
-        <a th:if="${session.user != null and session.user.type == 'RH'}" th:href="@{/admin/contrats}">Contrats</a>
-        <a th:if="${session.user != null and session.user.type == 'DG'}" th:href="@{/dg/contrats}">Contrats à valider</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/contrats}">Mes contrats</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/notifications}">Mes notifications</a>
-        <a th:if="${session.user != null and session.user.type == 'CANDIDAT'}" th:href="@{/candidat/integration}">Mon intégration</a>
-    </nav>
-    <form th:if="${session.user != null}" th:action="@{/logout}" method="post">
-        <span th:text="${session.user.email}"></span>
-        <button class="btn sec" type="submit">Déconnexion</button>
-    </form>
->>>>>>> 33e03d0c11dfb58f49c3361d50f3c1173277bb77
 </header>
 
 <!-- ===================== Messages (succès / erreur) ===================== -->
