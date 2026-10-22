@@ -34,6 +34,8 @@ public class AuthService {
             String type = switch (role) {
                 case "Administrateur RH" -> "RH";
                 case "Direction générale" -> "DG";
+                case "Directeur" -> "DIRECTEUR";
+                case "Financier" -> "FINANCE";
                 default -> "AUTRE";
             };
             return Optional.of(new SessionUser(type, r.get().getId(), r.get().getEmail()));

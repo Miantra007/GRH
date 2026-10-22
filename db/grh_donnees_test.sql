@@ -76,6 +76,14 @@ VALUES
         'rh@entreprise.mg',
         'hash_factice_6',
         '2016-04-04'
+    ),
+
+    (
+        4,
+        (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
+        'finance@entreprise.mg',
+        'hash_factice_7',
+        '2016-04-04'
     );
 
 -- id 6 : administrateur RH

@@ -27,6 +27,7 @@
         <div class="collapse navbar-collapse" id="menuPrincipal" th:if="${session.user != null}">
             <ul class="navbar-nav me-auto ms-lg-3 gap-lg-1">
                 <th:block th:if="${session.user.type == 'RH'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/admin/besoins}"><i class="fa-solid fa-clipboard-list me-1"></i> Besoins</a></li>
                     <li class="nav-item"><a class="nav-link" th:href="@{/admin/candidats}"
                                             th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/candidats')} ? 'active'">
                         <i class="fa-solid fa-user-graduate me-1"></i> Candidats</a></li>
@@ -44,6 +45,15 @@
                     <li class="nav-item"><a class="nav-link" th:href="@{/dg/contrats}"
                                             th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/dg/contrats')} ? 'active'">
                         <i class="fa-solid fa-stamp me-1"></i> Contrats à valider</a></li>
+                    <li class="nav-item"><a class="nav-link" th:href="@{/dg/besoins}"><i class="fa-solid fa-clipboard-check me-1"></i> Besoins à valider</a></li>
+                </th:block>
+                <th:block th:if="${session.user.type == 'DIRECTEUR'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/directeur/besoins/nouveau}"
+                                            th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/directeur/besoins')} ? 'active'">
+                        <i class="fa-solid fa-clipboard-list me-1"></i> Mes besoins</a></li>
+                </th:block>
+                <th:block th:if="${session.user.type == 'FINANCE'}">
+                    <li class="nav-item"><a class="nav-link" th:href="@{/finance/besoins}"><i class="fa-solid fa-coins me-1"></i> Besoins à valider</a></li>
                 </th:block>
                 <th:block th:if="${session.user.type == 'CANDIDAT'}">
                     <li class="nav-item"><a class="nav-link" th:href="@{/candidat/contrats}"

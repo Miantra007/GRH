@@ -46,6 +46,15 @@ public class BesoinPoste implements Identifiable {
     @Column(name = "salaire_valide_finance", precision = 12, scale = 0)
     private BigDecimal salaireValideFinance;
 
+    @Column(name = "decision_finance", length = 10)
+    private String decisionFinance;
+
+    @Column(name = "commentaire_finance")
+    private String commentaireFinance;
+
+    @Column(name = "decision_dg", length = 10)
+    private String decisionDg;
+
     @Column(name = "horaire_travail", length = 150)
     private String horaireTravail;
 

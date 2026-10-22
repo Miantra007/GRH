@@ -2,7 +2,7 @@ package mg.grh.web;
 
 import java.io.Serializable;
 
-/** Utilisateur connecté, stocké en session. type = RH | DG | CANDIDAT | AUTRE */
+/** Utilisateur connecté, stocké en session. type = RH | DG | DIRECTEUR | FINANCE | CANDIDAT | AUTRE */
 public class SessionUser implements Serializable {
     private final String type;
     private final Integer id;
@@ -22,6 +22,8 @@ public class SessionUser implements Serializable {
         return switch (type) {
             case "RH" -> "/admin/contrats";
             case "DG" -> "/dg/contrats";
+            case "DIRECTEUR" -> "/directeur/besoins/nouveau";
+            case "FINANCE" -> "/finance/besoins";
             case "CANDIDAT" -> "/candidat/notifications";
             default -> "/login";
         };

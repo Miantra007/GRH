@@ -111,6 +111,9 @@ CREATE TABLE IF NOT EXISTS besoin_poste (
     id_type_contrat INTEGER REFERENCES type_contrat(id_type_contrat),
     salaire_propose_rh NUMERIC(12, 0) CHECK (salaire_propose_rh >= 0),
     salaire_valide_finance NUMERIC(12, 0) CHECK (salaire_valide_finance >= 0),
+    decision_finance VARCHAR(10) CHECK (decision_finance IS NULL OR decision_finance IN ('ACCEPTEE', 'REFUSEE')),
+    commentaire_finance TEXT,
+    decision_dg VARCHAR(10) CHECK (decision_dg IS NULL OR decision_dg = 'VALIDEE'),
     -- Conditions décidées par le RH lors du besoin
     horaire_travail VARCHAR(150),
     responsable_hierarchique VARCHAR(150),

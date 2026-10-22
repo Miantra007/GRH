@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Integer> {
+    Optional<OffreEmploi> findByBesoinPosteId(Integer besoinPosteId);
     @Query("select o from OffreEmploi o join o.statutOffre s where o.visibleClient = true and s.libelle = 'PUBLIEE' and (o.dateLimite is null or o.dateLimite >= CURRENT_DATE) order by o.datePublication desc")
     List<OffreEmploi> findOffresPubliees();
 
