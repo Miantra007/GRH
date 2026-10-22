@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Offres d'emploi</title></head>
+<body>
+<main>
+    <h1>Offres d’emploi</h1>
+    <form method="get" action="/api/candidat/offres">
+        <label for="recherche">Rechercher une offre</label>
+        <input id="recherche" name="recherche" type="search" th:value="${recherche}">
+        <button type="submit">Rechercher</button>
+    </form>
+    <p th:if="${#lists.isEmpty(offres)}">Aucune offre publiée n’est disponible.</p>
+    <article th:each="offre : ${offres}">
+        <h2><a th:href="@{/api/candidat/offres/{id}(id=${offre.id})}" th:text="${offre.titre}">Offre</a></h2>
+        <p th:text="${offre.profilRecherche}"></p>
+        <p th:text="${offre.description}"></p>
+        <p th:if="${offre.dateLimite}">Date limite : <time th:text="${offre.dateLimite}"></time></p>
+        <a th:href="@{/api/candidat/offres/{id}(id=${offre.id})}">Voir les détails</a>
+        <a th:href="@{/api/candidat/offres/{id}/postuler(id=${offre.id})}">Postuler</a>
+    </article>
+    <h2>Suivre une candidature</h2>
+    <form method="get" action="/api/candidat/suivi">
+        <label for="code">Code de suivi</label><input id="code" name="code" required>
+        <button type="submit">Consulter</button>
+    </form>
+</main>
+</body>
+</html>

@@ -20,9 +20,8 @@ public class AuthWebController {
     }
 
     @GetMapping("/")
-    public String accueil(HttpSession session) {
-        SessionUser u = (SessionUser) session.getAttribute("user");
-        return u == null ? "redirect:/login" : "redirect:" + u.homeUrl();
+    public String accueil() {
+        return "redirect:/login";
     }
 
     @GetMapping("/login")

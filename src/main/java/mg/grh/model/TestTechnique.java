@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.DynamicInsert;
 import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Entity
 @Table(name = "test_technique")
@@ -24,9 +25,28 @@ public class TestTechnique implements Identifiable {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "id_candidat", nullable = false)
-    private Candidat candidat;
+    @JoinColumn(name = "id_candidature", nullable = false)
+    private Candidature candidature;
 
     @Column(name = "date_test")
     private LocalDate dateTest;
+
+    @Column(name = "heure_test")
+    private LocalTime heureTest;
+
+    @Column(name = "lieu")
+    private String lieu;
+
+    @Column(name = "consignes")
+    private String consignes;
+
+    @Column(name = "message_candidat")
+    private String messageCandidat;
+
+    @Column(name = "accepte_candidat", nullable = false)
+    private boolean accepteCandidat;
+
+    /** Décision RH sur le résultat du test : null tant que le test n’a pas été évalué. */
+    @Column(name = "resultat_accepte")
+    private Boolean resultatAccepte;
 }

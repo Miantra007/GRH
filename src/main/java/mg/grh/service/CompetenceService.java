@@ -9,4 +9,8 @@ public class CompetenceService extends GenericService<Competence> {
     public CompetenceService(CompetenceRepository repository) {
         super(repository);
     }
+
+    public Competence enregistrer(Competence competence) {
+        return repository.save(competence);
+    }
 }

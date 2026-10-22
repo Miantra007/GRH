@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Postuler à une offre</title>
+</head>
+<body>
+<main>
+    <h1>Constituer mon dossier de candidature</h1>
+    <ol aria-label="Étapes du dossier">
+        <li th:each="i : ${#numbers.sequence(1,3)}" th:attr="aria-current=${i == etape ? 'step' : null}"
+            th:text="${i == 1 ? 'Candidat' : (i == 2 ? 'CV' : 'Dossier')}">Étape</li>
+    </ol>
+    <p th:if="${erreur}" role="alert" th:text="${erreur}"></p>
+    <p th:if="${succes}" role="status" th:text="${succes}"></p>
+
+    <section th:if="${etape == 1}">
+        <h2>1. Création du candidat</h2>
+        <p>Offre choisie : <strong th:text="${offre.titre}"></strong></p>
+        <form method="post" action="/api/candidat/etape/1">
+            <input type="hidden" name="offreId" th:value="${offre.id}">
+            <p><label for="nom">Nom</label><input id="nom" name="nom" maxlength="50" required th:value="${nomSaisi != null ? nomSaisi : candidat?.nomCandidat}"></p>
+            <p><label for="prenom">Prénom</label><input id="prenom" name="prenom" maxlength="50" required th:value="${prenomSaisi != null ? prenomSaisi : candidat?.prenomCandidat}"></p>
+            <p><label for="email">Adresse email</label><input id="email" name="email" type="email" maxlength="150" required th:value="${emailSaisi != null ? emailSaisi : candidat?.email}"></p>
+            <p><label for="motDePasse">Mot de passe (8 caractères minimum)</label><input id="motDePasse" name="motDePasse" type="password" minlength="8" required autocomplete="new-password"></p>
+            <p><label for="dtn">Date de naissance</label><input id="dtn" name="dtn" type="date" th:value="${dtnSaisie != null ? dtnSaisie : candidat?.dtn}"></p>
+            <button type="submit">Suivant</button>
+        </form>
+    </section>
+
+    <section th:if="${etape == 2}">
+        <h2>2. Création du CV</h2>
+        <form method="post" action="/api/candidat/etape/2" enctype="multipart/form-data">
+            <fieldset>
+                <legend>Coordonnées et profil</legend>
+                <p><label for="titreCv">Titre du CV</label><input id="titreCv" name="titreCv" maxlength="150" th:value="${cv?.titreCv}"></p>
+                <p><label for="adresse">Adresse</label><input id="adresse" name="adresse" maxlength="255" th:value="${cv?.adresse}"></p>
+                <p><label for="profilProfessionnel">Profil professionnel</label><textarea id="profilProfessionnel" name="profilProfessionnel" th:text="${cv?.profilProfessionnel}"></textarea></p>
+                <p><label for="linkedinUrl">Profil LinkedIn</label><input id="linkedinUrl" name="linkedinUrl" type="url" th:value="${cv?.linkedinUrl}"></p>
+                <p><label for="githubUrl">Profil GitHub</label><input id="githubUrl" name="githubUrl" type="url" th:value="${cv?.githubUrl}"></p>
+                <p><label for="cvImporte">Importer un CV (PDF ou DOCX, 10 Mo maximum)</label><input id="cvImporte" name="cvImporte" type="file" accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"></p>
+                <p th:if="${cvImporte}">CV importé : <span th:text="${cvImporte}"></span></p>
+            </fieldset>
+            <fieldset><legend>Formations</legend>
+                <div id="formations">
+                    <div th:each="f : ${formations}">
+                        <p><label>Formation / diplôme <input name="formationNom" maxlength="100" th:value="${f.nomFormation}"></label></p>
+                        <p><label>Établissement <input name="formationEtablissement" maxlength="200" th:value="${f.etablissement}"></label></p>
+                        <p><label>Début <input name="formationDebut" type="date" th:value="${f.dateDebut}"></label>
+                            <label>Fin <input name="formationFin" type="date" th:value="${f.dateFin}"></label></p>
+                    </div>
+                    <div th:if="${formations == null or #lists.isEmpty(formations)}">
+                        <p><label>Formation / diplôme <input name="formationNom" maxlength="100"></label></p>
+                        <p><label>Établissement <input name="formationEtablissement" maxlength="200"></label></p>
+                        <p><label>Début <input name="formationDebut" type="date"></label> <label>Fin <input name="formationFin" type="date"></label></p>
+                    </div>
+                </div>
+                <button type="button" onclick="ajouterFormation()">Ajouter une formation</button>
+            </fieldset>
+            <fieldset><legend>Expériences professionnelles</legend>
+                <div id="experiences">
+                    <div th:each="e : ${experiences}">
+                        <p><label>Poste <input name="experiencePoste" maxlength="150" th:value="${e.poste}"></label>
+                            <label>Entreprise <input name="experienceEntreprise" maxlength="150" th:value="${e.entreprise}"></label></p>
+                        <p><label>Début <input name="experienceDebut" type="date" th:value="${e.dateDebut}"></label>
+                            <label>Fin <input name="experienceFin" type="date" th:value="${e.dateFin}"></label></p>
+                    </div>
+                    <div th:if="${experiences == null or #lists.isEmpty(experiences)}">
+                        <p><label>Poste <input name="experiencePoste" maxlength="150"></label> <label>Entreprise <input name="experienceEntreprise" maxlength="150"></label></p>
+                        <p><label>Début <input name="experienceDebut" type="date"></label> <label>Fin <input name="experienceFin" type="date"></label></p>
+                    </div>
+                </div>
+                <button type="button" onclick="ajouterExperience()">Ajouter une expérience</button>
+            </fieldset>
+            <fieldset><legend>Compétences</legend>
+                <div id="competences">
+                    <div th:each="c : ${competences}">
+                        <p><label>Compétence <input name="competenceNom" maxlength="100" th:value="${c.nomCompetence}"></label>
+                            <label>Niveau <select name="competenceNiveau"><option value="">Choisir</option>
+                                <option th:each="n : ${niveaux}" th:value="${n.id}" th:text="${n.libelleNiveau}" th:selected="${c.niveauCompetence.id == n.id}"></option>
+                            </select></label></p>
+                    </div>
+                    <div th:if="${competences == null or #lists.isEmpty(competences)}">
+                        <p><label>Compétence <input name="competenceNom" maxlength="100"></label>
+                            <label>Niveau <select name="competenceNiveau"><option value="">Choisir</option><option th:each="n : ${niveaux}" th:value="${n.id}" th:text="${n.libelleNiveau}"></option></select></label></p>
+                    </div>
+                </div>
+                <button type="button" onclick="ajouterCompetence()">Ajouter une compétence</button>
+            </fieldset>
+            <fieldset><legend>Diplômes et études</legend>
+                <div id="educations">
+                    <div th:each="d : ${educations}">
+                        <p><label>Diplôme <input name="diplome" maxlength="150" th:value="${d.diplome}"></label> <label>Niveau <input name="diplomeNiveau" maxlength="50" th:value="${d.niveau}"></label></p>
+                        <p><label>Établissement <input name="diplomeEtablissement" maxlength="150" th:value="${d.etablissement}"></label> <label>Domaine <input name="diplomeDomaine" maxlength="150" th:value="${d.domaineEtude}"></label></p>
+                        <p><label>Début <input name="diplomeDebut" type="date" th:value="${d.dateDebut}"></label> <label>Fin <input name="diplomeFin" type="date" th:value="${d.dateFin}"></label></p>
+                    </div>
+                    <div th:if="${educations == null or #lists.isEmpty(educations)}">
+                        <p><label>Diplôme <input name="diplome" maxlength="150"></label> <label>Niveau <input name="diplomeNiveau" maxlength="50"></label></p>
+                        <p><label>Établissement <input name="diplomeEtablissement" maxlength="150"></label> <label>Domaine <input name="diplomeDomaine" maxlength="150"></label></p>
+                        <p><label>Début <input name="diplomeDebut" type="date"></label> <label>Fin <input name="diplomeFin" type="date"></label></p>
+                    </div>
+                </div>
+                <button type="button" onclick="ajouterEducation()">Ajouter un diplôme</button>
+            </fieldset>
+            <fieldset><legend>Langues</legend>
+                <div id="languesCv">
+                    <div th:each="l : ${languesCv}">
+                        <p><label>Langue <input name="langueNom" maxlength="100" th:value="${l.langue.nomLangue}"></label>
+                            <label>Niveau <select name="langueNiveau"><option value="">Choisir</option><option th:each="n : ${niveauxLangue}" th:value="${n.id}" th:text="${n.libelleNiveau}" th:selected="${l.niveauLangue.id == n.id}"></option></select></label></p>
+                    </div>
+                    <div th:if="${languesCv == null or #lists.isEmpty(languesCv)}">
+                        <p><label>Langue <input name="langueNom" maxlength="100"></label> <label>Niveau <select name="langueNiveau"><option value="">Choisir</option><option th:each="n : ${niveauxLangue}" th:value="${n.id}" th:text="${n.libelleNiveau}"></option></select></label></p>
+                    </div>
+                </div>
+                <button type="button" onclick="ajouterLangue()">Ajouter une langue</button>
+            </fieldset>
+            <button type="submit" name="direction" value="precedent">Précédent</button>
+            <button type="submit" name="direction" value="suivant">Suivant</button>
+        </form>
+    </section>
+
+    <section th:if="${etape == 3}">
+        <h2>3. Constitution du dossier</h2>
+        <p>Offre : <strong th:text="${offre.titre}"></strong></p>
+        <p th:if="${candidat}">Candidat : <span th:text="|${candidat.prenomCandidat} ${candidat.nomCandidat} (${candidat.email})|"></span></p>
+        <section th:if="${cv}">
+            <h3>Récapitulatif du CV</h3><p th:text="${cv.titreCv}"></p><p th:text="${cv.profilProfessionnel}"></p>
+            <p th:if="${cvImporte}">CV importé : <span th:text="${cvImporte}"></span></p>
+            <h4>Formations</h4><ul><li th:each="f : ${formations}" th:text="|${f.nomFormation} — ${f.etablissement}|"></li></ul>
+            <h4>Diplômes</h4><ul><li th:each="d : ${educations}" th:text="|${d.diplome} — ${d.etablissement} (${d.niveau})|"></li></ul>
+            <h4>Expériences</h4><ul><li th:each="e : ${experiences}" th:text="|${e.poste} — ${e.entreprise}|"></li></ul>
+            <h4>Compétences</h4><ul><li th:each="c : ${competences}" th:text="|${c.nomCompetence} — ${c.niveauCompetence.libelleNiveau}|"></li></ul>
+            <h4>Langues</h4><ul><li th:each="l : ${languesCv}" th:text="|${l.langue.nomLangue} — ${l.niveauLangue.libelleNiveau}|"></li></ul>
+        </section>
+        <form method="post" action="/api/candidat/etape/3" enctype="multipart/form-data">
+            <p><label for="lettreMotivation">Lettre de motivation</label><textarea id="lettreMotivation" name="lettreMotivation" rows="10" maxlength="20000" required th:text="${lettreDraft}"></textarea></p>
+            <p><label for="justificatifs">Documents justificatifs (PDF, DOCX, JPG ou PNG, 10 Mo chacun, 10 fichiers maximum)</label><input id="justificatifs" name="justificatifs" type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png"></p>
+            <p th:if="${documentsDraft}">Documents déjà ajoutés pour ce brouillon :</p>
+            <ul th:if="${documentsDraft}"><li th:each="piece : ${documentsDraft}" th:text="${piece.nom}"></li></ul>
+            <button type="submit" name="direction" value="precedent">Précédent</button>
+            <button type="submit" name="direction" value="envoyer">Vérifier et envoyer ma candidature</button>
+        </form>
+        <p>Après l’envoi, un code privé permettra de consulter le statut sans créer de compte.</p>
+    </section>
+</main>
+<select id="modeleNiveaux" hidden><option th:each="n : ${niveaux}" th:value="${n.id}" th:text="${n.libelleNiveau}"></option></select>
+<script>
+function ajouterFormation(){document.getElementById('formations').insertAdjacentHTML('beforeend','<div><p><label>Formation / diplôme <input name="formationNom" maxlength="100"></label></p><p><label>Établissement <input name="formationEtablissement" maxlength="200"></label></p><p><label>Début <input name="formationDebut" type="date"></label> <label>Fin <input name="formationFin" type="date"></label></p></div>')}
+function ajouterExperience(){document.getElementById('experiences').insertAdjacentHTML('beforeend','<div><p><label>Poste <input name="experiencePoste" maxlength="150"></label> <label>Entreprise <input name="experienceEntreprise" maxlength="150"></label></p><p><label>Début <input name="experienceDebut" type="date"></label> <label>Fin <input name="experienceFin" type="date"></label></p></div>')}
+function ajouterCompetence(){const options=document.getElementById('modeleNiveaux').innerHTML;document.getElementById('competences').insertAdjacentHTML('beforeend','<div><p><label>Compétence <input name="competenceNom" maxlength="100"></label> <label>Niveau <select name="competenceNiveau"><option value="">Choisir</option>'+options+'</select></label></p></div>')}
+function ajouterEducation(){document.getElementById('educations').insertAdjacentHTML('beforeend','<div><p><label>Diplôme <input name="diplome" maxlength="150"></label> <label>Niveau <input name="diplomeNiveau" maxlength="50"></label></p><p><label>Établissement <input name="diplomeEtablissement" maxlength="150"></label> <label>Domaine <input name="diplomeDomaine" maxlength="150"></label></p><p><label>Début <input name="diplomeDebut" type="date"></label> <label>Fin <input name="diplomeFin" type="date"></label></p></div>')}
+function ajouterLangue(){const options=document.getElementById('modeleNiveauxLangue').innerHTML;document.getElementById('languesCv').insertAdjacentHTML('beforeend','<div><p><label>Langue <input name="langueNom" maxlength="100"></label> <label>Niveau <select name="langueNiveau"><option value="">Choisir</option>'+options+'</select></label></p></div>')}
+</script>
+<select id="modeleNiveauxLangue" hidden><option th:each="n : ${niveauxLangue}" th:value="${n.id}" th:text="${n.libelleNiveau}"></option></select>
+</body>
+</html>

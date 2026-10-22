@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tests techniques')}"></head>
+<body>
+<header th:replace="~{fragments :: nav}"></header>
+<main>
+    <div th:replace="~{fragments :: messages}"></div>
+    <h1>Candidats convoqués aux tests techniques</h1>
+    <p>Les candidatures sont séparées par offre. Après le test, acceptez ou refusez chaque candidat.</p>
+    <section th:each="groupe : ${groupes}">
+        <h2 th:text="${groupe.offre.titre}"></h2>
+        <table>
+            <thead><tr><th>Candidat</th><th>Convocation</th><th>Décision RH / entretien</th></tr></thead>
+            <tbody>
+            <tr th:each="ligne : ${groupe.candidatures}">
+                <td>
+                    <a th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
+                       th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|"></a>
+                    <p th:text="${ligne.candidature.candidat.email}"></p>
+                </td>
+                <td>
+                    <p><strong>Date :</strong> <time th:text="${ligne.test.dateTest}"></time></p>
+                    <p><strong>Heure :</strong> <time th:text="${ligne.test.heureTest}"></time></p>
+                    <p><strong>Lieu :</strong> <span th:text="${ligne.test.lieu}"></span></p>
+                    <p><strong>Consignes :</strong> <span th:text="${ligne.test.consignes}"></span></p>
+                    <p><strong>Message :</strong> <span th:text="${ligne.test.messageCandidat}"></span></p>
+                </td>
+                <td>
+                    <form th:if="${ligne.test.resultatAccepte == null}" method="post"
+                          th:action="@{/admin/candidatures/{id}/decision-test(id=${ligne.candidature.id})}">
+                        <button type="submit" name="decision" value="ACCEPTER">Accepter le résultat</button>
+                        <button type="submit" name="decision" value="REFUSER">Refuser le candidat</button>
+                    </form>
+                    <p th:if="${ligne.test.resultatAccepte == false}">Candidat refusé après le test.</p>
+                    <form th:if="${ligne.test.resultatAccepte == true}" method="post"
+                          th:action="@{/admin/candidatures/{id}/entretien(id=${ligne.candidature.id})}">
+                        <input type="hidden" name="origine" value="tests">
+                        <p><label>Date de l’entretien <input name="date" type="date" required></label></p>
+                        <p><label>Heure de l’entretien <input name="heure" type="time" required></label></p>
+                        <p><label>Lieu ou modalité <input name="lieu" required></label></p>
+                        <p><label>Consignes pratiques <textarea name="consignes" required></textarea></label></p>
+                        <p><label>Message au candidat <textarea name="message"></textarea></label></p>
+                        <button type="submit" th:text="${ligne.candidature.statut.libelle == 'ENTRETIEN' ? 'Modifier et notifier la convocation' : 'Programmer et notifier l’entretien'}"></button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+    <p th:if="${#lists.isEmpty(groupes)}">Aucun candidat n’est actuellement convoqué à un test technique.</p>
+</main>
+</body>
+</html>

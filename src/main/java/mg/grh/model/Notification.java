@@ -24,6 +24,9 @@ public class Notification implements Identifiable{
     @Column(name = "id_proposition")
     private Integer idProposition;
 
+    @Column(name = "id_candidature")
+    private Integer idCandidature;
+
     private String titre;
     private String message;
 
