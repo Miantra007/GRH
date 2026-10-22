@@ -49,7 +49,7 @@ public class CandidatureService extends GenericService<Candidature> {
         java.util.Map<String, java.util.Set<String>> transitions = java.util.Map.of(
                 "RECUE", java.util.Set.of("DOSSIER_RETENU", "DOSSIER_REJETE"),
                 "DOSSIER_RETENU", java.util.Set.of("TEST_TECHNIQUE", "ENTRETIEN", "NON_RETENUE"),
-                "DOSSIER_REJETE", java.util.Set.of("NON_RETENUE"),
+                "DOSSIER_REJETE", java.util.Set.of(),
                 "TEST_TECHNIQUE", java.util.Set.of("ENTRETIEN", "NON_RETENUE"),
                 "ENTRETIEN", java.util.Set.of("RETENUE", "NON_RETENUE"),
                 "RETENUE", java.util.Set.of("NON_RETENUE"),

@@ -22,7 +22,7 @@ public class SessionUser implements Serializable {
         return switch (type) {
             case "RH" -> "/admin/contrats";
             case "DG" -> "/dg/contrats";
-            case "CANDIDAT" -> "/candidat/contrats";
+            case "CANDIDAT" -> "/candidat/notifications";
             default -> "/login";
         };
     }

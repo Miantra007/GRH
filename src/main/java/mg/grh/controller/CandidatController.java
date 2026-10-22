@@ -135,6 +135,11 @@ public class CandidatController {
     public String postuler(@PathVariable Integer offreId, HttpSession session) {
         OffreEmploi offre = offreService.offrePubliee(offreId);
         session.setAttribute("candidatureOffreId", offre.getId());
+        Object utilisateur = session.getAttribute("user");
+        if (utilisateur instanceof mg.grh.web.SessionUser user && "CANDIDAT".equals(user.getType())) {
+            session.setAttribute("candidatureCandidatId", user.getId());
+            return "redirect:/api/candidat/etape/2";
+        }
         session.removeAttribute("candidatureCandidatId");
         session.removeAttribute("lettreCandidatureDraft");
         session.removeAttribute("documentsCandidatureDraft");
@@ -192,7 +197,8 @@ public class CandidatController {
     @PostMapping("/etape/1")
     public String enregistrerCandidat(@RequestParam String nom, @RequestParam String prenom,
             @RequestParam String email,
-            @RequestParam(required = false) LocalDate dtn, HttpSession session, RedirectAttributes ra) {
+            @RequestParam(required = false) LocalDate dtn, @RequestParam(required = false) String motDePasse,
+            HttpSession session, RedirectAttributes ra) {
         try {
             Integer offreId = (Integer) session.getAttribute("candidatureOffreId");
             if (offreId == null) throw new IllegalArgumentException("Choisissez une offre avant de postuler.");
@@ -204,8 +210,9 @@ public class CandidatController {
             candidat.setPrenomCandidat(prenom);
             candidat.setEmail(email);
             candidat.setDtn(dtn);
-            String motDePasseTechnique = candidat.getId() == null ? UUID.randomUUID().toString() : null;
-            candidat = candidatService.enregistrerCandidat(candidat, motDePasseTechnique);
+            if (candidat.getId() != null && (motDePasse == null || motDePasse.isBlank()))
+                throw new IllegalArgumentException("Un compte existe déjà avec cet email. Connectez-vous pour postuler.");
+            candidat = candidatService.enregistrerCandidat(candidat, motDePasse);
             session.setAttribute("candidatureCandidatId", candidat.getId());
             return "redirect:/api/candidat/etape/2";
         } catch (RuntimeException e) {
@@ -433,10 +440,32 @@ public class CandidatController {
         model.addAttribute("candidature", candidature);
         model.addAttribute("tests", testTechniqueRepository.findByCandidatureIdOrderByDateTestAsc(candidature.getId()));
         model.addAttribute("entretiens", entretienRepository.findByCandidatureIdOrderByDateEntretienAsc(candidature.getId()));
-        model.addAttribute("notifications", notificationRepository.findByCandidatureIdOrderByDateCreationDesc(candidature.getId()));
+        model.addAttribute("notifications", notificationRepository.findByIdCandidatureOrderByDateCreationDesc(candidature.getId()));
         model.addAttribute("proposition", propositionRepository.findByCandidatureId(candidature.getId()).orElse(null));
         model.addAttribute("dossier", dossierRepository.findByCandidatureId(candidature.getId()).orElse(null));
         return "candidat/suivi-candidature";
+    }
+
+    @PostMapping("/suivi/{code}/test/{testId}/accepter")
+    @Transactional
+    public String accepterTest(@PathVariable String code, @PathVariable Integer testId, RedirectAttributes ra) {
+        try {
+            Candidature candidature = candidatureService.parCodeSuivi(code);
+            List<TestTechnique> tests = testTechniqueRepository.findByCandidatureIdOrderByDateTestAsc(candidature.getId());
+            TestTechnique test = tests.stream().filter(t -> t.getId().equals(testId)).findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("Convocation au test introuvable."));
+            if (tests.isEmpty() || !tests.get(tests.size() - 1).getId().equals(testId))
+                throw new IllegalStateException("Seule la convocation la plus récente peut être acceptée.");
+            if (!"TEST_TECHNIQUE".equals(candidature.getStatut().getLibelle()))
+                throw new IllegalStateException("Cette convocation n’est plus en attente d’acceptation.");
+            if (test.isAccepteCandidat()) throw new IllegalStateException("Cette convocation a déjà été acceptée.");
+            test.setAccepteCandidat(true);
+            testTechniqueRepository.save(test);
+            ra.addFlashAttribute("succes", "Convocation au test acceptée. Le service RH pourra ensuite vous transmettre une date d’entretien.");
+        } catch (RuntimeException e) {
+            ra.addFlashAttribute("erreur", message(e));
+        }
+        return "redirect:/api/candidat/suivi/" + code;
     }
 
     @GetMapping("/suivi")
@@ -465,8 +494,8 @@ public class CandidatController {
             proposition.setReponseCandidat(ref); proposition.setContreProposition(limiter(contreProposition, 10000));
             proposition.setCommentaireCandidat(limiter(commentaire, 10000)); proposition.setSalaireDemande(salaireDemande);
             proposition.setDateReponseCandidat(LocalDateTime.now());
-            if (libelle.equals("NON")) proposition.setStatutProposition(statutPropositionRepository.findByLibelle("REFUSEE_CANDIDAT").orElse(proposition.getStatutProposition()));
-            else proposition.setStatutProposition(statutPropositionRepository.findByLibelle("EN_ATTENTE_RH").orElse(proposition.getStatutProposition()));
+            if (libelle.equals("NON")) proposition.setStatut(statutPropositionRepository.findByLibelle("REFUSEE_CANDIDAT").orElse(proposition.getStatut()));
+            else proposition.setStatut(statutPropositionRepository.findByLibelle("EN_ATTENTE_RH").orElse(proposition.getStatut()));
             propositionRepository.save(proposition);
             ra.addFlashAttribute("succes", "Votre réponse a été transmise au service RH.");
         } catch (RuntimeException e) { TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); ra.addFlashAttribute("erreur", message(e)); }
@@ -480,6 +509,8 @@ public class CandidatController {
     }
     private Integer candidatIdAnonyme(HttpSession session) {
         Object id = session.getAttribute("candidatureCandidatId");
+        if (!(id instanceof Integer) && session.getAttribute("user") instanceof mg.grh.web.SessionUser user
+                && "CANDIDAT".equals(user.getType())) return user.getId();
         return id instanceof Integer candidatId ? candidatId : null;
     }
     @SuppressWarnings("unchecked")

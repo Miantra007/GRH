@@ -42,4 +42,11 @@ public class TestTechnique implements Identifiable {
 
     @Column(name = "message_candidat")
     private String messageCandidat;
+
+    @Column(name = "accepte_candidat", nullable = false)
+    private boolean accepteCandidat;
+
+    /** Décision RH sur le résultat du test : null tant que le test n’a pas été évalué. */
+    @Column(name = "resultat_accepte")
+    private Boolean resultatAccepte;
 }

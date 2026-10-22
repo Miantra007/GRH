@@ -31,7 +31,9 @@ Le candidat peut consulter les offres sans compte. Le parcours de candidature co
 | GET | `/api/candidat/confirmation/{code}` | Affiche la confirmation associée au code de suivi. |
 | GET | `/api/candidat/suivi?code=...` | Ouvre le suivi avec le code reçu après candidature. |
 | GET | `/api/candidat/suivi/{code}` | Consulte l’avancement et les notifications de la candidature. |
+| POST | `/api/candidat/suivi/{code}/test/{testId}/accepter` | Confirme la réception de la convocation au test. La décision RH sur le résultat est gérée dans `/admin/candidatures/tests`. |
 | POST | `/api/candidat/suivi/{code}/proposition` | Répond à une proposition d’embauche (acceptation, refus ou contre-proposition selon le formulaire). |
+| GET | `/candidats/{idCandidat}/propositions/{idProposition}` | Ouvre le formulaire de réponse existant à la proposition après sélection finale. |
 
 Les boutons **Précédent** et **Suivant** du formulaire permettent de naviguer dans les étapes. Le fichier CV et les pièces justificatives sont envoyés avec les formulaires d’upload.
 
@@ -44,11 +46,15 @@ Les pages RH nécessitent une session avec le rôle RH. Elles permettent de suiv
 | Méthode | URL | Fonction |
 |---|---|---|
 | GET | `/admin/candidatures` | Liste les candidatures reçues. |
-| GET | `/admin/candidatures/{id}` | Consulte le dossier, le CV, les justificatifs, les tests, entretiens et proposition. |
+| GET | `/admin/candidatures/{id}` | Ouvre le dossier complet; pour une candidature reçue, affiche les boutons Accepter/Refuser. L’acceptation permet de programmer le test, le refus clôt cette candidature pour cette offre. |
 | GET | `/admin/candidatures/{id}/documents/{documentId}` | Télécharge un justificatif du dossier. |
-| POST | `/admin/candidatures/{id}/statut` | Modifie le statut de recrutement (`statut`). |
+| POST | `/admin/candidatures/{id}/decision-dossier` | Accepte ou refuse le dossier (`decision=ACCEPTER` ou `REFUSER`), pour cette seule offre. |
 | POST | `/admin/candidatures/{id}/test` | Planifie ou met à jour un test technique (`date`, `heure`, `lieu`, `consignes`, `message` facultatif). |
-| POST | `/admin/candidatures/{id}/entretien` | Planifie ou met à jour un entretien (mêmes champs que le test). |
+| GET | `/admin/candidatures/tests` | Liste les candidats convoqués au test, regroupés par offre; permet d’accepter/refuser le résultat et, après acceptation, de programmer l’entretien. |
+| POST | `/admin/candidatures/{id}/decision-test` | Accepte ou refuse le résultat du test (`decision=ACCEPTER` ou `REFUSER`); le refus clôt cette candidature. |
+| POST | `/admin/candidatures/{id}/entretien` | Planifie ou met à jour un entretien (`date`, `heure`, `lieu`, `consignes`, `message` facultatif). Depuis la page des tests, envoyer aussi `origine=tests` pour revenir à cette liste. |
+| GET | `/admin/candidatures/entretiens` | Liste les candidats convoqués aux entretiens, regroupés par offre. |
+| POST | `/admin/candidatures/{id}/decision-entretien` | Accepte ou refuse le candidat après entretien; un candidat accepté est redirigé vers la page de réponse existante `/candidats/{idCandidat}/propositions/{idProposition}`. |
 | POST | `/admin/candidatures/{id}/proposition` | Envoie une proposition après avoir retenu la candidature (`salaire`, autres champs facultatifs). |
 | POST | `/admin/candidatures/{id}/proposition/decision` | Enregistre la décision RH après la réponse du candidat (`decision`, `commentaire` facultatif). |
 

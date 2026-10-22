@@ -1,3 +1,4 @@
+-- Active: 1792657013409@@127.0.0.1@5432@grh
 -- ============================================================
 -- BASE MIANTRA : GESTION DU RECRUTEMENT
 -- Fichier : base_miantra.sql
@@ -199,6 +200,8 @@ ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS heure_test TIME;
 ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS lieu TEXT;
 ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS consignes TEXT;
 ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS message_candidat TEXT;
+ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS accepte_candidat BOOLEAN NOT NULL DEFAULT FALSE;
+ALTER TABLE test_technique ADD COLUMN IF NOT EXISTS resultat_accepte BOOLEAN;
 
 -- ============================================================
 -- 13. TABLE ENTRETIEN
@@ -315,6 +318,8 @@ INSERT INTO statut_candidature (libelle) VALUES ('RECUE'), ('DOSSIER_RETENU'), (
 INSERT INTO reponse_candidat (libelle) VALUES ('OUI'), ('NON'), ('AUTRE') ON CONFLICT (libelle) DO NOTHING;
 INSERT INTO decision_rh (libelle) VALUES ('ACCEPTEE'), ('REFUSEE') ON CONFLICT (libelle) DO NOTHING;
 INSERT INTO statut_proposition (libelle) VALUES ('EN_ATTENTE_CANDIDAT'), ('EN_ATTENTE_RH'), ('ACCORD_FINAL'), ('REFUSEE_CANDIDAT'), ('REFUSEE_RH') ON CONFLICT (libelle) DO NOTHING;
+INSERT INTO type_critere_proposition (libelle) VALUES ('SALAIRE'), ('HORAIRE'), ('RESPONSABLE'), ('TRAVAIL'), ('DATE_PRISE_POSTE') ON CONFLICT (libelle) DO NOTHING;
+INSERT INTO reponse_critere (libelle) VALUES ('OUI'), ('NON'), ('AUTRE') ON CONFLICT (libelle) DO NOTHING;
 
 COMMIT;
 

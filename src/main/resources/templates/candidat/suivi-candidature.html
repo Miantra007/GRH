@@ -4,30 +4,46 @@
 <body>
 <main>
     <h1>Suivi de candidature</h1>
+    <p th:if="${succes}" th:text="${succes}"></p><p th:if="${erreur}" th:text="${erreur}"></p>
     <p>Offre : <strong th:text="${candidature.offre.titre}"></strong></p>
     <p>Statut : <strong th:text="${candidature.statut.libelle}"></strong></p>
     <p>Déposée le : <time th:text="${candidature.dateCandidature}"></time></p>
+    <section th:if="${candidature.statut.libelle == 'RETENUE' or candidature.statut.libelle == 'NON_RETENUE'}">
+        <h2>Décision finale</h2>
+        <p th:if="${candidature.statut.libelle == 'RETENUE'}">Votre candidature est retenue.</p>
+        <p th:if="${candidature.statut.libelle == 'NON_RETENUE'}">Votre candidature n’a pas été retenue.</p>
+    </section>
     <h2>Notifications</h2>
-    <ul><li th:each="n : ${notifications}"><strong th:text="${n.titre}"></strong> — <span th:text="${n.message}"></span></li></ul>
+    <p th:if="${#lists.isEmpty(notifications)}">Aucune notification pour le moment.</p>
+    <ul><li th:each="n : ${notifications}"><strong th:text="${n.titre}"></strong> — <span th:text="${n.message}"></span> <time th:text="${n.dateCreation}"></time></li></ul>
+    <p th:if="${#lists.isEmpty(tests)}">Aucune convocation à un test technique pour le moment.</p>
     <h2>Tests techniques</h2>
-    <ul><li th:each="t : ${tests}"><span th:text="${t.dateTest}"></span> <span th:text="${t.heureTest}"></span> — <span th:text="${t.lieu}"></span><p th:text="${t.consignes}"></p><p th:text="${t.messageCandidat}"></p></li></ul>
-    <h2>Entretiens</h2>
-    <ul><li th:each="e : ${entretiens}"><span th:text="${e.dateEntretien}"></span> <span th:text="${e.heureEntretien}"></span> — <span th:text="${e.lieu}"></span><p th:text="${e.consignes}"></p><p th:text="${e.messageCandidat}"></p></li></ul>
-    <section th:if="${proposition != null}">
-        <h2>Proposition d’embauche</h2>
-        <p>Salaire proposé : <span th:text="${proposition.salairePropose}"></span></p>
-        <p th:text="${proposition.horaireTravail}"></p><p th:text="${proposition.travailAEffectuer}"></p>
-        <p>Date de prise de poste : <span th:text="${proposition.datePrisePoste}"></span></p>
-        <p th:if="${proposition.statutProposition.libelle == 'EN_ATTENTE_CANDIDAT'}">Répondez à la proposition :</p>
-        <form th:if="${proposition.statutProposition.libelle == 'EN_ATTENTE_CANDIDAT'}" method="post" th:action="@{/api/candidat/suivi/{code}/proposition(code=${candidature.codeSuivi})}">
-            <label><input type="radio" name="reponse" value="OUI" required> Oui</label>
-            <label><input type="radio" name="reponse" value="NON"> Non</label>
-            <label><input type="radio" name="reponse" value="AUTRE"> Autre</label>
-            <p><label for="salaireDemande">Salaire demandé</label><input id="salaireDemande" name="salaireDemande" type="number" min="0"></p>
-            <p><label for="contreProposition">Contre-proposition</label><textarea id="contreProposition" name="contreProposition"></textarea></p>
-            <p><label for="commentaire">Commentaire</label><textarea id="commentaire" name="commentaire"></textarea></p>
-            <button type="submit">Envoyer ma réponse</button>
+    <ul><li th:each="t, iter : ${tests}">
+        <p><strong>Date :</strong> <time th:text="${t.dateTest}"></time></p>
+        <p><strong>Heure :</strong> <time th:text="${t.heureTest}"></time></p>
+        <p><strong>Lieu :</strong> <span th:text="${t.lieu}"></span></p>
+        <p><strong>Consignes :</strong> <span th:text="${t.consignes}"></span></p>
+        <p><strong>Message :</strong> <span th:text="${t.messageCandidat}"></span></p>
+        <p th:if="${t.accepteCandidat}"><strong>Convocation acceptée</strong></p>
+        <form th:if="${!t.accepteCandidat and iter.last and candidature.statut.libelle == 'TEST_TECHNIQUE'}" method="post" th:action="@{/api/candidat/suivi/{code}/test/{testId}/accepter(code=${candidature.codeSuivi},testId=${t.id})}">
+            <button type="submit">Accepter la convocation au test</button>
         </form>
+    </li></ul>
+    <h2>Convocations aux entretiens</h2>
+    <p th:if="${#lists.isEmpty(entretiens)}">Aucune convocation à un entretien pour le moment.</p>
+    <ul><li th:each="e : ${entretiens}">
+        <p><strong>Date :</strong> <time th:text="${e.dateEntretien}"></time></p>
+        <p><strong>Heure :</strong> <time th:text="${e.heureEntretien}"></time></p>
+        <p><strong>Lieu :</strong> <span th:text="${e.lieu}"></span></p>
+        <p><strong>Consignes :</strong> <span th:text="${e.consignes}"></span></p>
+        <p><strong>Message :</strong> <span th:text="${e.messageCandidat}"></span></p>
+    </li></ul>
+    <section th:if="${proposition != null and candidature.statut.libelle == 'RETENUE'}">
+        <h2>Proposition d’embauche</h2>
+        <p>Date d’envoi : <time th:text="${proposition.dateEnvoi}"></time></p>
+        <p>Salaire proposé : <span th:text="${proposition.salaireFinal}"></span></p>
+        <p>Statut de la proposition : <span th:text="${proposition.statut.libelle}"></span></p>
+        <p>Le formulaire d’acceptation sera accessible depuis ce <a th:href="@{/api/candidat/formulaire-acceptation}">lien vers le formulaire d’acceptation</a> lorsqu’il sera mis en place.</p>
         <p th:if="${proposition.reponseCandidat != null}">Réponse : <span th:text="${proposition.reponseCandidat.libelle}"></span></p>
         <p th:if="${proposition.commentaireRh != null}" th:text="${proposition.commentaireRh}"></p>
     </section>

@@ -10,10 +10,16 @@
     <h2 th:text="${candidature.offre.titre}"></h2>
     <p>Candidat : <span th:text="|${candidature.candidat.prenomCandidat} ${candidature.candidat.nomCandidat}|"></span> — <span th:text="${candidature.candidat.email}"></span></p>
     <p>Reçue le <time th:text="${candidature.dateCandidature}"></time> — statut <strong th:text="${candidature.statut.libelle}"></strong></p>
-    <form method="post" th:action="@{/admin/candidatures/{id}/statut(id=${candidature.id})}">
-        <label for="statut">Modifier le statut</label><select id="statut" name="statut"><option th:each="s : ${statuts}" th:value="${s.libelle}" th:text="${s.libelle}" th:selected="${s.id == candidature.statut.id}"></option></select>
-        <button type="submit">Enregistrer le statut</button>
-    </form>
+    <section th:if="${candidature.statut.libelle == 'RECUE'}">
+        <h2>Décision sur le dossier</h2>
+        <p>Accepter le dossier permettra de programmer un test technique pour cette offre. Le refus clôt cette candidature sans modifier les candidatures du même candidat pour d’autres offres.</p>
+        <form method="post" th:action="@{/admin/candidatures/{id}/decision-dossier(id=${candidature.id})}">
+            <button type="submit" name="decision" value="ACCEPTER">Accepter</button>
+            <button type="submit" name="decision" value="REFUSER">Refuser</button>
+        </form>
+    </section>
+    <p th:if="${candidature.statut.libelle == 'DOSSIER_REJETE' or candidature.statut.libelle == 'NON_RETENUE'}">Cette candidature est clôturée pour cette offre.</p>
+    <p th:if="${candidature.statut.libelle == 'DOSSIER_RETENU'}">Dossier accepté : programmez le test technique ci-dessous.</p>
     <h2>Lettre de motivation</h2><p th:if="${dossier == null}">Aucun dossier associé.</p><pre th:if="${dossier != null}" th:text="${dossier.lettreMotivation}"></pre>
     <h2>CV</h2>
     <section th:if="${cv != null}">
@@ -27,29 +33,32 @@
     </section>
     <h2>Documents justificatifs</h2>
     <ul><li th:each="doc : ${documents}"><a th:href="@{/admin/candidatures/{id}/documents/{docId}(id=${candidature.id},docId=${doc.id})}" th:text="${doc.nomFichier}"></a></li></ul>
-    <h2>Planifier un test technique</h2>
-    <form method="post" th:action="@{/admin/candidatures/{id}/test(id=${candidature.id})}">
-        <p><label>Date <input name="date" type="date" required></label> <label>Heure <input name="heure" type="time" required></label></p>
-        <p><label>Lieu <input name="lieu" required></label></p><p><label>Consignes <textarea name="consignes" required></textarea></label></p><p><label>Message au candidat <textarea name="message"></textarea></label></p>
-        <button type="submit">Planifier le test</button>
+    <h2>Test technique : planification et modification</h2>
+    <p th:if="${!testPlanifiable}">La planification du test est disponible après la sélection du dossier.</p>
+    <form th:if="${testPlanifiable}" method="post" th:action="@{/admin/candidatures/{id}/test(id=${candidature.id})}">
+        <p><label>Date du test <input name="date" type="date" required th:value="${testCourant?.dateTest}"></label> <label>Heure du test <input name="heure" type="time" required th:value="${testCourant?.heureTest}"></label></p>
+        <p><label>Lieu ou modalité (adresse, lien visio…) <input name="lieu" required th:value="${testCourant?.lieu}"></label></p>
+        <p><label>Consignes pratiques <textarea name="consignes" required th:text="${testCourant?.consignes}"></textarea></label></p>
+        <p><label>Message au candidat <textarea name="message" th:text="${testCourant?.messageCandidat}"></textarea></label></p>
+        <button type="submit" th:text="${testCourant == null ? 'Planifier le test' : 'Modifier la convocation au test'}"></button>
     </form>
-    <ul><li th:each="t : ${tests}" th:text="|${t.dateTest} ${t.heureTest} — ${t.lieu}: ${t.consignes}|"></li></ul>
-    <h2>Planifier un entretien</h2>
-    <form method="post" th:action="@{/admin/candidatures/{id}/entretien(id=${candidature.id})}">
-        <p><label>Date <input name="date" type="date" required></label> <label>Heure <input name="heure" type="time" required></label></p>
-        <p><label>Lieu <input name="lieu" required></label></p><p><label>Consignes <textarea name="consignes" required></textarea></label></p><p><label>Message au candidat <textarea name="message"></textarea></label></p>
-        <button type="submit">Planifier l’entretien</button>
-    </form>
+    <p th:if="${#lists.isEmpty(tests)}">Aucun test technique n’est programmé.</p>
+    <ul><li th:each="t, iter : ${tests}">
+        <span th:text="|${t.dateTest} ${t.heureTest} — ${t.lieu}: ${t.consignes}|"></span>
+        <strong th:if="${t.accepteCandidat}"> — Convocation acceptée par le candidat</strong>
+        <strong th:if="${t.resultatAccepte == true}"> — Résultat du test accepté par le RH</strong>
+        <strong th:if="${t.resultatAccepte == false}"> — Résultat du test refusé par le RH</strong>
+        <strong th:if="${!t.accepteCandidat and iter.last and candidature.statut.libelle == 'TEST_TECHNIQUE'}"> — En attente de la réponse du candidat</strong>
+    </li></ul>
+    <p th:if="${#lists.isEmpty(entretiens)}">Aucun entretien n’est programmé.</p>
     <ul><li th:each="e : ${entretiens}" th:text="|${e.dateEntretien} ${e.heureEntretien} — ${e.lieu}: ${e.consignes}|"></li></ul>
     <h2>Proposition d’embauche</h2>
-    <form th:if="${proposition == null or proposition.reponseCandidat == null}" method="post" th:action="@{/admin/candidatures/{id}/proposition(id=${candidature.id})}">
-        <p><label>Salaire proposé <input name="salaire" type="number" min="0" required th:value="${proposition?.salairePropose}"></label></p>
-        <p><label>Horaire <input name="horaire" th:value="${proposition?.horaireTravail}"></label></p><p><label>Responsable hiérarchique <input name="responsable" th:value="${proposition?.responsableHierarchique}"></label></p>
-        <p><label>Missions <textarea name="missions" th:text="${proposition?.travailAEffectuer}"></textarea></label></p><p><label>Prise de poste <input name="datePrisePoste" type="date" th:value="${proposition?.datePrisePoste}"></label></p>
+    <form th:if="${proposition == null or proposition.decisionRh == null}" method="post" th:action="@{/admin/candidatures/{id}/proposition(id=${candidature.id})}">
+        <p><label>Salaire proposé <input name="salaire" type="number" min="0" required th:value="${proposition?.salaireFinal}"></label></p>
         <button type="submit">Transmettre la proposition</button>
     </form>
-    <section th:if="${proposition != null and proposition.reponseCandidat != null}">
-        <h3>Réponse candidat : <span th:text="${proposition.reponseCandidat.libelle}"></span></h3>
+    <section th:if="${proposition != null}">
+        <h3 th:if="${proposition.reponseCandidat != null}">Réponse candidat : <span th:text="${proposition.reponseCandidat.libelle}"></span></h3>
         <p th:text="${proposition.commentaireCandidat}"></p><p th:text="${proposition.contreProposition}"></p>
         <form method="post" th:action="@{/admin/candidatures/{id}/proposition/decision(id=${candidature.id})}">
             <label>Décision <select name="decision" required><option value="ACCEPTEE">Acceptée</option><option value="REFUSEE">Refusée</option></select></label>

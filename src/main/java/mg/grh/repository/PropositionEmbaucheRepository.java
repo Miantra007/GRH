@@ -11,7 +11,10 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface PropositionEmbaucheRepository extends JpaRepository<PropositionEmbauche, Integer> {
-    Optional<PropositionEmbauche> findByCandidatureId(Integer candidatureId);
+
+    @Query("select p from PropositionEmbauche p where p.idCandidature = :candidatureId")
+    Optional<PropositionEmbauche> findByCandidatureId(@Param("candidatureId") Integer candidatureId);
+    
     @Query(nativeQuery = true, value = """
             SELECT pe.id_proposition  AS "idProposition",
                    c.id_candidat      AS "idCandidat",
@@ -33,4 +36,5 @@ public interface PropositionEmbaucheRepository extends JpaRepository<Proposition
             WHERE pe.id_proposition = :id
             """)
     Optional<PropositionInfo> findInfo(@Param("id") Integer id);
+
 }
