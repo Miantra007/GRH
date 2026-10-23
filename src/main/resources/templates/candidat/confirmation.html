@@ -9,12 +9,6 @@
         <h1 class="h3 fw-bold">Candidature envoyée</h1>
         <p>Votre dossier pour l’offre « <strong th:text="${candidature.offre.titre}">offre</strong> » a bien été transmis.</p>
 
-        <div class="alert alert-info text-start">
-            <p class="fw-semibold mb-1"><i class="fa-solid fa-key me-1"></i> Votre code de suivi</p>
-            <p class="mb-0">Conservez ce code pour consulter votre statut et vos convocations :</p>
-            <p class="fs-5 fw-bold mb-0" th:text="${candidature.codeSuivi}">CODE</p>
-        </div>
-
         <div class="alert alert-warning text-start">
             <p class="mb-0"><i class="fa-solid fa-circle-info me-1"></i>
                 Pour répondre à une proposition d’embauche, choisir votre contrat puis le signer,
@@ -22,8 +16,6 @@
         </div>
 
         <div class="d-flex flex-wrap justify-content-center gap-2">
-            <a class="btn btn-primary" th:href="@{/api/candidat/suivi/{code}(code=${candidature.codeSuivi})}">
-                <i class="fa-solid fa-magnifying-glass-chart me-1"></i> Consulter le suivi</a>
             <a class="btn btn-outline-primary" th:href="@{/login}">
                 <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter</a>
             <a class="btn btn-link" href="/api/candidat/offres">Retour aux offres</a>

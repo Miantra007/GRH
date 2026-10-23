@@ -90,10 +90,6 @@
             <p class="mb-1"><strong>Consignes :</strong> <span th:text="${t.consignes}"></span></p>
             <p class="mb-1" th:if="${t.messageCandidat}"><strong>Message :</strong> <span th:text="${t.messageCandidat}"></span></p>
             <p class="text-success mb-0" th:if="${t.accepteCandidat}"><i class="fa-solid fa-check me-1"></i>Convocation acceptée</p>
-            <form th:if="${!t.accepteCandidat and iter.last and candidature.statut.libelle == 'TEST_TECHNIQUE'}" method="post"
-                  th:action="@{/api/candidat/suivi/{code}/test/{testId}/accepter(code=${candidature.codeSuivi},testId=${t.id})}">
-                <button class="btn btn-outline-primary btn-sm" type="submit">Accepter la convocation au test</button>
-            </form>
         </div>
     </div>
 
