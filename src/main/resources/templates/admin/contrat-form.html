@@ -73,13 +73,18 @@
                         <option value="">—</option>
                         <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
                     </select></div>
+                <div class="col-md-6"><label class="form-label">Sexe<span class="req">*</span></label>
+                    <select class="form-select" name="travailleur.sexe.id" id="sexeField" required>
+                        <option value="">— Choisir —</option>
+                        <option th:each="s : ${sexes}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                    </select></div>
                 <div class="col-md-6"><label class="form-label">Situation familiale</label>
                     <select class="form-select" name="travailleur.situationFamille.id">
                         <option value="">—</option>
                         <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
                     </select></div>
-                <div class="col-md-6"><label class="form-label">CIN</label><input class="form-control" type="text" name="travailleur.cinNumero"></div>
-                <div class="col-md-6"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="travailleur.telephone"></div>
+                <div class="col-md-6"><label class="form-label">CIN<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.cinNumero" id="cinField" placeholder="12 chiffres (ex: 102 092 047 241)" required></div>
+                <div class="col-md-6"><label class="form-label">Téléphone<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.telephone" id="telephoneField" placeholder="03XXXXXXXX" pattern="^03[23478]\d{7}$" title="Format: 03 suivi de 2,3,4,7 ou 8 et 7 chiffres" required></div>
             </div>
         </div>
     </div>
@@ -123,10 +128,6 @@
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/ce(propositionId=${propositionId})} : @{/admin/contrats/ce(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Langue du contrat<span class="req">*</span></label>
-                    <select class="form-select" name="langue.id" required>
-                        <option th:each="x : ${langues}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
                 <div class="col-md-6"><label class="form-label">Catégorie professionnelle<span class="req">*</span></label>
                     <select class="form-select" name="categorie.id" required>
                         <option value="">— Choisir —</option>
@@ -282,6 +283,62 @@
     if (choix) {
         choix.addEventListener('change', recopier);
         recopier();
+
+        // Validation CIN et sexe
+        const sexeField = document.getElementById('sexeField');
+        const cinField = document.getElementById('cinField');
+        const telephoneField = document.getElementById('telephoneField');
+
+        if (cinField && sexeField) {
+            cinField.addEventListener('blur', function() {
+                const cin = cinField.value.replace(/\s/g, '');
+                const sexe = sexeField.value;
+
+                if (!cin) return;
+
+                if (!/^\d{12}$/.test(cin)) {
+                    cinField.setCustomValidity('Le CIN doit contenir 12 chiffres.');
+                    cinField.reportValidity();
+                    return;
+                }
+
+                if (sexe) {
+                    const sixiemeChiffre = cin.charAt(5);
+                    // sexe = 2 pour F (femme), 1 pour M (homme)
+                    const sexeId = sexeField.selectedOptions[0].textContent;
+                    const expectedChiffre = sexeId.includes('F') ? '2' : '1';
+
+                    if (sixiemeChiffre !== expectedChiffre) {
+                        cinField.setCustomValidity(
+                            sexeId.includes('F')
+                                ? 'CIN invalide : le 6e chiffre doit être 2 pour les femmes.'
+                                : 'CIN invalide : le 6e chiffre doit être 1 pour les hommes.'
+                        );
+                        cinField.reportValidity();
+                    } else {
+                        cinField.setCustomValidity('');
+                    }
+                }
+            });
+
+            cinField.addEventListener('change', function() {
+                cinField.setCustomValidity('');
+            });
+        }
+
+        // Validation téléphone
+        if (telephoneField) {
+            telephoneField.addEventListener('blur', function() {
+                const tel = telephoneField.value;
+                if (tel && !/^03[23478]\d{7}$/.test(tel)) {
+                    telephoneField.setCustomValidity('Format : 03 suivi de 2, 3, 4, 7 ou 8 et 7 chiffres.');
+                    telephoneField.reportValidity();
+                } else {
+                    telephoneField.setCustomValidity('');
+                }
+            });
+        }
+
         document.querySelectorAll('.form-contrat form').forEach(function (f) {
             f.addEventListener('submit', function (e) {
                 if (!choix.value) {   // besoin obligatoire quand le candidat a une proposition acceptée

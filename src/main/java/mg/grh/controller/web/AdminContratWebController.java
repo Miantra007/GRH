@@ -32,6 +32,7 @@ public class AdminContratWebController {
     private final NationaliteService nationaliteService;
     private final SituationFamilleService situationService;
     private final EmbaucheService embaucheService;
+    private final SexeService sexeService;
 
     public AdminContratWebController(ContratCandidatService contratService, CandidatService candidatService,
                                      EmployeurService employeurService, TravailleurService travailleurService,
@@ -39,7 +40,8 @@ public class AdminContratWebController {
                                      ConventionCollectiveService conventionService, PosteService posteService,
                                      MotifCddService motifService, StatutContratService statutService,
                                      CiviliteService civiliteService, NationaliteService nationaliteService,
-                                     SituationFamilleService situationService, EmbaucheService embaucheService) {
+                                     SituationFamilleService situationService, EmbaucheService embaucheService,
+                                     SexeService sexeService) {
         this.contratService = contratService;
         this.candidatService = candidatService;
         this.employeurService = employeurService;
@@ -54,6 +56,7 @@ public class AdminContratWebController {
         this.nationaliteService = nationaliteService;
         this.situationService = situationService;
         this.embaucheService = embaucheService;
+        this.sexeService = sexeService;
     }
 
     // ------------------------------------------------------------ candidats
@@ -115,6 +118,7 @@ public class AdminContratWebController {
         model.addAttribute("nationalites", nationaliteService.findAll());
         model.addAttribute("civilites", civiliteService.findAll());
         model.addAttribute("situationsFamiliales", situationService.findAll());
+        model.addAttribute("sexes", sexeService.findAll());
         return "admin/contrat-form";
     }
 

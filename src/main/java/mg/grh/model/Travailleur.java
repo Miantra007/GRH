@@ -24,6 +24,10 @@ public class Travailleur implements Identifiable {
     @JoinColumn(name = "civilite_id")
     private Civilite civilite;
 
+    @ManyToOne
+    @JoinColumn(name = "sexe_id")
+    private Sexe sexe;
+
     @Column(name = "nom_prenoms", length = 100, nullable = false)
     private String nomPrenoms;
 
