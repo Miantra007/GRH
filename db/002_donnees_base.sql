@@ -121,6 +121,61 @@ INSERT INTO type_rupture (libelle) VALUES
 ('Retraite')
 ON CONFLICT DO NOTHING;
 
+-- STATUT OFFRE
+INSERT INTO statut_offre (libelle) VALUES
+('BROUILLON'),
+('PUBLIEE'),
+('FERMEE'),
+('ANNULEE')
+ON CONFLICT DO NOTHING;
+
+-- TYPE BESOIN
+INSERT INTO type_besoin (libelle) VALUES
+('CREATION'),
+('REMPLACEMENT')
+ON CONFLICT DO NOTHING;
+
+-- TYPE CONTRAT
+INSERT INTO type_contrat (libelle) VALUES
+('Contrat d''essai'),
+('CDD'),
+('CDI')
+ON CONFLICT DO NOTHING;
+
+-- TYPE CONSIGNE
+INSERT INTO type_consigne (libelle) VALUES
+('Consigne sécurité'),
+('Consigne accueil'),
+('Consigne IT'),
+('Consigne RH')
+ON CONFLICT DO NOTHING;
+
+-- TYPE CRITERE PROPOSITION
+INSERT INTO type_critere_proposition (libelle) VALUES
+('Compétence technique'),
+('Compétence relationnelle'),
+('Expérience'),
+('Disponibilité'),
+('Salaire attendu')
+ON CONFLICT DO NOTHING;
+
+-- STATUT BESOIN
+INSERT INTO statut_besoin (libelle) VALUES
+('NOUVEAU'),
+('VALIDE'),
+('POURVU'),
+('ANNULE')
+ON CONFLICT DO NOTHING;
+
+-- STATUT CANDIDATURE
+INSERT INTO statut_candidature (libelle) VALUES
+('NOUVELLE'),
+('EN_COURS'),
+('QUALIFIEE'),
+('REFUSEE'),
+('ARCHIVEE')
+ON CONFLICT DO NOTHING;
+
 -- LANGUE CONTRAT
 INSERT INTO langue_contrat (libelle) VALUES
 ('Français'),
@@ -178,77 +233,81 @@ ON CONFLICT DO NOTHING;
 -- ============================================================
 -- UTILISATEURS (Tous les responsables peuvent se connecter)
 -- Mot de passe par défaut: password123
+-- Hash: $2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.
 -- ============================================================
 
 -- Utilisateurs administratifs
 INSERT INTO utilisateur (email, mot_de_passe, role, active) VALUES
-('admin@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'ADMIN', TRUE),
-('rh@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'RH', TRUE),
-('dg@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DG', TRUE),
-('finance@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'FINANCE', TRUE),
-('directeur@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+('admin@test.com', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'ADMIN', TRUE),
+('rh@test.com', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'RH', TRUE),
+('dg@test.com', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DG', TRUE),
+('finance@test.com', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'FINANCE', TRUE),
+('directeur@test.com', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR', TRUE),
 -- Directeurs
-('dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR_GENERAL', TRUE),
-('directeur.dsi@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
-('directeur.drh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
-('directeur.df@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
-('directeur.dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+('dg@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR_GENERAL', TRUE),
+('directeur.dsi@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR', TRUE),
+('directeur.drh@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR', TRUE),
+('directeur.df@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR', TRUE),
+('directeur.dg@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'DIRECTEUR', TRUE),
 -- Managers
-('manager.it@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
-('manager.rh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
-('manager.finance@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
-('manager.general@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE)
+('manager.it@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'MANAGER', TRUE),
+('manager.rh@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'MANAGER', TRUE),
+('manager.finance@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'MANAGER', TRUE),
+('manager.general@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', 'MANAGER', TRUE)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
 -- ORGANISATION ET HIÉRARCHIE
 -- ============================================================
 
--- RÔLES
+-- RÔLES (Doivent correspondre aux valeurs du AuthService)
 INSERT INTO role (libelle) VALUES
-('Directeur Général'),
+('Direction générale'),
 ('Directeur'),
-('Manager'),
-('Responsable RH'),
-('Responsable Financier')
+('Administrateur RH'),
+('Financier'),
+('Manager')
 ON CONFLICT DO NOTHING;
 
 -- RESPONSABLES (Directeurs et Managers)
+-- Mot de passe: password123
+-- Hash: $2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.
+
 -- Directeur Général
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(1, 1, 'dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-01-01');
+(1, 1, 'dg@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-01-01');
 
 -- Directeur DSI (Direction Système Information)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(2, 1, 'directeur.dsi@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-02-01');
+(2, 1, 'directeur.dsi@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-02-01');
 
--- Directeur DRH (Direction Ressources Humaines)
+-- Directeur DRH (Administrateur RH)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(2, 1, 'directeur.drh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-03-01');
+(3, 1, 'directeur.drh@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-03-01');
 
--- Directeur DF (Direction Finance)
+-- Directeur DF (Financier)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(2, 1, 'directeur.df@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-04-01');
+(4, 1, 'directeur.df@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-04-01');
 
--- Directeur DG (Direction Générale)
+-- Directeur DG (Directeur Général)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(2, 1, 'directeur.dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-05-01');
+(1, 1, 'directeur.dg@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-05-01');
 
 -- Manager IT (département IT)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(3, 1, 'manager.it@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-06-01');
+(5, 1, 'manager.it@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-06-01');
 
 -- Manager RH (département RH)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(4, 1, 'manager.rh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-07-01');
+(3, 1, 'manager.rh@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-07-01');
 
 -- Manager Finance (département Finance)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(5, 1, 'manager.finance@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-08-01');
+(4, 1, 'manager.finance@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-08-01');
 
 -- Manager Général (département Général)
 INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche) VALUES
-(3, 1, 'manager.general@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', '2020-09-01');
+(5, 1, 'manager.general@entreprise.mg', '$2b$10$QpCCahKi6R7mA.4CXbRyHeB/oXqdbXHWj9kWaim.52WFM1rGloOS.', '2020-09-01');
 
 -- DIRECTION (avec leurs directeurs respectifs)
 INSERT INTO direction (nom_direction, id_directeur) VALUES

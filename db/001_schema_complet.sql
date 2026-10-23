@@ -250,6 +250,31 @@ CREATE TABLE type_rupture (
     libelle VARCHAR(100) NOT NULL UNIQUE
 );
 
+CREATE TABLE type_contrat (
+    id_type_contrat SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE type_consigne (
+    id_type_consigne SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE type_critere_proposition (
+    id_type_critere SERIAL PRIMARY KEY,
+    libelle VARCHAR(100) NOT NULL UNIQUE
+);
+
+CREATE TABLE statut_besoin (
+    id_statut_besoin SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
+CREATE TABLE statut_candidature (
+    id_statut_candidature SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
 CREATE TABLE texte_legal (
     id SERIAL PRIMARY KEY,
     reference VARCHAR(100) NOT NULL,
@@ -409,6 +434,11 @@ CREATE TABLE signature_cdi (
 -- RECRUTEMENT
 -- ============================================================
 
+CREATE TABLE type_besoin (
+    id_type_besoin SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
 CREATE TABLE besoin (
     id_besoin SERIAL PRIMARY KEY,
     date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -418,7 +448,7 @@ CREATE TABLE besoin_poste (
     id_besoin_poste SERIAL PRIMARY KEY,
     id_besoin INT NOT NULL REFERENCES besoin(id_besoin),
     id_poste INT NOT NULL REFERENCES poste(id_poste),
-    type_besoin VARCHAR(20) CHECK (type_besoin IN ('CREATION', 'REMPLACEMENT')),
+    id_type_besoin INT REFERENCES type_besoin(id_type_besoin),
     date_limite DATE,
     description TEXT
 );
@@ -431,12 +461,21 @@ CREATE TABLE candidature (
     statut VARCHAR(50) DEFAULT 'NOUVELLE'
 );
 
+CREATE TABLE statut_offre (
+    id_statut_offre SERIAL PRIMARY KEY,
+    libelle VARCHAR(50) NOT NULL UNIQUE
+);
+
 CREATE TABLE offre_emploi (
-    id SERIAL PRIMARY KEY,
+    id_offre SERIAL PRIMARY KEY,
     id_besoin_poste INT NOT NULL REFERENCES besoin_poste(id_besoin_poste),
-    statut VARCHAR(50) DEFAULT 'BROUILLON',
+    id_statut_offre INT NOT NULL REFERENCES statut_offre(id_statut_offre),
+    titre VARCHAR(255),
+    description TEXT,
+    profil_recherche TEXT,
     visible_client BOOLEAN DEFAULT FALSE,
-    date_publication DATE
+    date_publication DATE,
+    date_limite DATE
 );
 
 CREATE TABLE proposition_embauche (
@@ -518,4 +557,104 @@ CREATE TABLE historique_statut_contrat(
     id_statut_contrat INTEGER NOT NULL REFERENCES statut_contrat(id),
     id_contrat_candidat INTEGER NOT NULL REFERENCES contrat_candidat(id_contrat_candidat),
     date_changement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- DOSSIER CANDIDATURE ET DOCUMENTS
+-- ============================================================
+
+CREATE TABLE dossier_candidature (
+    id_dossier SERIAL PRIMARY KEY,
+    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
+    id_proposition INT REFERENCES proposition_embauche(id_proposition),
+    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE document_dossier (
+    id_document SERIAL PRIMARY KEY,
+    id_dossier INT NOT NULL REFERENCES dossier_candidature(id_dossier),
+    nom_document VARCHAR(255),
+    url_document TEXT,
+    date_ajout TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- CRITERES ET REPONSES
+-- ============================================================
+
+CREATE TABLE critere_proposition (
+    id_critere SERIAL PRIMARY KEY,
+    id_proposition INT NOT NULL REFERENCES proposition_embauche(id_proposition),
+    id_type_critere INT NOT NULL REFERENCES type_critere_proposition(id_type_critere),
+    description TEXT
+);
+
+CREATE TABLE reponse_critere (
+    id_reponse SERIAL PRIMARY KEY,
+    id_critere INT NOT NULL REFERENCES critere_proposition(id_critere),
+    reponse TEXT,
+    date_reponse TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ============================================================
+-- ENTRETIENS ET TESTS
+-- ============================================================
+
+CREATE TABLE entretien (
+    id_entretien SERIAL PRIMARY KEY,
+    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
+    id_proposition INT REFERENCES proposition_embauche(id_proposition),
+    date_entretien TIMESTAMP,
+    lieu VARCHAR(255),
+    notes TEXT,
+    resultat VARCHAR(50)
+);
+
+CREATE TABLE test_technique (
+    id_test SERIAL PRIMARY KEY,
+    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
+    id_proposition INT REFERENCES proposition_embauche(id_proposition),
+    date_test TIMESTAMP,
+    titre VARCHAR(255),
+    score NUMERIC(5,2),
+    notes TEXT
+);
+
+-- ============================================================
+-- AVENANTS ET RUPTURES CDD
+-- ============================================================
+
+CREATE TABLE avenant_cdd (
+    id_avenant SERIAL PRIMARY KEY,
+    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
+    id_type_avenant INT REFERENCES type_avenant(id),
+    date_avenant DATE,
+    description TEXT
+);
+
+CREATE TABLE rupture_cdd (
+    id_rupture SERIAL PRIMARY KEY,
+    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
+    id_type_rupture INT REFERENCES type_rupture(id),
+    date_rupture DATE,
+    description TEXT
+);
+
+CREATE TABLE element_salaire_cdd (
+    id_element SERIAL PRIMARY KEY,
+    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
+    libelle VARCHAR(100),
+    montant NUMERIC(12,2),
+    type_element VARCHAR(50)
+);
+
+-- ============================================================
+-- CONSIGNES INTEGRATION
+-- ============================================================
+
+CREATE TABLE consigne_integration (
+    id_consigne SERIAL PRIMARY KEY,
+    id_type_consigne INT NOT NULL REFERENCES type_consigne(id_type_consigne),
+    libelle VARCHAR(255),
+    description TEXT
 );
