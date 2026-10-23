@@ -30,10 +30,6 @@
             <h2 class="titre-section">Besoin de recrutement</h2>
         </div>
         <div class="card-corps">
-            <th:block th:if="${proposition != null}">
-                <p class="mb-0">Le poste, la date de début et le salaire sont repris de la proposition acceptée et vérifiés à l’enregistrement.</p>
-                <p th:if="${#lists.isEmpty(travailleurs)}" class="text-danger mb-0 mt-2">Votre dossier travailleur doit être préparé par le RH avant la création du contrat.</p>
-            </th:block>
             <th:block th:unless="${proposition != null}">
                 <label class="form-label" for="candidatureChoix">Candidature acceptée<span class="req">*</span></label>
                 <select class="form-select" id="candidatureChoix" required>
@@ -67,16 +63,6 @@
                 <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
                 <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
                 <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
-                <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
-                    <select class="form-select" name="travailleur.nationalite.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${nationalites}" th:value="${x.id}" th:text="${x.nomNationalite}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Civilité</label>
-                    <select class="form-select" name="travailleur.civilite.id">
-                        <option value="">—</option>
-                        <option th:each="x : ${civilites}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
                 <div class="col-md-6"><label class="form-label">CIN</label><input class="form-control" type="text" name="travailleur.cinNumero"></div>
                 <div class="col-md-6"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="travailleur.telephone"></div>
             </div>
