@@ -21,8 +21,17 @@
         </div>
     </div>
 
+    <div class="alert alert-warning" th:unless="${selectionOuverte}">
+        <i class="fa-solid fa-hourglass-half me-1"></i>
+        <strong>Sélection pas encore ouverte :</strong>
+        <span th:text="${nombreCandidatures}">0</span> candidature(s) reçue(s) sur
+        <span th:text="${seuilCandidatures}">0</span> requises
+        (<span th:text="${nombrePostes}">0</span> poste(s) demandé(s) + 2).
+        Les décisions sur les dossiers, tests et entretiens seront disponibles dès que ce nombre sera atteint.
+    </div>
+
     <!-- Décision sur le dossier -->
-    <div class="card-grh card-corps mb-3" th:if="${candidature.statut.libelle == 'RECUE'}">
+    <div class="card-grh card-corps mb-3" th:if="${selectionOuverte and candidature.statut.libelle == 'RECUE'}">
         <h2 class="h6 fw-bold">Décision sur le dossier</h2>
         <p class="text-muted small">Accepter le dossier permet de programmer un test technique. Le refus clôt cette candidature pour cette offre.</p>
         <form method="post" th:action="@{/admin/candidatures/{id}/decision-dossier(id=${candidature.id})}" class="d-flex gap-2">
@@ -63,8 +72,8 @@
     <!-- Test technique -->
     <div class="card-grh card-corps mb-3">
         <h2 class="h6 fw-bold">Test technique</h2>
-        <p class="text-muted small" th:if="${!testPlanifiable}">La planification du test est disponible après la sélection du dossier.</p>
-        <form th:if="${testPlanifiable}" method="post" th:action="@{/admin/candidatures/{id}/test(id=${candidature.id})}">
+        <p class="text-muted small" th:if="${!selectionOuverte or !testPlanifiable}">La planification du test est disponible après la sélection du dossier.</p>
+        <form th:if="${selectionOuverte and testPlanifiable}" method="post" th:action="@{/admin/candidatures/{id}/test(id=${candidature.id})}">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Date du test</label><input class="form-control" name="date" type="date" required th:value="${testCourant?.dateTest}"></div>
                 <div class="col-md-6"><label class="form-label">Heure du test</label><input class="form-control" name="heure" type="time" required th:value="${testCourant?.heureTest}"></div>

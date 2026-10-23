@@ -124,6 +124,10 @@ public class AdminCandidatureWebController {
     public String detail(@PathVariable Integer id, Model model) {
         Candidature candidature = candidatureService.findById(id);
         model.addAttribute("candidature", candidature);
+        model.addAttribute("selectionOuverte", candidatureService.selectionOuverte(candidature.getOffre()));
+        model.addAttribute("nombreCandidatures", candidatureService.nombreCandidatures(candidature.getOffre()));
+        model.addAttribute("seuilCandidatures", candidatureService.seuilCandidatures(candidature.getOffre()));
+        model.addAttribute("nombrePostes", candidatureService.nombrePostes(candidature.getOffre()));
         model.addAttribute("dossier", dossierRepository.findByCandidatureId(id).orElse(null));
         model.addAttribute("proposition", propositionRepository.findByCandidatureId(id).orElse(null));
         List<TestTechnique> tests = testService.pourCandidature(id);

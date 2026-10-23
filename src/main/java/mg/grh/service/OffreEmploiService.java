@@ -31,9 +31,19 @@ public class OffreEmploiService extends GenericService<OffreEmploi> {
         this.statutOffreRepository = statutOffreRepository;
     }
 
-    public List<OffreEmploi> offresPubliees() { return offreRepository.findOffresPubliees(); }
+    public List<OffreEmploi> offresPubliees() {
+        return offreRepository.findOffresPubliees().stream().filter(o -> !pourvue(o)).toList();
+    }
     public OffreEmploi offrePubliee(Integer id) {
-        return offreRepository.findOffrePubliee(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette offre n’est plus disponible."));
+        return offreRepository.findOffrePubliee(id).filter(o -> !pourvue(o))
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Cette offre n’est plus disponible."));
+    }
+
+    /** Tous les postes de l'offre sont occupés par des candidats dont le contrat est validé. */
+    private boolean pourvue(OffreEmploi offre) {
+        int postes = besoinPosteRepository.findById(offre.getBesoinPosteId())
+                .map(bp -> bp.getNombrePostes()).orElse(1);
+        return offreRepository.countEmbauchesValidees(offre.getId()) >= postes;
     }
 
     @Transactional(readOnly = true)

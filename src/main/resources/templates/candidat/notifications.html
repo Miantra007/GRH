@@ -33,10 +33,18 @@
                th:if="${propositions.get(n.idProposition).statut.libelle == 'EN_ATTENTE_CANDIDAT'}"
                th:href="@{/candidats/{c}/propositions/{p}(c=${session.user.id},p=${n.idProposition})}">
                 <i class="fa-solid fa-file-pen me-1"></i> Remplir le formulaire d’acceptation</a>
-            <a class="btn btn-primary btn-sm"
-               th:if="${propositions.get(n.idProposition).statut.libelle == 'ACCORD_FINAL'}"
-               th:href="@{/candidat/contrats/nouveau(propositionId=${n.idProposition})}">
-                <i class="fa-solid fa-file-signature me-1"></i> Choisir mon contrat</a>
+            <th:block th:if="${propositions.get(n.idProposition).statut.libelle == 'ACCORD_FINAL'}"
+                      th:with="statutContrat=${statutContrats.get(n.idProposition)}">
+                <a class="btn btn-primary btn-sm" th:if="${statutContrat == null}"
+                   th:href="@{/candidat/contrats/nouveau(propositionId=${n.idProposition})}">
+                    <i class="fa-solid fa-file-signature me-1"></i> Choisir mon contrat</a>
+                <a class="btn btn-outline-primary btn-sm" th:if="${statutContrat != null and statutContrat != 'Validé'}"
+                   th:href="@{/candidat/contrats}">
+                    <i class="fa-solid fa-file-signature me-1"></i> Voir mon contrat</a>
+                <a class="btn btn-primary btn-sm" th:if="${statutContrat == 'Validé'}"
+                   th:href="@{/candidat/integration}">
+                    <i class="fa-solid fa-list-check me-1"></i> Voir mon intégration</a>
+            </th:block>
         </th:block>
     </div>
 

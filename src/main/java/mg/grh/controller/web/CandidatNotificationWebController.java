@@ -1,7 +1,9 @@
 package mg.grh.controller.web;
 
+import mg.grh.model.ContratCandidat;
 import mg.grh.model.Notification;
 import mg.grh.model.PropositionEmbauche;
+import mg.grh.repository.ContratCandidatRepository;
 import mg.grh.repository.NotificationRepository;
 import mg.grh.repository.PropositionEmbaucheRepository;
 import mg.grh.web.SessionUser;
@@ -18,11 +20,13 @@ import java.util.Map;
 public class CandidatNotificationWebController {
     private final NotificationRepository notifications;
     private final PropositionEmbaucheRepository propositions;
+    private final ContratCandidatRepository contrats;
 
     public CandidatNotificationWebController(NotificationRepository notifications,
-            PropositionEmbaucheRepository propositions) {
+            PropositionEmbaucheRepository propositions, ContratCandidatRepository contrats) {
         this.notifications = notifications;
         this.propositions = propositions;
+        this.contrats = contrats;
     }
 
     @GetMapping("/candidat/notifications")
@@ -46,6 +50,12 @@ public class CandidatNotificationWebController {
             }
         }
         model.addAttribute("propositions", propositionsParId);
+        Map<Integer, String> statutContratParProposition = new HashMap<>();
+        for (ContratCandidat c : contrats.findByCandidatId(user.getId())) {
+            if (c.getProposition() != null && c.getStatutActuel() != null)
+                statutContratParProposition.put(c.getProposition().getId(), c.getStatutActuel().getLibelle());
+        }
+        model.addAttribute("statutContrats", statutContratParProposition);
         return "candidat/notifications";
     }
 }
