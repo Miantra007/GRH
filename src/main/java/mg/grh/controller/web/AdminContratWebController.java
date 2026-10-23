@@ -114,6 +114,7 @@ public class AdminContratWebController {
         model.addAttribute("candidatures", contratService.candidaturesRetenues(candidatId));
         model.addAttribute("nationalites", nationaliteService.findAll());
         model.addAttribute("civilites", civiliteService.findAll());
+        model.addAttribute("situationsFamiliales", situationService.findAll());
         return "admin/contrat-form";
     }
 

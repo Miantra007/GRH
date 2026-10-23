@@ -73,6 +73,11 @@
                         <option value="">—</option>
                         <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
                     </select></div>
+                <div class="col-md-6"><label class="form-label">Situation familiale</label>
+                    <select class="form-select" name="travailleur.situationFamille.id">
+                        <option value="">—</option>
+                        <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                    </select></div>
                 <div class="col-md-6"><label class="form-label">CIN</label><input class="form-control" type="text" name="travailleur.cinNumero"></div>
                 <div class="col-md-6"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="travailleur.telephone"></div>
             </div>
