@@ -70,4 +70,8 @@ public class Travailleur implements Identifiable {
 
     @Column(name = "numero_cnaps", length = 100)
     private String numeroCnaps;
+
+    @ManyToOne
+    @JoinColumn(name = "id_candidat")
+    private Candidat candidat;
 }
