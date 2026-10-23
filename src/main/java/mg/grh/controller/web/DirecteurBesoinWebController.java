@@ -5,8 +5,8 @@ import mg.grh.dto.BesoinCreationForm;
 import mg.grh.model.Direction;
 import mg.grh.repository.DepartementRepository;
 import mg.grh.repository.DirectionRepository;
+import mg.grh.repository.PosteRepository;
 import mg.grh.repository.TypeBesoinRepository;
-import mg.grh.repository.TypeContratRepository;
 import mg.grh.service.BesoinService;
 import mg.grh.web.SessionUser;
 import org.springframework.stereotype.Controller;
@@ -26,16 +26,16 @@ public class DirecteurBesoinWebController {
     private final DirectionRepository directionRepository;
     private final DepartementRepository departementRepository;
     private final TypeBesoinRepository typeBesoinRepository;
-    private final TypeContratRepository typeContratRepository;
+    private final PosteRepository posteRepository;
 
     public DirecteurBesoinWebController(BesoinService besoinService, DirectionRepository directionRepository,
             DepartementRepository departementRepository, TypeBesoinRepository typeBesoinRepository,
-            TypeContratRepository typeContratRepository) {
+            PosteRepository posteRepository) {
         this.besoinService = besoinService;
         this.directionRepository = directionRepository;
         this.departementRepository = departementRepository;
         this.typeBesoinRepository = typeBesoinRepository;
-        this.typeContratRepository = typeContratRepository;
+        this.posteRepository = posteRepository;
     }
 
     @GetMapping("/nouveau")
@@ -66,11 +66,18 @@ public class DirecteurBesoinWebController {
         List<Direction> directions = directionRepository.findAll().stream()
                 .filter(direction -> direction.getDirecteur() != null && directeur.getId().equals(direction.getDirecteur().getId()))
                 .toList();
+        // Seuls les postes des directions dirigées par ce directeur peuvent être demandés.
+        java.util.Set<Integer> idsDirections = directions.stream().map(Direction::getId)
+                .collect(java.util.stream.Collectors.toSet());
         model.addAttribute("formulaire", formulaire);
         model.addAttribute("directions", directions);
         model.addAttribute("departements", departementRepository.findAll());
         model.addAttribute("typesBesoin", typeBesoinRepository.findAll());
-        model.addAttribute("typesContrat", typeContratRepository.findAll());
+        model.addAttribute("postes", posteRepository.findAll().stream()
+                .filter(p -> p.getDirection() != null && idsDirections.contains(p.getDirection().getId()))
+                .sorted(java.util.Comparator.comparing(mg.grh.model.Poste::getLibelle,
+                        java.util.Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER)))
+                .toList());
     }
 
     private SessionUser directeur(HttpSession session) {

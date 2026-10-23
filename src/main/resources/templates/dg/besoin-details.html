@@ -1,3 +1,56 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Validation du besoin')}"></head><body><header th:replace="~{fragments :: nav}"></header><main class="container-xl py-4">
-<div class="page-header d-flex align-items-center gap-3 mb-4"><span class="icone"><i class="fa-solid fa-stamp"></i></span><div><h1 th:text="'Besoin n°' + ${besoin.id}"></h1><p class="text-muted mb-0">Postes acceptés par Finance et en attente de votre validation.</p></div></div><div th:replace="~{fragments :: messages}"></div><section class="card-grh overflow-hidden mb-3"><div class="table-responsive"><table class="table table-grh"><thead><tr><th>Poste</th><th>Salaire RH</th><th>Salaire validé Finance</th></tr></thead><tbody><tr th:each="poste : ${postes}"><td class="fw-semibold" th:text="${poste.poste.libelle}"></td><td th:text="${poste.salaireProposeRh}"></td><td th:text="${poste.salaireValideFinance}"></td></tr></tbody></table></div></section><div class="d-flex gap-2"><a class="btn btn-light border" th:href="@{/dg/besoins}">Retour</a><form th:action="@{/dg/besoins/{id}/valider(id=${besoin.id})}" method="post"><button class="btn btn-primary" type="submit">Valider les postes affichés</button></form></div></main><th:block th:replace="~{fragments :: scripts}"></th:block></body></html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Validation du besoin')}"></head>
+<body>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 1080px">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-stamp"></i></span>
+        <div>
+            <h1 th:text="'Besoin n°' + ${besoin.id}">Besoin</h1>
+            <p class="small mb-0">Salaires fixés par la Finance, en attente de votre validation finale.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <section class="card-grh overflow-hidden mb-3">
+        <div class="table-responsive">
+            <table class="table table-grh">
+                <thead><tr><th>Poste</th><th>Nombre</th><th>Salaire proposé RH</th><th>Salaire retenu</th><th>Décision Finance</th><th>Commentaire Finance</th></tr></thead>
+                <tbody>
+                <tr th:each="poste : ${postes}">
+                    <td class="fw-semibold" th:text="${poste.poste.libelle}">Poste</td>
+                    <td th:text="${poste.nombrePostes}">1</td>
+                    <td class="text-muted" th:text="${poste.salaireProposeRh != null} ? ${#numbers.formatDecimal(poste.salaireProposeRh, 0, 'WHITESPACE', 0, 'POINT')} + ' Ar' : '—'">0</td>
+                    <td class="fw-bold" th:text="${#numbers.formatDecimal(poste.salaireValideFinance, 0, 'WHITESPACE', 0, 'POINT')} + ' Ar'">0</td>
+                    <td>
+                        <span class="badge-statut valide" th:if="${poste.decisionFinance == 'ACCEPTEE'}"><i class="fa-solid fa-check"></i> Salaire RH accepté</span>
+                        <span class="badge-statut cree" th:if="${poste.decisionFinance == 'REFUSEE'}"><i class="fa-solid fa-pen"></i> Salaire fixé par la Finance</span>
+                    </td>
+                    <td class="small text-muted" th:text="${poste.commentaireFinance} ?: '—'">—</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(postes)}">
+            <i class="fa-solid fa-circle-check"></i>
+            <p class="fw-semibold text-body mb-0">Aucun poste en attente de validation.</p>
+        </div>
+    </section>
+
+    <div class="card-grh card-corps mb-3" th:if="${besoin.commentaireFinance != null and !#strings.isEmpty(besoin.commentaireFinance)}">
+        <h2 class="h6 fw-bold">Commentaire global de la Finance</h2>
+        <p class="mb-0" th:text="${besoin.commentaireFinance}"></p>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a class="btn btn-light border" th:href="@{/dg/besoins}">Retour</a>
+        <form th:if="${!#lists.isEmpty(postes)}" th:action="@{/dg/besoins/{id}/valider(id=${besoin.id})}" method="post">
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-stamp me-1"></i>Valider le besoin</button>
+        </form>
+    </div>
+</main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
+</body>
+</html>

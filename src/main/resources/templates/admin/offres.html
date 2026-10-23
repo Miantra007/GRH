@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Offres à publier')}"></head>
+<body>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-bullhorn"></i></span>
+        <div>
+            <h1>Offres à publier</h1>
+            <p class="text-muted small mb-0">Postes validés par la Direction générale : publiez leur offre d'emploi sur le site carrières.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh overflow-hidden">
+        <div class="table-responsive" th:unless="${#lists.isEmpty(offres)}">
+            <table class="table table-grh mb-0">
+                <thead><tr><th>Besoin</th><th>Offre</th><th>Direction</th><th>Nombre</th><th>Salaire retenu</th><th>Date limite</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="ligne : ${offres}">
+                    <td class="col-id" th:text="${ligne.poste != null} ? 'n°' + ${ligne.poste.besoin.id} : '—'">n°1</td>
+                    <td>
+                        <div class="fw-semibold" th:text="${ligne.offre.titre}">Titre</div>
+                        <div class="small text-muted" th:if="${ligne.poste != null}" th:text="${ligne.poste.poste.libelle}">Poste</div>
+                    </td>
+                    <td th:text="${ligne.poste != null} ? ${ligne.poste.besoin.direction.nomDirection} : '—'">Direction</td>
+                    <td th:text="${ligne.poste != null} ? ${ligne.poste.nombrePostes} : '—'">1</td>
+                    <td class="fw-bold" th:text="${ligne.poste != null and ligne.poste.salaireValideFinance != null} ? ${#numbers.formatDecimal(ligne.poste.salaireValideFinance, 0, 'WHITESPACE', 0, 'POINT')} + ' Ar' : '—'">0 Ar</td>
+                    <td class="text-muted small" th:text="${ligne.offre.dateLimite != null} ? ${#temporals.format(ligne.offre.dateLimite, 'dd/MM/yyyy')} : 'Aucune'">—</td>
+                    <td class="col-actions">
+                        <form th:action="@{/admin/offres/{id}/publier(id=${ligne.offre.id})}" method="post">
+                            <button class="btn btn-primary btn-sm" type="submit"><i class="fa-solid fa-bullhorn me-1"></i>Publier</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(offres)}">
+            <i class="fa-solid fa-circle-check"></i>
+            <p class="fw-semibold text-body mb-1">Aucune offre en attente de publication</p>
+            <p class="small mb-0">Les offres apparaîtront ici dès que la Direction générale aura validé un besoin.</p>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
+</body>
+</html>

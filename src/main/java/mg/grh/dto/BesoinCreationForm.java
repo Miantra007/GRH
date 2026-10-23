@@ -23,24 +23,21 @@ public class BesoinCreationForm {
     @Setter
     @NoArgsConstructor
     public static class LignePoste {
-        private String libelle;
+        /** Poste choisi parmi ceux de la direction du directeur. */
+        private Integer posteId;
         private Integer nombrePostes;
         private String missions;
-        private Integer typeContratId;
         private String horaireTravail;
         private String responsableHierarchique;
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
         private LocalDate datePrisePoste;
 
         public void valider() {
-            if (libelle == null || libelle.isBlank() || libelle.trim().length() > 50) {
-                throw new IllegalArgumentException("Chaque poste doit avoir un libellé de 50 caractères maximum.");
+            if (posteId == null) {
+                throw new IllegalArgumentException("Sélectionnez un poste pour chaque ligne.");
             }
             if (nombrePostes == null || nombrePostes < 1) {
                 throw new IllegalArgumentException("Le nombre de postes doit être supérieur à zéro.");
-            }
-            if (typeContratId == null) {
-                throw new IllegalArgumentException("Sélectionnez un type de contrat pour chaque poste.");
             }
         }
     }

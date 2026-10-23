@@ -1,53 +1,117 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Suivi de candidature</title></head>
+<head th:replace="~{fragments :: head('Suivi de candidature')}"></head>
 <body>
-<main>
-    <h1>Suivi de candidature</h1>
-    <p th:if="${succes}" th:text="${succes}"></p><p th:if="${erreur}" th:text="${erreur}"></p>
-    <p>Offre : <strong th:text="${candidature.offre.titre}"></strong></p>
-    <p>Statut : <strong th:text="${candidature.statut.libelle}"></strong></p>
-    <p>Déposée le : <time th:text="${candidature.dateCandidature}"></time></p>
-    <section th:if="${candidature.statut.libelle == 'RETENUE' or candidature.statut.libelle == 'NON_RETENUE'}">
-        <h2>Décision finale</h2>
-        <p th:if="${candidature.statut.libelle == 'RETENUE'}">Votre candidature est retenue.</p>
-        <p th:if="${candidature.statut.libelle == 'NON_RETENUE'}">Votre candidature n’a pas été retenue.</p>
-    </section>
-    <h2>Notifications</h2>
-    <p th:if="${#lists.isEmpty(notifications)}">Aucune notification pour le moment.</p>
-    <ul><li th:each="n : ${notifications}"><strong th:text="${n.titre}"></strong> — <span th:text="${n.message}"></span> <time th:text="${n.dateCreation}"></time></li></ul>
-    <p th:if="${#lists.isEmpty(tests)}">Aucune convocation à un test technique pour le moment.</p>
-    <h2>Tests techniques</h2>
-    <ul><li th:each="t, iter : ${tests}">
-        <p><strong>Date :</strong> <time th:text="${t.dateTest}"></time></p>
-        <p><strong>Heure :</strong> <time th:text="${t.heureTest}"></time></p>
-        <p><strong>Lieu :</strong> <span th:text="${t.lieu}"></span></p>
-        <p><strong>Consignes :</strong> <span th:text="${t.consignes}"></span></p>
-        <p><strong>Message :</strong> <span th:text="${t.messageCandidat}"></span></p>
-        <p th:if="${t.accepteCandidat}"><strong>Convocation acceptée</strong></p>
-        <form th:if="${!t.accepteCandidat and iter.last and candidature.statut.libelle == 'TEST_TECHNIQUE'}" method="post" th:action="@{/api/candidat/suivi/{code}/test/{testId}/accepter(code=${candidature.codeSuivi},testId=${t.id})}">
-            <button type="submit">Accepter la convocation au test</button>
-        </form>
-    </li></ul>
-    <h2>Convocations aux entretiens</h2>
-    <p th:if="${#lists.isEmpty(entretiens)}">Aucune convocation à un entretien pour le moment.</p>
-    <ul><li th:each="e : ${entretiens}">
-        <p><strong>Date :</strong> <time th:text="${e.dateEntretien}"></time></p>
-        <p><strong>Heure :</strong> <time th:text="${e.heureEntretien}"></time></p>
-        <p><strong>Lieu :</strong> <span th:text="${e.lieu}"></span></p>
-        <p><strong>Consignes :</strong> <span th:text="${e.consignes}"></span></p>
-        <p><strong>Message :</strong> <span th:text="${e.messageCandidat}"></span></p>
-    </li></ul>
-    <section th:if="${proposition != null and candidature.statut.libelle == 'RETENUE'}">
-        <h2>Proposition d’embauche</h2>
-        <p>Date d’envoi : <time th:text="${proposition.dateEnvoi}"></time></p>
-        <p>Salaire proposé : <span th:text="${proposition.salaireFinal}"></span></p>
-        <p>Statut de la proposition : <span th:text="${proposition.statut.libelle}"></span></p>
-        <p>Le formulaire d’acceptation sera accessible depuis ce <a th:href="@{/api/candidat/formulaire-acceptation}">lien vers le formulaire d’acceptation</a> lorsqu’il sera mis en place.</p>
-        <p th:if="${proposition.reponseCandidat != null}">Réponse : <span th:text="${proposition.reponseCandidat.libelle}"></span></p>
-        <p th:if="${proposition.commentaireRh != null}" th:text="${proposition.commentaireRh}"></p>
-    </section>
-    <p><a href="/api/candidat/offres">Retour aux offres</a></p>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 860px">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-magnifying-glass-chart"></i></span>
+        <div>
+            <h1>Suivi de candidature</h1>
+            <p class="text-muted small mb-0">Offre : <strong th:text="${candidature.offre.titre}">offre</strong></p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh card-corps mb-3">
+        <div class="row">
+            <div class="col-sm-6 mb-2"><span class="text-muted small d-block">Statut</span>
+                <strong th:text="${candidature.statut.libelle}">statut</strong></div>
+            <div class="col-sm-6 mb-2"><span class="text-muted small d-block">Déposée le</span>
+                <strong><time th:text="${#temporals.format(candidature.dateCandidature, 'dd/MM/yyyy')}">date</time></strong></div>
+        </div>
+    </div>
+
+    <!-- Décision finale -->
+    <div class="card-grh card-corps mb-3" th:if="${candidature.statut.libelle == 'RETENUE' or candidature.statut.libelle == 'NON_RETENUE'}">
+        <h2 class="h6 fw-bold">Décision finale</h2>
+        <p class="mb-0 text-success" th:if="${candidature.statut.libelle == 'RETENUE'}">
+            <i class="fa-solid fa-circle-check me-1"></i> Votre candidature est retenue.</p>
+        <p class="mb-0 text-danger" th:if="${candidature.statut.libelle == 'NON_RETENUE'}">
+            <i class="fa-solid fa-circle-xmark me-1"></i> Votre candidature n’a pas été retenue.</p>
+    </div>
+
+    <!-- Proposition d'embauche : formulaire d'acceptation + choix du contrat -->
+    <div class="card-grh card-corps mb-3" th:if="${proposition != null}">
+        <h2 class="h6 fw-bold">Proposition d’embauche</h2>
+        <div class="row">
+            <div class="col-sm-4 mb-2"><span class="text-muted small d-block">Envoyée le</span>
+                <strong><time th:text="${#temporals.format(proposition.dateEnvoi, 'dd/MM/yyyy')}">date</time></strong></div>
+            <div class="col-sm-4 mb-2"><span class="text-muted small d-block">Salaire proposé</span>
+                <strong th:text="${proposition.salaireFinal} ?: '—'">—</strong></div>
+            <div class="col-sm-4 mb-2"><span class="text-muted small d-block">Statut</span>
+                <strong th:text="${proposition.statut.libelle}">statut</strong></div>
+        </div>
+
+        <!-- À remplir : le candidat répond à la proposition -->
+        <div th:if="${proposition.statut.libelle == 'EN_ATTENTE_CANDIDAT'}" class="mt-2">
+            <a class="btn btn-primary"
+               th:href="@{/candidats/{c}/propositions/{p}(c=${candidature.candidat.id},p=${proposition.id})}">
+                <i class="fa-solid fa-file-pen me-1"></i> Remplir le formulaire d’acceptation</a>
+            <p class="small text-muted mt-2 mb-0"><i class="fa-solid fa-circle-info me-1"></i>
+                Connectez-vous avec votre compte candidat pour accéder au formulaire.</p>
+        </div>
+
+        <!-- Accord final : le candidat choisit son contrat -->
+        <div th:if="${proposition.statut.libelle == 'ACCORD_FINAL'}" class="mt-2">
+            <a class="btn btn-primary" th:href="@{/candidat/contrats/nouveau(propositionId=${proposition.id})}">
+                <i class="fa-solid fa-file-signature me-1"></i> Choisir mon contrat</a>
+            <p class="small text-muted mt-2 mb-0"><i class="fa-solid fa-circle-info me-1"></i>
+                Connectez-vous avec votre compte candidat pour choisir votre contrat.</p>
+        </div>
+
+        <p class="mt-2 mb-0" th:if="${proposition.reponseCandidat != null}">
+            Votre réponse : <strong th:text="${proposition.reponseCandidat.libelle}">—</strong></p>
+        <p class="mb-0" th:if="${proposition.commentaireRh != null}">
+            Message du RH : <span th:text="${proposition.commentaireRh}"></span></p>
+    </div>
+
+    <!-- Notifications -->
+    <div class="card-grh card-corps mb-3">
+        <h2 class="h6 fw-bold">Notifications</h2>
+        <p class="text-muted mb-0" th:if="${#lists.isEmpty(notifications)}">Aucune notification pour le moment.</p>
+        <ul class="list-unstyled mb-0">
+            <li class="border-bottom py-2" th:each="n : ${notifications}">
+                <strong th:text="${n.titre}">titre</strong> — <span th:text="${n.message}">message</span>
+                <span class="text-muted small d-block"><time th:text="${#temporals.format(n.dateCreation, 'dd/MM/yyyy HH:mm')}">date</time></span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tests techniques -->
+    <div class="card-grh card-corps mb-3">
+        <h2 class="h6 fw-bold">Tests techniques</h2>
+        <p class="text-muted" th:if="${#lists.isEmpty(tests)}">Aucune convocation à un test technique pour le moment.</p>
+        <div class="border-bottom py-2" th:each="t, iter : ${tests}">
+            <p class="mb-1"><strong>Date :</strong> <time th:text="${t.dateTest}"></time>
+                &nbsp;<strong>Heure :</strong> <time th:text="${t.heureTest}"></time></p>
+            <p class="mb-1"><strong>Lieu :</strong> <span th:text="${t.lieu}"></span></p>
+            <p class="mb-1"><strong>Consignes :</strong> <span th:text="${t.consignes}"></span></p>
+            <p class="mb-1" th:if="${t.messageCandidat}"><strong>Message :</strong> <span th:text="${t.messageCandidat}"></span></p>
+            <p class="text-success mb-0" th:if="${t.accepteCandidat}"><i class="fa-solid fa-check me-1"></i>Convocation acceptée</p>
+            <form th:if="${!t.accepteCandidat and iter.last and candidature.statut.libelle == 'TEST_TECHNIQUE'}" method="post"
+                  th:action="@{/api/candidat/suivi/{code}/test/{testId}/accepter(code=${candidature.codeSuivi},testId=${t.id})}">
+                <button class="btn btn-outline-primary btn-sm" type="submit">Accepter la convocation au test</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Entretiens -->
+    <div class="card-grh card-corps mb-3">
+        <h2 class="h6 fw-bold">Convocations aux entretiens</h2>
+        <p class="text-muted" th:if="${#lists.isEmpty(entretiens)}">Aucune convocation à un entretien pour le moment.</p>
+        <div class="border-bottom py-2" th:each="e : ${entretiens}">
+            <p class="mb-1"><strong>Date :</strong> <time th:text="${e.dateEntretien}"></time>
+                &nbsp;<strong>Heure :</strong> <time th:text="${e.heureEntretien}"></time></p>
+            <p class="mb-1"><strong>Lieu :</strong> <span th:text="${e.lieu}"></span></p>
+            <p class="mb-1"><strong>Consignes :</strong> <span th:text="${e.consignes}"></span></p>
+            <p class="mb-0" th:if="${e.messageCandidat}"><strong>Message :</strong> <span th:text="${e.messageCandidat}"></span></p>
+        </div>
+    </div>
+
+    <a class="btn btn-link px-0" href="/api/candidat/offres"><i class="fa-solid fa-arrow-left me-1"></i> Retour aux offres</a>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

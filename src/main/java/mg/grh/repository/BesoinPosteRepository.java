@@ -13,7 +13,7 @@ public interface BesoinPosteRepository extends JpaRepository<BesoinPoste, Intege
     List<BesoinPoste> findByBesoinIdOrderByIdAsc(Integer besoinId);
 
     @Query("select distinct bp.besoin from BesoinPoste bp "
-            + "where bp.decisionFinance = 'ACCEPTEE' and bp.decisionDg is null "
+            + "where bp.salaireValideFinance is not null and bp.decisionDg is null "
             + "order by bp.besoin.dateDemande asc")
     List<Besoin> findBesoinsAvecPosteEnAttenteDg();
 }

@@ -2,35 +2,65 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Connexion')}"></head>
 <body>
-<main class="connexion">
-    <div class="text-center mb-4">
-        <span class="brand-logo mb-3"><i class="fa-solid fa-people-group"></i></span>
-        <h1 class="h4 fw-bold mb-1">Connexion à GRH</h1>
-        <p class="text-muted mb-0">Gestion des ressources humaines</p>
-    </div>
-
-    <div th:replace="~{fragments :: messages}"></div>
-
-    <form class="card-grh p-4 needs-validation" th:action="@{/login}" method="post" novalidate>
-        <div class="mb-3">
-            <label class="form-label" for="email">Adresse e-mail</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-envelope"></i></span>
-                <input class="form-control" id="email" name="email" type="email" autocomplete="username" required autofocus>
-            </div>
+<div class="auth-page">
+    <!-- Panneau de présentation -->
+    <aside class="auth-aside">
+        <a class="brand" th:href="@{/}">
+            <span class="brand-logo"><i class="fa-solid fa-people-group"></i></span>
+            <span class="brand-text">GRH<small>Ressources humaines</small></span>
+        </a>
+        <div>
+            <h2>Pilotez tout le recrutement, du besoin à l’intégration.</h2>
+            <p>Une seule plateforme pour les directions, les ressources humaines, la finance et les candidats.</p>
+            <ul class="auth-points">
+                <li><i class="fa-solid fa-clipboard-list"></i> Besoins validés par la finance et la direction générale</li>
+                <li><i class="fa-solid fa-user-check"></i> Sélection des dossiers, tests et entretiens</li>
+                <li><i class="fa-solid fa-file-signature"></i> Propositions, contrats et embauche</li>
+            </ul>
         </div>
-        <div class="mb-4">
-            <label class="form-label" for="mdp">Mot de passe</label>
-            <div class="input-group">
-                <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
-                <input class="form-control" id="mdp" name="motDePasse" type="password" autocomplete="current-password" required>
+        <div class="auth-pied">© GRH · Gestion des ressources humaines</div>
+    </aside>
+
+    <!-- Formulaire -->
+    <main class="auth-main">
+        <div class="auth-card">
+            <div class="d-lg-none text-center mb-4">
+                <span class="brand-logo" style="width:52px;height:52px;font-size:1.4rem"><i class="fa-solid fa-people-group"></i></span>
             </div>
+            <h1 class="mb-1">Connexion</h1>
+            <p class="text-muted mb-4">Connectez-vous pour accéder à votre espace.</p>
+
+            <div th:replace="~{fragments :: messages}"></div>
+
+            <form class="card-grh needs-validation" th:action="@{/login}" method="post" novalidate>
+                <div class="mb-3">
+                    <label class="form-label" for="email">Adresse e-mail</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-regular fa-envelope"></i></span>
+                        <input class="form-control" id="email" name="email" type="email" placeholder="nom@entreprise.mg"
+                               autocomplete="username" required autofocus>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="mdp">Mot de passe</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fa-solid fa-lock"></i></span>
+                        <input class="form-control" id="mdp" name="motDePasse" type="password" placeholder="••••••••"
+                               autocomplete="current-password" required>
+                    </div>
+                </div>
+                <button class="btn btn-primary w-100 py-2" type="submit">
+                    <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter
+                </button>
+            </form>
+
+            <p class="text-center text-muted small mt-4 mb-0">
+                Vous cherchez un emploi ?
+                <a class="fw-semibold" th:href="@{/api/candidat/offres}">Voir les offres</a>
+            </p>
         </div>
-        <button class="btn btn-primary w-100" type="submit">
-            <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter
-        </button>
-    </form>
-</main>
+    </main>
+</div>
 <th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

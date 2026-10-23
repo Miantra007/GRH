@@ -2,52 +2,84 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Tests techniques')}"></head>
 <body>
-<header th:replace="~{fragments :: nav}"></header>
-<main>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-flask"></i></span>
+        <div>
+            <h1>Tests techniques</h1>
+            <p class="small mb-0">Candidats convoqués, regroupés par offre. Après le test, acceptez le résultat pour programmer l’entretien.</p>
+        </div>
+    </div>
+
     <div th:replace="~{fragments :: messages}"></div>
-    <h1>Candidats convoqués aux tests techniques</h1>
-    <p>Les candidatures sont séparées par offre. Après le test, acceptez ou refusez chaque candidat.</p>
-    <section th:each="groupe : ${groupes}">
-        <h2 th:text="${groupe.offre.titre}"></h2>
-        <table>
-            <thead><tr><th>Candidat</th><th>Convocation</th><th>Décision RH / entretien</th></tr></thead>
-            <tbody>
-            <tr th:each="ligne : ${groupe.candidatures}">
-                <td>
-                    <a th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
-                       th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|"></a>
-                    <p th:text="${ligne.candidature.candidat.email}"></p>
-                </td>
-                <td>
-                    <p><strong>Date :</strong> <time th:text="${ligne.test.dateTest}"></time></p>
-                    <p><strong>Heure :</strong> <time th:text="${ligne.test.heureTest}"></time></p>
-                    <p><strong>Lieu :</strong> <span th:text="${ligne.test.lieu}"></span></p>
-                    <p><strong>Consignes :</strong> <span th:text="${ligne.test.consignes}"></span></p>
-                    <p><strong>Message :</strong> <span th:text="${ligne.test.messageCandidat}"></span></p>
-                </td>
-                <td>
-                    <form th:if="${ligne.test.resultatAccepte == null}" method="post"
-                          th:action="@{/admin/candidatures/{id}/decision-test(id=${ligne.candidature.id})}">
-                        <button type="submit" name="decision" value="ACCEPTER">Accepter le résultat</button>
-                        <button type="submit" name="decision" value="REFUSER">Refuser le candidat</button>
-                    </form>
-                    <p th:if="${ligne.test.resultatAccepte == false}">Candidat refusé après le test.</p>
-                    <form th:if="${ligne.test.resultatAccepte == true}" method="post"
-                          th:action="@{/admin/candidatures/{id}/entretien(id=${ligne.candidature.id})}">
-                        <input type="hidden" name="origine" value="tests">
-                        <p><label>Date de l’entretien <input name="date" type="date" required></label></p>
-                        <p><label>Heure de l’entretien <input name="heure" type="time" required></label></p>
-                        <p><label>Lieu ou modalité <input name="lieu" required></label></p>
-                        <p><label>Consignes pratiques <textarea name="consignes" required></textarea></label></p>
-                        <p><label>Message au candidat <textarea name="message"></textarea></label></p>
-                        <button type="submit" th:text="${ligne.candidature.statut.libelle == 'ENTRETIEN' ? 'Modifier et notifier la convocation' : 'Programmer et notifier l’entretien'}"></button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+
+    <div class="card-grh etat-vide" th:if="${#lists.isEmpty(groupes)}">
+        <i class="fa-solid fa-flask"></i>
+        <p class="fw-semibold text-body mb-0">Aucun candidat n’est actuellement convoqué à un test technique.</p>
+    </div>
+
+    <section class="card-grh overflow-hidden mb-4" th:each="groupe : ${groupes}">
+        <div class="card-tete">
+            <span class="badge-type"><i class="fa-solid fa-briefcase me-1"></i>Offre</span>
+            <h2 class="titre-section" th:text="${groupe.offre.titre}">Offre</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-grh">
+                <thead><tr><th>Candidat</th><th>Convocation</th><th style="min-width: 320px">Décision RH / entretien</th></tr></thead>
+                <tbody>
+                <tr th:each="ligne : ${groupe.candidatures}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" style="width:36px;height:36px;font-size:.8rem"
+                                  th:text="${#strings.toUpperCase(#strings.substring(ligne.candidature.candidat.prenomCandidat, 0, 1))}">C</span>
+                            <div>
+                                <a class="fw-semibold" th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
+                                   th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|">Candidat</a>
+                                <div class="small text-muted" th:text="${ligne.candidature.candidat.email}">email</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="small">
+                        <div><i class="fa-regular fa-calendar me-1 text-muted"></i><time th:text="${ligne.test.dateTest}"></time>
+                            · <i class="fa-regular fa-clock me-1 text-muted"></i><time th:text="${ligne.test.heureTest}"></time></div>
+                        <div><i class="fa-solid fa-location-dot me-1 text-muted"></i><span th:text="${ligne.test.lieu}"></span></div>
+                        <div class="text-muted" th:text="${ligne.test.consignes}"></div>
+                        <div class="text-muted fst-italic" th:if="${ligne.test.messageCandidat}" th:text="${ligne.test.messageCandidat}"></div>
+                        <div class="mt-2">
+                            <span class="badge-statut valide" th:if="${ligne.test.accepteCandidat}"><i class="fa-solid fa-check"></i> Convocation acceptée</span>
+                            <span class="badge-statut cree" th:unless="${ligne.test.accepteCandidat}"><i class="fa-regular fa-hourglass-half"></i> En attente du candidat</span>
+                        </div>
+                    </td>
+                    <td>
+                        <form th:if="${ligne.test.resultatAccepte == null}" method="post" class="d-flex flex-wrap gap-2"
+                              th:action="@{/admin/candidatures/{id}/decision-test(id=${ligne.candidature.id})}">
+                            <button class="btn btn-success btn-sm" type="submit" name="decision" value="ACCEPTER"><i class="fa-solid fa-check me-1"></i>Accepter le résultat</button>
+                            <button class="btn btn-outline-danger btn-sm" type="submit" name="decision" value="REFUSER"><i class="fa-solid fa-xmark me-1"></i>Refuser</button>
+                        </form>
+                        <span class="badge-statut retard" th:if="${ligne.test.resultatAccepte == false}"><i class="fa-solid fa-ban"></i> Refusé après le test</span>
+                        <form th:if="${ligne.test.resultatAccepte == true}" method="post"
+                              th:action="@{/admin/candidatures/{id}/entretien(id=${ligne.candidature.id})}">
+                            <input type="hidden" name="origine" value="tests">
+                            <div class="small fw-semibold text-success mb-2"><i class="fa-solid fa-circle-check me-1"></i>Résultat accepté — programmez l’entretien</div>
+                            <div class="row g-2">
+                                <div class="col-6"><input class="form-control form-control-sm" name="date" type="date" required aria-label="Date de l’entretien"></div>
+                                <div class="col-6"><input class="form-control form-control-sm" name="heure" type="time" required aria-label="Heure de l’entretien"></div>
+                                <div class="col-12"><input class="form-control form-control-sm" name="lieu" placeholder="Lieu ou modalité (salle, lien visio…)" required></div>
+                                <div class="col-12"><textarea class="form-control form-control-sm" name="consignes" rows="2" placeholder="Consignes pratiques" required></textarea></div>
+                                <div class="col-12"><textarea class="form-control form-control-sm" name="message" rows="2" placeholder="Message au candidat (facultatif)"></textarea></div>
+                            </div>
+                            <button class="btn btn-primary btn-sm mt-2" type="submit">
+                                <i class="fa-solid fa-calendar-check me-1"></i><span th:text="${ligne.candidature.statut.libelle == 'ENTRETIEN' ? 'Modifier et notifier la convocation' : 'Programmer et notifier l’entretien'}">Programmer</span>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
-    <p th:if="${#lists.isEmpty(groupes)}">Aucun candidat n’est actuellement convoqué à un test technique.</p>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

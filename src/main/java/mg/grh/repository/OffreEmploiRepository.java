@@ -14,4 +14,8 @@ public interface OffreEmploiRepository extends JpaRepository<OffreEmploi, Intege
 
     @Query("select o from OffreEmploi o join o.statutOffre s where o.id = :id and o.visibleClient = true and s.libelle = 'PUBLIEE' and (o.dateLimite is null or o.dateLimite >= CURRENT_DATE)")
     Optional<OffreEmploi> findOffrePubliee(@Param("id") Integer id);
+
+    /** Offres encore en brouillon dont le poste a été validé par la Direction générale. */
+    @Query("select o from OffreEmploi o, BesoinPoste bp join o.statutOffre s where bp.id = o.besoinPosteId and bp.decisionDg = 'VALIDEE' and s.libelle = 'BROUILLON' order by o.id")
+    List<OffreEmploi> findOffresAPublier();
 }

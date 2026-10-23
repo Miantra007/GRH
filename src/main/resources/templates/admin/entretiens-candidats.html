@@ -2,40 +2,64 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Entretiens')}"></head>
 <body>
-<header th:replace="~{fragments :: nav}"></header>
-<main>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-comments"></i></span>
+        <div>
+            <h1>Entretiens</h1>
+            <p class="small mb-0">Candidats convoqués, regroupés par offre. Retenir un candidat crée sa proposition d’embauche et le notifie.</p>
+        </div>
+    </div>
+
     <div th:replace="~{fragments :: messages}"></div>
-    <h1>Candidats convoqués aux entretiens</h1>
-    <p>Les candidatures sont séparées par offre. La décision ne concerne que la candidature affichée.</p>
-    <section th:each="groupe : ${groupes}">
-        <h2 th:text="${groupe.offre.titre}"></h2>
-        <table>
-            <thead><tr><th>Candidat</th><th>Convocation</th><th>Décision</th></tr></thead>
-            <tbody>
-            <tr th:each="ligne : ${groupe.candidatures}">
-                <td>
-                    <a th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
-                       th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|"></a>
-                    <p th:text="${ligne.candidature.candidat.email}"></p>
-                </td>
-                <td>
-                    <p><strong>Date :</strong> <time th:text="${ligne.entretien.dateEntretien}"></time></p>
-                    <p><strong>Heure :</strong> <time th:text="${ligne.entretien.heureEntretien}"></time></p>
-                    <p><strong>Lieu :</strong> <span th:text="${ligne.entretien.lieu}"></span></p>
-                    <p><strong>Consignes :</strong> <span th:text="${ligne.entretien.consignes}"></span></p>
-                    <p><strong>Message :</strong> <span th:text="${ligne.entretien.messageCandidat}"></span></p>
-                </td>
-                <td>
-                    <form method="post" th:action="@{/admin/candidatures/{id}/decision-entretien(id=${ligne.candidature.id})}">
-                        <button type="submit" name="decision" value="ACCEPTER">Accepter et ouvrir la proposition</button>
-                        <button type="submit" name="decision" value="REFUSER">Refuser le candidat</button>
-                    </form>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+
+    <div class="card-grh etat-vide" th:if="${#lists.isEmpty(groupes)}">
+        <i class="fa-solid fa-comments"></i>
+        <p class="fw-semibold text-body mb-0">Aucun candidat n’est actuellement convoqué à un entretien.</p>
+    </div>
+
+    <section class="card-grh overflow-hidden mb-4" th:each="groupe : ${groupes}">
+        <div class="card-tete">
+            <span class="badge-type"><i class="fa-solid fa-briefcase me-1"></i>Offre</span>
+            <h2 class="titre-section" th:text="${groupe.offre.titre}">Offre</h2>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-grh">
+                <thead><tr><th>Candidat</th><th>Convocation</th><th class="col-actions">Décision</th></tr></thead>
+                <tbody>
+                <tr th:each="ligne : ${groupe.candidatures}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="avatar" style="width:36px;height:36px;font-size:.8rem"
+                                  th:text="${#strings.toUpperCase(#strings.substring(ligne.candidature.candidat.prenomCandidat, 0, 1))}">C</span>
+                            <div>
+                                <a class="fw-semibold" th:href="@{/admin/candidatures/{id}(id=${ligne.candidature.id})}"
+                                   th:text="|${ligne.candidature.candidat.prenomCandidat} ${ligne.candidature.candidat.nomCandidat}|">Candidat</a>
+                                <div class="small text-muted" th:text="${ligne.candidature.candidat.email}">email</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="small">
+                        <div><i class="fa-regular fa-calendar me-1 text-muted"></i><time th:text="${ligne.entretien.dateEntretien}"></time>
+                            · <i class="fa-regular fa-clock me-1 text-muted"></i><time th:text="${ligne.entretien.heureEntretien}"></time></div>
+                        <div><i class="fa-solid fa-location-dot me-1 text-muted"></i><span th:text="${ligne.entretien.lieu}"></span></div>
+                        <div class="text-muted" th:text="${ligne.entretien.consignes}"></div>
+                        <div class="text-muted fst-italic" th:if="${ligne.entretien.messageCandidat}" th:text="${ligne.entretien.messageCandidat}"></div>
+                    </td>
+                    <td class="col-actions">
+                        <form method="post" class="d-flex flex-wrap justify-content-end gap-2"
+                              th:action="@{/admin/candidatures/{id}/decision-entretien(id=${ligne.candidature.id})}">
+                            <button class="btn btn-success btn-sm" type="submit" name="decision" value="ACCEPTER"><i class="fa-solid fa-user-check me-1"></i>Retenir le candidat</button>
+                            <button class="btn btn-outline-danger btn-sm" type="submit" name="decision" value="REFUSER"><i class="fa-solid fa-xmark me-1"></i>Refuser</button>
+                        </form>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </section>
-    <p th:if="${#lists.isEmpty(groupes)}">Aucun candidat n’est actuellement convoqué à un entretien.</p>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

@@ -1,5 +1,12 @@
 // Comportements communs à toutes les pages
 (function () {
+    // Barre latérale sur mobile : <button data-sidebar-toggle> ouvre, [data-sidebar-close] ou Échap ferment
+    document.querySelectorAll('[data-sidebar-toggle]').forEach(b =>
+        b.addEventListener('click', () => document.body.classList.toggle('sidebar-open')));
+    document.querySelectorAll('[data-sidebar-close]').forEach(b =>
+        b.addEventListener('click', () => document.body.classList.remove('sidebar-open')));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') document.body.classList.remove('sidebar-open'); });
+
     // Confirmation avant une action importante : <form data-confirm="Question ?" data-confirm-bouton="Valider">
     const modale = document.getElementById('modaleConfirmation');
     if (modale) {

@@ -21,17 +21,17 @@ public class BesoinService extends GenericService<Besoin> {
     private final TypeBesoinRepository typeBesoinRepository;
     private final StatutBesoinRepository statutBesoinRepository;
     private final PosteRepository posteRepository;
-    private final TypeContratRepository typeContratRepository;
     private final BesoinPosteRepository besoinPosteRepository;
     private final OffreEmploiRepository offreEmploiRepository;
     private final StatutOffreRepository statutOffreRepository;
+    private final NotificationRepository notificationRepository;
 
     public BesoinService(BesoinRepository repository, DirectionRepository directionRepository,
             DepartementRepository departementRepository, ResponsableRepository responsableRepository,
             TypeBesoinRepository typeBesoinRepository, StatutBesoinRepository statutBesoinRepository,
-            PosteRepository posteRepository, TypeContratRepository typeContratRepository,
+            PosteRepository posteRepository,
             BesoinPosteRepository besoinPosteRepository, OffreEmploiRepository offreEmploiRepository,
-            StatutOffreRepository statutOffreRepository) {
+            StatutOffreRepository statutOffreRepository, NotificationRepository notificationRepository) {
         super(repository);
         this.besoinRepository = repository;
         this.directionRepository = directionRepository;
@@ -40,10 +40,10 @@ public class BesoinService extends GenericService<Besoin> {
         this.typeBesoinRepository = typeBesoinRepository;
         this.statutBesoinRepository = statutBesoinRepository;
         this.posteRepository = posteRepository;
-        this.typeContratRepository = typeContratRepository;
         this.besoinPosteRepository = besoinPosteRepository;
         this.offreEmploiRepository = offreEmploiRepository;
         this.statutOffreRepository = statutOffreRepository;
+        this.notificationRepository = notificationRepository;
     }
 
     /** Crée un besoin et ses postes. Toute erreur annule l'ensemble des insertions. */
@@ -74,24 +74,26 @@ public class BesoinService extends GenericService<Besoin> {
         besoin.validerPourCreation();
         besoin = repository.save(besoin);
 
+        java.util.Set<Integer> postesChoisis = new java.util.HashSet<>();
         for (BesoinCreationForm.LignePoste ligne : formulaire.getPostes()) {
             if (ligne == null) {
                 throw new IllegalArgumentException("Une ligne de poste est invalide.");
             }
             ligne.valider();
-            Poste poste = new Poste();
-            poste.setLibelle(ligne.getLibelle().trim());
-            poste.setDirection(direction);
-            poste.setDateCreation(LocalDate.now());
-            poste = posteRepository.save(poste);
+            Poste poste = posteRepository.findById(ligne.getPosteId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Poste introuvable."));
+            if (poste.getDirection() == null || !direction.getId().equals(poste.getDirection().getId())) {
+                throw new SecurityException("Le poste « " + poste.getLibelle() + " » n'appartient pas à votre direction.");
+            }
+            if (!postesChoisis.add(poste.getId())) {
+                throw new IllegalArgumentException("Le poste « " + poste.getLibelle() + " » est demandé deux fois : indiquez plutôt le nombre de postes.");
+            }
 
             BesoinPoste besoinPoste = new BesoinPoste();
             besoinPoste.setBesoin(besoin);
             besoinPoste.setPoste(poste);
             besoinPoste.setNombrePostes(ligne.getNombrePostes());
             besoinPoste.setMissions(ligne.getMissions());
-            besoinPoste.setTypeContrat(typeContratRepository.findById(ligne.getTypeContratId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Type de contrat introuvable.")));
             besoinPoste.setHoraireTravail(ligne.getHoraireTravail());
             besoinPoste.setResponsableHierarchique(ligne.getResponsableHierarchique());
             besoinPoste.setDatePrisePoste(ligne.getDatePrisePoste());
@@ -134,18 +136,19 @@ public class BesoinService extends GenericService<Besoin> {
                 : postes;
     }
 
-    /** Les salaires déjà acceptés restent validés et ne sont plus redemandés à Finance. */
+    /** Postes dont la Finance n'a pas encore fixé le salaire retenu. */
     @Transactional(readOnly = true)
     public java.util.List<BesoinPoste> postesADeciderParFinance(Integer besoinId) {
         return postesDuBesoin(besoinId).stream()
-                .filter(poste -> !"ACCEPTEE".equals(poste.getDecisionFinance()))
+                .filter(poste -> poste.getSalaireValideFinance() == null)
                 .toList();
     }
 
+    /** Postes dont le salaire est fixé par la Finance (accepté ou contre-proposé) et pas encore validés par le DG. */
     @Transactional(readOnly = true)
     public java.util.List<BesoinPoste> postesAValiderParDg(Integer besoinId) {
         return postesDuBesoin(besoinId).stream()
-                .filter(poste -> "ACCEPTEE".equals(poste.getDecisionFinance()))
+                .filter(poste -> poste.getSalaireValideFinance() != null)
                 .filter(poste -> poste.getDecisionDg() == null)
                 .toList();
     }
@@ -204,12 +207,18 @@ public class BesoinService extends GenericService<Besoin> {
         repository.save(besoin);
     }
 
+    /**
+     * Décision de la Finance, poste par poste :
+     * ACCEPTEE -> le salaire proposé par le RH est retenu ;
+     * REFUSEE  -> la Finance propose son propre salaire, et c'est celui-là qui est retenu.
+     * Une fois tous les salaires fixés, le besoin part directement à la Direction générale.
+     */
     @Transactional
     public void deciderParFinance(Integer besoinId, Integer financeId, DecisionFinanceForm formulaire) {
         Besoin besoin = besoinAvecStatut(besoinId, "EN_ATTENTE_FINANCE");
         java.util.List<BesoinPoste> tousLesPostes = postesDuBesoin(besoinId);
         java.util.Map<Integer, BesoinPoste> postes = tousLesPostes.stream()
-                .filter(poste -> !"ACCEPTEE".equals(poste.getDecisionFinance()))
+                .filter(poste -> poste.getSalaireValideFinance() == null)
                 .collect(java.util.stream.Collectors.toMap(BesoinPoste::getId, p -> p));
         if (formulaire == null || formulaire.getLignes() == null || formulaire.getLignes().size() != postes.size()) {
             throw new IllegalArgumentException("Décidez le salaire de chaque poste.");
@@ -222,18 +231,27 @@ public class BesoinService extends GenericService<Besoin> {
             if (besoinPoste == null || !(decision.equals("ACCEPTEE") || decision.equals("REFUSEE"))) {
                 throw new IllegalArgumentException("Chaque salaire doit être accepté ou refusé.");
             }
+            java.math.BigDecimal salaireRetenu;
+            if (decision.equals("ACCEPTEE")) {
+                salaireRetenu = besoinPoste.getSalaireProposeRh();
+            } else {
+                salaireRetenu = ligne.getSalaireFinance();
+                if (salaireRetenu == null || salaireRetenu.signum() < 0) {
+                    throw new IllegalArgumentException("Proposez un salaire valide pour le poste « "
+                            + besoinPoste.getPoste().getLibelle() + " » dont vous refusez le salaire RH.");
+                }
+            }
             besoinPoste.setDecisionFinance(decision);
             besoinPoste.setCommentaireFinance(ligne.getCommentaire());
-            besoinPoste.setSalaireValideFinance(decision.equals("ACCEPTEE") ? besoinPoste.getSalaireProposeRh() : null);
+            besoinPoste.setSalaireValideFinance(salaireRetenu);
             besoinPoste.setDecisionDg(null);
             besoinPosteRepository.save(besoinPoste);
         }
         besoin.setFinanceValidateur(responsable(financeId, "FINANCE"));
         besoin.setCommentaireFinance(formulaire.getCommentaireFinance());
         besoin.setDateValidationFinance(LocalDateTime.now());
-        boolean toutAccepte = tousLesPostes.stream()
-                .allMatch(poste -> "ACCEPTEE".equals(poste.getDecisionFinance()));
-        besoin.setStatutBesoin(statut(toutAccepte ? "EN_ATTENTE_DG" : "EN_ATTENTE_RH"));
+        boolean toutFixe = tousLesPostes.stream().allMatch(poste -> poste.getSalaireValideFinance() != null);
+        besoin.setStatutBesoin(statut(toutFixe ? "EN_ATTENTE_DG" : "EN_ATTENTE_FINANCE"));
         repository.save(besoin);
     }
 
@@ -242,7 +260,7 @@ public class BesoinService extends GenericService<Besoin> {
         Besoin besoin = findById(besoinId);
         java.util.List<BesoinPoste> postesAValider = postesAValiderParDg(besoinId);
         if (postesAValider.isEmpty()) {
-            throw new IllegalStateException("Aucun poste validé par Finance n'est en attente du DG.");
+            throw new IllegalStateException("Aucun poste dont la Finance a fixé le salaire n'est en attente du DG.");
         }
         postesAValider.forEach(poste -> {
             poste.setDecisionDg("VALIDEE");
@@ -250,13 +268,27 @@ public class BesoinService extends GenericService<Besoin> {
         });
         besoin.setDgValidateur(responsable(dgId, "DG"));
         boolean toutValide = postesDuBesoin(besoinId).stream()
-                .allMatch(poste -> "ACCEPTEE".equals(poste.getDecisionFinance())
+                .allMatch(poste -> poste.getSalaireValideFinance() != null
                         && "VALIDEE".equals(poste.getDecisionDg()));
         if (toutValide) {
             besoin.setDateValidationDg(LocalDateTime.now());
             besoin.setStatutBesoin(statut("VALIDEE"));
+            notifierRhOffresAPublier(besoin, postesAValider);
         }
         repository.save(besoin);
+    }
+
+    /** Prévient le RH qui a traité le besoin (ou, à défaut, tous les RH) que les offres peuvent être publiées. */
+    private void notifierRhOffresAPublier(Besoin besoin, java.util.List<BesoinPoste> postes) {
+        java.util.List<mg.grh.model.Responsable> destinataires = besoin.getRhTraitant() != null
+                ? java.util.List.of(besoin.getRhTraitant())
+                : responsableRepository.findByRoleLibelle("Administrateur RH");
+        String libelles = postes.stream().map(poste -> poste.getPoste().getLibelle())
+                .collect(java.util.stream.Collectors.joining(", "));
+        String message = "La Direction générale a validé le besoin n°" + besoin.getId() + " (" + libelles + "). "
+                + "Les offres d'emploi correspondantes sont prêtes : publiez-les depuis le menu « Offres à publier ».";
+        destinataires.forEach(rh -> notificationRepository.save(Notification.pour(null, rh.getId(), null,
+                "Besoin validé : offres à publier", message)));
     }
 
     private Besoin besoinAvecStatut(Integer id, String statutAttendu) {

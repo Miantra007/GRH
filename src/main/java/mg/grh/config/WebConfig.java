@@ -11,6 +11,14 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor()).addPathPatterns(
                 "/admin/**", "/dg/**", "/directeur/**", "/finance/**",
-                "/candidat/**", "/candidats/**", "/rh/**", "/api/**");
+                "/candidat/**", "/candidats/**", "/rh/**", "/api/**")
+                // Parcours public candidat : consultation des offres et dépôt de candidature
+                // sans authentification (l'inscription se fait via le formulaire saisie-candidat).
+                .excludePathPatterns(
+                        "/api/candidat/offres", "/api/candidat/offres/*",
+                        "/api/candidat/offres/*/postuler",
+                        "/api/candidat/etape/**",
+                        "/api/candidat/confirmation/*",
+                        "/api/candidat/suivi", "/api/candidat/suivi/**");
     }
 }

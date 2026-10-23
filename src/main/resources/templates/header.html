@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- =====================================================================
+     En-tête de l'application
+     - utilisateur connecté : barre latérale (menu selon le rôle) + barre supérieure
+     - visiteur : barre horizontale simple (offres d'emploi, connexion)
+     ===================================================================== -->
+<header th:fragment="nav" class="app-header" th:classappend="${session.user != null} ? 'has-sidebar' : 'is-public'">
+
+    <!-- ========================= Utilisateur connecté ========================= -->
+    <th:block th:if="${session.user != null}">
+        <aside class="app-sidebar" id="appSidebar" aria-label="Menu principal">
+            <div class="sidebar-brand">
+                <a class="brand" th:href="@{/}">
+                    <span class="brand-logo"><i class="fa-solid fa-people-group"></i></span>
+                    <span class="brand-text">GRH<small>Ressources humaines</small></span>
+                </a>
+                <button type="button" class="sidebar-close d-lg-none" data-sidebar-close aria-label="Fermer le menu">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <!-- ---------- RH ---------- -->
+                <th:block th:if="${session.user.type == 'RH'}">
+                    <div class="nav-section">Recrutement</div>
+                    <a class="sidebar-link" th:href="@{/admin/besoins}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/besoins')} ? 'active'">
+                        <i class="fa-solid fa-clipboard-list"></i><span>Besoins</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/offres}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/offres')} ? 'active'">
+                        <i class="fa-solid fa-bullhorn"></i><span>Offres à publier</span>
+                        <span class="sidebar-badge" th:if="${offresAPublier != null and offresAPublier > 0}" th:text="${offresAPublier}">0</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/candidatures}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/candidatures') and !#strings.contains(uriCourante, '/tests') and !#strings.contains(uriCourante, '/entretiens')} ? 'active'">
+                        <i class="fa-solid fa-folder-open"></i><span>Candidatures</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/candidatures/tests}"
+                       th:classappend="${uriCourante == '/admin/candidatures/tests'} ? 'active'">
+                        <i class="fa-solid fa-flask"></i><span>Tests techniques</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/candidatures/entretiens}"
+                       th:classappend="${uriCourante == '/admin/candidatures/entretiens'} ? 'active'">
+                        <i class="fa-solid fa-comments"></i><span>Entretiens</span></a>
+
+                    <div class="nav-section">Personnel</div>
+                    <a class="sidebar-link" th:href="@{/admin/candidats}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/candidats')} ? 'active'">
+                        <i class="fa-solid fa-user-graduate"></i><span>Candidats</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/contrats}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/contrats')} ? 'active'">
+                        <i class="fa-solid fa-file-contract"></i><span>Contrats</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/employes}"
+                       th:classappend="${uriCourante == '/admin/employes'} ? 'active'">
+                        <i class="fa-solid fa-users"></i><span>Employés</span></a>
+                    <a class="sidebar-link" th:href="@{/admin/employes/historique}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/admin/employes/historique')} ? 'active'">
+                        <i class="fa-solid fa-clock-rotate-left"></i><span>Historique</span></a>
+
+                    <div class="nav-section">Communication</div>
+                    <a class="sidebar-link" th:href="@{/rh/{id}/notifications(id=${session.user.id})}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/rh/')} ? 'active'">
+                        <i class="fa-regular fa-bell"></i><span>Notifications</span>
+                        <span class="sidebar-badge" th:if="${notifsNonLues != null and notifsNonLues > 0}" th:text="${notifsNonLues}">0</span></a>
+                    <a class="sidebar-link" th:href="@{/api/candidat/offres}">
+                        <i class="fa-solid fa-globe"></i><span>Site carrières</span></a>
+                </th:block>
+
+                <!-- ---------- Direction générale ---------- -->
+                <th:block th:if="${session.user.type == 'DG'}">
+                    <div class="nav-section">Validation</div>
+                    <a class="sidebar-link" th:href="@{/dg/besoins}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/dg/besoins')} ? 'active'">
+                        <i class="fa-solid fa-clipboard-check"></i><span>Besoins à valider</span></a>
+                    <a class="sidebar-link" th:href="@{/dg/contrats}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/dg/contrats')} ? 'active'">
+                        <i class="fa-solid fa-stamp"></i><span>Contrats</span></a>
+                </th:block>
+
+                <!-- ---------- Directeur ---------- -->
+                <th:block th:if="${session.user.type == 'DIRECTEUR'}">
+                    <div class="nav-section">Ma direction</div>
+                    <a class="sidebar-link" th:href="@{/directeur/besoins/nouveau}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/directeur/besoins')} ? 'active'">
+                        <i class="fa-solid fa-square-plus"></i><span>Nouveau besoin</span></a>
+                </th:block>
+
+                <!-- ---------- Finance ---------- -->
+                <th:block th:if="${session.user.type == 'FINANCE'}">
+                    <div class="nav-section">Validation</div>
+                    <a class="sidebar-link" th:href="@{/finance/besoins}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/finance/besoins')} ? 'active'">
+                        <i class="fa-solid fa-coins"></i><span>Besoins à valider</span></a>
+                </th:block>
+
+                <!-- ---------- Candidat ---------- -->
+                <th:block th:if="${session.user.type == 'CANDIDAT'}">
+                    <div class="nav-section">Mon espace</div>
+                    <a class="sidebar-link" th:href="@{/candidats/{id}/notifications(id=${session.user.id})}"
+                       th:classappend="${uriCourante != null and (#strings.startsWith(uriCourante, '/candidats/') or #strings.startsWith(uriCourante, '/candidat/notifications'))} ? 'active'">
+                        <i class="fa-regular fa-bell"></i><span>Notifications</span>
+                        <span class="sidebar-badge" th:if="${notifsNonLues != null and notifsNonLues > 0}" th:text="${notifsNonLues}">0</span></a>
+                    <a class="sidebar-link" th:href="@{/candidat/contrats}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/candidat/contrats')} ? 'active'">
+                        <i class="fa-solid fa-file-signature"></i><span>Mes contrats</span></a>
+                    <a class="sidebar-link" th:href="@{/candidat/integration}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/candidat/integration')} ? 'active'">
+                        <i class="fa-solid fa-list-check"></i><span>Mon intégration</span></a>
+
+                    <div class="nav-section">Carrières</div>
+                    <a class="sidebar-link" th:href="@{/api/candidat/offres}"
+                       th:classappend="${uriCourante != null and #strings.startsWith(uriCourante, '/api/candidat')} ? 'active'">
+                        <i class="fa-solid fa-briefcase"></i><span>Offres d’emploi</span></a>
+                </th:block>
+            </nav>
+
+            <!-- Carte utilisateur + déconnexion -->
+            <div class="sidebar-user">
+                <span class="avatar" th:text="${#strings.toUpperCase(#strings.substring(session.user.email, 0, 1))}">U</span>
+                <span class="qui">
+                    <span class="nom" th:text="${session.user.email}">email</span>
+                    <small th:switch="${session.user.type}">
+                        <th:block th:case="'RH'">Ressources humaines</th:block>
+                        <th:block th:case="'DG'">Direction générale</th:block>
+                        <th:block th:case="'DIRECTEUR'">Directeur</th:block>
+                        <th:block th:case="'FINANCE'">Finance</th:block>
+                        <th:block th:case="*">Candidat</th:block>
+                    </small>
+                </span>
+                <form th:action="@{/logout}" method="post">
+                    <button class="sidebar-logout" type="submit" title="Se déconnecter" aria-label="Se déconnecter">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </form>
+            </div>
+        </aside>
+        <div class="sidebar-backdrop" data-sidebar-close></div>
+
+        <!-- Barre supérieure -->
+        <div class="app-topbar">
+            <button type="button" class="topbar-btn d-lg-none" data-sidebar-toggle aria-label="Ouvrir le menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="topbar-title" th:switch="${session.user.type}">
+                <th:block th:case="'RH'">Espace ressources humaines</th:block>
+                <th:block th:case="'DG'">Espace direction générale</th:block>
+                <th:block th:case="'DIRECTEUR'">Espace directeur</th:block>
+                <th:block th:case="'FINANCE'">Espace finance</th:block>
+                <th:block th:case="*">Espace candidat</th:block>
+            </div>
+            <div class="topbar-actions">
+                <a class="topbar-btn position-relative" title="Notifications"
+                   th:if="${session.user.type == 'RH' or session.user.type == 'CANDIDAT'}"
+                   th:href="${session.user.type == 'RH'} ? @{/rh/{id}/notifications(id=${session.user.id})} : @{/candidats/{id}/notifications(id=${session.user.id})}">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="topbar-dot" th:if="${notifsNonLues != null and notifsNonLues > 0}" th:text="${notifsNonLues}">0</span>
+                </a>
+                <span class="topbar-user d-none d-md-flex">
+                    <span class="avatar" th:text="${#strings.toUpperCase(#strings.substring(session.user.email, 0, 1))}">U</span>
+                    <span class="nom" th:text="${session.user.email}">email</span>
+                </span>
+                <form th:action="@{/logout}" method="post" class="m-0">
+                    <button class="btn btn-logout" type="submit">
+                        <i class="fa-solid fa-right-from-bracket"></i><span class="d-none d-sm-inline ms-2">Déconnexion</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </th:block>
+
+    <!-- ========================= Visiteur ========================= -->
+    <nav class="public-nav" th:unless="${session.user != null}">
+        <div class="container-xl d-flex align-items-center gap-3">
+            <a class="brand" th:href="@{/}">
+                <span class="brand-logo"><i class="fa-solid fa-people-group"></i></span>
+                <span class="brand-text">GRH<small>Carrières</small></span>
+            </a>
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <a class="public-link d-none d-sm-inline-flex" th:href="@{/api/candidat/offres}"><i class="fa-solid fa-briefcase me-2"></i>Offres d’emploi</a>
+                <a class="btn btn-primary btn-sm" th:href="@{/login}"><i class="fa-solid fa-right-to-bracket me-1"></i> Connexion</a>
+            </div>
+        </div>
+    </nav>
+</header>
+</body>
+</html>

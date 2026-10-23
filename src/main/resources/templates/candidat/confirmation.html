@@ -1,14 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Candidature envoyée</title></head>
+<head th:replace="~{fragments :: head('Candidature envoyée')}"></head>
 <body>
-<main>
-    <h1>Candidature envoyée</h1>
-    <p>Votre dossier pour l’offre « <span th:text="${candidature.offre.titre}"></span> » a été transmis.</p>
-    <p>Conservez ce code privé pour consulter votre statut et vos convocations :</p>
-    <p><strong th:text="${candidature.codeSuivi}"></strong></p>
-    <p><a th:href="@{/api/candidat/suivi/{code}(code=${candidature.codeSuivi})}">Consulter le suivi</a></p>
-    <p><a href="/api/candidat/offres">Retour aux offres</a></p>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 720px">
+    <div class="card-grh card-corps text-center">
+        <span class="icone mx-auto mb-3"><i class="fa-solid fa-circle-check"></i></span>
+        <h1 class="h3 fw-bold">Candidature envoyée</h1>
+        <p>Votre dossier pour l’offre « <strong th:text="${candidature.offre.titre}">offre</strong> » a bien été transmis.</p>
+
+        <div class="alert alert-info text-start">
+            <p class="fw-semibold mb-1"><i class="fa-solid fa-key me-1"></i> Votre code de suivi</p>
+            <p class="mb-0">Conservez ce code pour consulter votre statut et vos convocations :</p>
+            <p class="fs-5 fw-bold mb-0" th:text="${candidature.codeSuivi}">CODE</p>
+        </div>
+
+        <div class="alert alert-warning text-start">
+            <p class="mb-0"><i class="fa-solid fa-circle-info me-1"></i>
+                Pour répondre à une proposition d’embauche, choisir votre contrat puis le signer,
+                <strong>connectez-vous</strong> avec l’adresse e-mail et le mot de passe saisis lors de votre candidature.</p>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-center gap-2">
+            <a class="btn btn-primary" th:href="@{/api/candidat/suivi/{code}(code=${candidature.codeSuivi})}">
+                <i class="fa-solid fa-magnifying-glass-chart me-1"></i> Consulter le suivi</a>
+            <a class="btn btn-outline-primary" th:href="@{/login}">
+                <i class="fa-solid fa-right-to-bracket me-1"></i> Se connecter</a>
+            <a class="btn btn-link" href="/api/candidat/offres">Retour aux offres</a>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

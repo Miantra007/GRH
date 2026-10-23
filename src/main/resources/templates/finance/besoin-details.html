@@ -1,5 +1,79 @@
 <!DOCTYPE html>
-<html lang="fr" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Décision financière')}"></head><body><header th:replace="~{fragments :: nav}"></header><main class="container-xl py-4">
-<div class="page-header d-flex align-items-center gap-3 mb-4"><span class="icone"><i class="fa-solid fa-scale-balanced"></i></span><div><h1 th:text="'Besoin n°' + ${besoin.id}"></h1><p class="text-muted mb-0">Accepter ou refuser le salaire de chaque poste.</p></div></div><div th:replace="~{fragments :: messages}"></div><form th:action="@{/finance/besoins/{id}(id=${besoin.id})}" th:object="${formulaire}" method="post">
-<section class="card-grh card-corps mb-3" th:each="poste, statut : ${postes}"><h2 class="titre-section mb-3" th:text="${poste.poste.libelle}"></h2><input type="hidden" th:field="*{lignes[__${statut.index}__].besoinPosteId}"><p class="encart info">Salaire suggéré par RH : <strong class="ms-1" th:text="${poste.salaireProposeRh}"></strong></p><div class="row g-3"><div class="col-md-4"><label class="form-label">Décision</label><select class="form-select" th:field="*{lignes[__${statut.index}__].decision}" required><option value="">Sélectionner</option><option value="ACCEPTEE">Accepter</option><option value="REFUSEE">Refuser</option></select></div><div class="col-md-8"><label class="form-label">Commentaire</label><textarea class="form-control" rows="2" th:field="*{lignes[__${statut.index}__].commentaire}"></textarea></div></div></section>
-<section class="card-grh card-corps mb-3"><label class="form-label">Commentaire global</label><textarea class="form-control" rows="3" th:field="*{commentaireFinance}"></textarea></section><div class="d-flex gap-2"><a class="btn btn-light border" th:href="@{/finance/besoins}">Retour</a><button class="btn btn-primary" type="submit">Enregistrer la décision</button></div></form></main><th:block th:replace="~{fragments :: scripts}"></th:block></body></html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Décision financière')}"></head>
+<body>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 980px">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-scale-balanced"></i></span>
+        <div>
+            <h1 th:text="'Besoin n°' + ${besoin.id}">Besoin</h1>
+            <p class="small mb-0">Pour chaque poste, acceptez le salaire proposé par le RH, ou refusez-le et proposez le vôtre :
+                c’est votre salaire qui sera retenu. Le besoin part ensuite à la Direction générale.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <form th:action="@{/finance/besoins/{id}(id=${besoin.id})}" th:object="${formulaire}" method="post">
+        <section class="card-grh card-corps mb-3 ligne-finance" th:each="poste, statut : ${postes}">
+            <input type="hidden" th:field="*{lignes[__${statut.index}__].besoinPosteId}">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <h2 class="titre-section" th:text="${poste.poste.libelle}">Poste</h2>
+                <span class="badge-type" th:text="${poste.nombrePostes} + ' poste(s)'">1 poste</span>
+            </div>
+            <div class="encart info mb-3">
+                <i class="fa-solid fa-coins"></i>
+                <div>Salaire proposé par le RH : <strong th:text="${#numbers.formatDecimal(poste.salaireProposeRh, 0, 'WHITESPACE', 0, 'POINT')} + ' Ar'">0 Ar</strong></div>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Décision</label>
+                    <select class="form-select choix-decision" th:field="*{lignes[__${statut.index}__].decision}" required>
+                        <option value="">Sélectionner</option>
+                        <option value="ACCEPTEE">Accepter le salaire RH</option>
+                        <option value="REFUSEE">Refuser et proposer un salaire</option>
+                    </select>
+                </div>
+                <div class="col-md-4 champ-salaire-finance" hidden>
+                    <label class="form-label">Salaire proposé par la Finance (Ar)</label>
+                    <input class="form-control" type="number" min="0" step="1" placeholder="Ex. 1 500 000"
+                           th:field="*{lignes[__${statut.index}__].salaireFinance}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Commentaire</label>
+                    <textarea class="form-control" rows="1" th:field="*{lignes[__${statut.index}__].commentaire}"></textarea>
+                </div>
+            </div>
+        </section>
+
+        <section class="card-grh card-corps mb-3">
+            <label class="form-label">Commentaire global</label>
+            <textarea class="form-control" rows="3" th:field="*{commentaireFinance}"></textarea>
+        </section>
+
+        <div class="d-flex gap-2">
+            <a class="btn btn-light border" th:href="@{/finance/besoins}">Retour</a>
+            <button class="btn btn-primary" type="submit"><i class="fa-solid fa-paper-plane me-1"></i>Valider et envoyer à la Direction générale</button>
+        </div>
+    </form>
+</main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
+<script>
+    // Le salaire Finance n'est demandé (et obligatoire) que lorsque le salaire RH est refusé.
+    document.querySelectorAll('.ligne-finance').forEach(ligne => {
+        const choix = ligne.querySelector('.choix-decision');
+        const bloc = ligne.querySelector('.champ-salaire-finance');
+        const champ = bloc.querySelector('input');
+        const maj = () => {
+            const refus = choix.value === 'REFUSEE';
+            bloc.hidden = !refus;
+            champ.required = refus;
+            if (!refus) champ.value = '';
+        };
+        choix.addEventListener('change', maj);
+        maj();
+    });
+</script>
+</body>
+</html>

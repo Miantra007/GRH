@@ -11,4 +11,9 @@ public interface NotificationRepository extends JpaRepository<Notification, Inte
     
 
     List<Notification> findByIdCandidatureOrderByDateCreationDesc(Integer candidatureId);
+
+    // Compteurs de notifications non lues (badge du menu)
+    long countByIdCandidatAndLuFalse(Integer idCandidat);
+
+    long countByIdResponsableAndLuFalse(Integer idResponsable);
 }

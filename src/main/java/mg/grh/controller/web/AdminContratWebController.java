@@ -90,8 +90,9 @@ public class AdminContratWebController {
     public String valider(@PathVariable Integer id, HttpSession session, RedirectAttributes ra) {
         try {
             SessionUser rh = (SessionUser) session.getAttribute("user");
-            contratService.valider(id, rh.getId());
-            ra.addFlashAttribute("succes", "Contrat validé par le RH. Le candidat a été notifié.");
+            mg.grh.dto.ResultatValidation resultat = contratService.valider(id, rh.getId());
+            ra.addFlashAttribute("succes", "Contrat validé par le RH. Le candidat a été notifié. "
+                    + resultat.embauche().message());
         } catch (RuntimeException e) {
             ra.addFlashAttribute("erreur", e.getMessage());
         }

@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Nouveau besoin')}" ></head>
 <body>
-<header th:replace="~{fragments :: nav}"></header>
+<header th:replace="~{header :: nav}"></header>
 <main class="container-xl py-4">
     <div class="page-header mb-4">
         <h1>Nouveau besoin de recrutement</h1>
@@ -45,9 +45,8 @@
         <div id="postes">
             <section class="border rounded p-3 mb-3 poste" th:each="poste, statut : *{postes}">
                 <div class="row g-3">
-                    <div class="col-md-5"><label class="form-label">Libellé</label><input class="form-control" th:field="*{postes[__${statut.index}__].libelle}" required></div>
-                    <div class="col-md-2"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" th:field="*{postes[__${statut.index}__].nombrePostes}" required></div>
-                    <div class="col-md-5"><label class="form-label">Type de contrat</label><select class="form-select" th:field="*{postes[__${statut.index}__].typeContratId}" required><option value="">Sélectionner</option><option th:each="type : ${typesContrat}" th:value="${type.id}" th:text="${type.libelle}"></option></select></div>
+                    <div class="col-md-9"><label class="form-label">Poste de votre direction</label><select class="form-select" th:field="*{postes[__${statut.index}__].posteId}" required><option value="">Sélectionner un poste</option><option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.libelle}"></option></select></div>
+                    <div class="col-md-3"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" th:field="*{postes[__${statut.index}__].nombrePostes}" required></div>
                     <div class="col-md-6"><label class="form-label">Missions</label><textarea class="form-control" rows="2" th:field="*{postes[__${statut.index}__].missions}"></textarea></div>
                     <div class="col-md-3"><label class="form-label">Horaire</label><input class="form-control" th:field="*{postes[__${statut.index}__].horaireTravail}"></div>
                     <div class="col-md-3"><label class="form-label">Prise de poste</label><input class="form-control" type="date" th:field="*{postes[__${statut.index}__].datePrisePoste}"></div>
@@ -62,9 +61,8 @@
 <template id="poste-template">
     <section class="border rounded p-3 mb-3 poste">
         <div class="row g-3">
-            <div class="col-md-5"><label class="form-label">Libellé</label><input class="form-control" name="postes[__index__].libelle" required></div>
-            <div class="col-md-2"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" name="postes[__index__].nombrePostes" required></div>
-            <div class="col-md-5"><label class="form-label">Type de contrat</label><select class="form-select" name="postes[__index__].typeContratId" required><option value="">Sélectionner</option><option th:each="type : ${typesContrat}" th:value="${type.id}" th:text="${type.libelle}"></option></select></div>
+            <div class="col-md-9"><label class="form-label">Poste de votre direction</label><select class="form-select" name="postes[__index__].posteId" required><option value="">Sélectionner un poste</option><option th:each="p : ${postes}" th:value="${p.id}" th:text="${p.libelle}"></option></select></div>
+            <div class="col-md-3"><label class="form-label">Nombre</label><input class="form-control" min="1" type="number" name="postes[__index__].nombrePostes" required></div>
             <div class="col-md-6"><label class="form-label">Missions</label><textarea class="form-control" rows="2" name="postes[__index__].missions"></textarea></div>
             <div class="col-md-3"><label class="form-label">Horaire</label><input class="form-control" name="postes[__index__].horaireTravail"></div>
             <div class="col-md-3"><label class="form-label">Prise de poste</label><input class="form-control" type="date" name="postes[__index__].datePrisePoste"></div>

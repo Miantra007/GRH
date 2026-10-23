@@ -2,16 +2,46 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Mes notifications')}"></head>
 <body>
-<main class="container">
-    <h1>Mes notifications</h1>
-    <p>Messages transmis par les responsables au sujet de vos candidatures.</p>
-    <article class="card" th:each="n : ${notifications}">
-        <h2 th:text="${n.titre}"></h2>
-        <p th:text="${n.message}"></p>
-        <time th:text="${n.dateCreation}"></time>
-    </article>
-    <p th:if="${#lists.isEmpty(notifications)}">Vous n’avez pas encore reçu de notification.</p>
-    <p><a th:href="@{/api/candidat/offres}">Consulter les offres et le suivi public</a></p>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 820px">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-regular fa-bell"></i></span>
+        <div>
+            <h1>Mes notifications</h1>
+            <p class="text-muted small mb-0">Messages transmis par les responsables au sujet de vos candidatures.</p>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh etat-vide" th:if="${#lists.isEmpty(notifications)}">
+        <i class="fa-regular fa-bell-slash"></i>
+        <p class="fw-semibold text-body mb-0">Vous n’avez pas encore reçu de notification.</p>
+    </div>
+
+    <div class="card-grh card-corps mb-3" th:each="n : ${notifications}">
+        <div class="d-flex flex-wrap justify-content-between gap-2 mb-1">
+            <h2 class="h6 fw-bold mb-0" th:text="${n.titre}">Titre</h2>
+            <span class="text-muted small"><i class="fa-regular fa-clock me-1"></i><span
+                    th:text="${#temporals.format(n.dateCreation, 'dd/MM/yyyy HH:mm')}">date</span></span>
+        </div>
+        <p class="mb-2" th:text="${n.message}">Message</p>
+
+        <!-- Boutons contextuels selon le statut de la proposition citée -->
+        <th:block th:if="${n.idProposition != null and propositions.containsKey(n.idProposition)}">
+            <a class="btn btn-outline-primary btn-sm"
+               th:if="${propositions.get(n.idProposition).statut.libelle == 'EN_ATTENTE_CANDIDAT'}"
+               th:href="@{/candidats/{c}/propositions/{p}(c=${session.user.id},p=${n.idProposition})}">
+                <i class="fa-solid fa-file-pen me-1"></i> Remplir le formulaire d’acceptation</a>
+            <a class="btn btn-primary btn-sm"
+               th:if="${propositions.get(n.idProposition).statut.libelle == 'ACCORD_FINAL'}"
+               th:href="@{/candidat/contrats/nouveau(propositionId=${n.idProposition})}">
+                <i class="fa-solid fa-file-signature me-1"></i> Choisir mon contrat</a>
+        </th:block>
+    </div>
+
+    <p class="mt-3"><a class="btn btn-link px-0" th:href="@{/api/candidat/offres}">Consulter les offres</a></p>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

@@ -1,14 +1,33 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title th:text="${offre.titre}">Offre</title></head>
+<head th:replace="~{fragments :: head(${offre.titre})}"></head>
 <body>
-<main>
-    <p><a href="/api/candidat/offres">Retour aux offres</a></p>
-    <h1 th:text="${offre.titre}">Titre de l’offre</h1>
-    <p><strong>Profil recherché</strong></p><p th:text="${offre.profilRecherche}"></p>
-    <p><strong>Description</strong></p><p th:text="${offre.description}"></p>
-    <p th:if="${offre.dateLimite}">Date limite : <time th:text="${offre.dateLimite}"></time></p>
-    <a th:href="@{/api/candidat/offres/{id}/postuler(id=${offre.id})}">Postuler</a>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4" style="max-width: 820px">
+    <a class="btn btn-link px-0 mb-2" href="/api/candidat/offres"><i class="fa-solid fa-arrow-left me-1"></i> Retour aux offres</a>
+
+    <div th:replace="~{fragments :: messages}"></div>
+
+    <div class="card-grh card-corps">
+        <div class="page-header d-flex align-items-center gap-3 mb-3">
+            <span class="icone"><i class="fa-solid fa-briefcase"></i></span>
+            <h1 class="mb-0" th:text="${offre.titre}">Titre de l’offre</h1>
+        </div>
+
+        <h2 class="h6 fw-bold text-uppercase text-muted">Profil recherché</h2>
+        <p th:text="${offre.profilRecherche}">—</p>
+
+        <h2 class="h6 fw-bold text-uppercase text-muted mt-3">Description</h2>
+        <p th:text="${offre.description}">—</p>
+
+        <p class="small text-muted" th:if="${offre.dateLimite}">
+            <i class="fa-regular fa-calendar me-1"></i> Date limite : <time th:text="${offre.dateLimite}"></time>
+        </p>
+
+        <a class="btn btn-primary mt-2" th:href="@{/api/candidat/offres/{id}/postuler(id=${offre.id})}">
+            <i class="fa-solid fa-paper-plane me-1"></i> Postuler à cette offre</a>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

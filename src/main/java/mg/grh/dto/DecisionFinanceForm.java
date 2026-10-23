@@ -17,5 +17,7 @@ public class DecisionFinanceForm {
         private Integer besoinPosteId;
         private String decision;
         private String commentaire;
+        /** Salaire proposé par la Finance quand elle refuse celui du RH : c'est lui qui est retenu. */
+        private java.math.BigDecimal salaireFinance;
     }
 }

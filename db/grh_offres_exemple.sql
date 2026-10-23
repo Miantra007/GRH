@@ -4,8 +4,11 @@
 \c grh
 BEGIN;
 
-INSERT INTO type_besoin (libelle) VALUES ('CREATION') ON CONFLICT (libelle) DO NOTHING;
-INSERT INTO statut_besoin (libelle) VALUES ('VALIDEE') ON CONFLICT (libelle) DO NOTHING;
+INSERT INTO type_besoin (libelle) VALUES ('CREATION'), ('REMPLACEMENT') ON CONFLICT (libelle) DO NOTHING;
+-- Statuts couvrant tout le workflow besoin (directeur -> RH -> finance -> DG).
+INSERT INTO statut_besoin (libelle) VALUES
+    ('BROUILLON'), ('EN_ATTENTE_RH'), ('EN_ATTENTE_FINANCE'), ('EN_ATTENTE_DG'), ('VALIDEE'), ('REFUSEE')
+  ON CONFLICT (libelle) DO NOTHING;
 INSERT INTO type_contrat (libelle) VALUES ('CDI'), ('CDD'), ('STAGE') ON CONFLICT (libelle) DO NOTHING;
 INSERT INTO statut_offre (libelle) VALUES ('PUBLIEE') ON CONFLICT (libelle) DO NOTHING;
 
@@ -72,3 +75,19 @@ BEGIN
 END $$;
 
 COMMIT;
+
+
+
+
+-- Compte Finance (rôle « Financier »). Mot de passe : motdepasse123.
+-- Le mot de passe doit être stocké haché en BCrypt : un mot de passe en clair ne permet pas de se connecter.
+INSERT INTO responsable (id_role, id_statut_employe, email, mot_de_passe, date_embauche)
+SELECT (SELECT id_role FROM role WHERE libelle = 'Financier'),
+       (SELECT id_statut_employe FROM statut_employe WHERE libelle = 'ACTIF'),
+       'finance@entreprise.mg',
+       '$2b$12$AL9SLkK5ftyES4VMS/kY7u6HFPsSRN5kwJzOlR/H7jOfXsr0ylsWG',
+       DATE '2016-04-04'
+WHERE NOT EXISTS (SELECT 1 FROM responsable WHERE email = 'finance@entreprise.mg');
+
+UPDATE responsable SET mot_de_passe = '$2b$12$AL9SLkK5ftyES4VMS/kY7u6HFPsSRN5kwJzOlR/H7jOfXsr0ylsWG'
+WHERE email = 'finance@entreprise.mg' AND mot_de_passe NOT LIKE '$2%';

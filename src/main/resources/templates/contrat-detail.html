@@ -2,7 +2,7 @@
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
 <head th:replace="~{fragments :: head('Contrat')}"></head>
 <body th:with="etat=${cc.statutActuel?.libelle}, role=${session.user.type}">
-<header th:replace="~{fragments :: nav}"></header>
+<header th:replace="~{header :: nav}"></header>
 <main class="container-xl py-4">
 
     <div class="page-header d-flex flex-wrap align-items-center gap-3 mb-4">

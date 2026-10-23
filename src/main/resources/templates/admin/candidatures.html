@@ -1,22 +1,44 @@
 <!DOCTYPE html>
 <html lang="fr" xmlns:th="http://www.thymeleaf.org">
-<head><meta charset="UTF-8"><title>Candidatures reçues</title></head>
+<head th:replace="~{fragments :: head('Candidatures reçues')}"></head>
 <body>
-<header th:replace="~{fragments :: nav}"></header>
-<main>
+<header th:replace="~{header :: nav}"></header>
+<main class="container-xl py-4">
+    <div class="page-header d-flex align-items-center gap-3 mb-4">
+        <span class="icone"><i class="fa-solid fa-folder-open"></i></span>
+        <div>
+            <h1>Candidatures reçues</h1>
+            <p class="text-muted small mb-0">Étudiez les dossiers et lancez la sélection.</p>
+        </div>
+    </div>
+
     <div th:replace="~{fragments :: messages}"></div>
-    <h1>Candidatures reçues</h1>
-    <table>
-        <thead><tr><th>Offre</th><th>Candidat</th><th>Email</th><th>Date de réception</th><th>Statut</th><th>Dossier</th></tr></thead>
-        <tbody>
-        <tr th:each="c : ${candidatures}">
-            <td th:text="${c.offre.titre}"></td><td th:text="|${c.candidat.prenomCandidat} ${c.candidat.nomCandidat}|"></td>
-            <td th:text="${c.candidat.email}"></td><td th:text="${c.dateCandidature}"></td><td th:text="${c.statut.libelle}"></td>
-            <td><a th:href="@{/admin/candidatures/{id}(id=${c.id})}">Ouvrir le dossier</a></td>
-        </tr>
-        <tr th:if="${#lists.isEmpty(candidatures)}"><td colspan="6">Aucune candidature reçue.</td></tr>
-        </tbody>
-    </table>
+
+    <div class="card-grh overflow-hidden">
+        <div class="table-responsive" th:unless="${#lists.isEmpty(candidatures)}">
+            <table class="table table-grh mb-0">
+                <thead><tr><th>Offre</th><th>Candidat</th><th>Email</th><th>Reçue le</th><th>Statut</th><th class="col-actions"></th></tr></thead>
+                <tbody>
+                <tr th:each="c : ${candidatures}">
+                    <td th:text="${c.offre.titre}">Offre</td>
+                    <td th:text="|${c.candidat.prenomCandidat} ${c.candidat.nomCandidat}|">Candidat</td>
+                    <td class="text-muted small" th:text="${c.candidat.email}">email</td>
+                    <td class="text-muted small"><time th:text="${#temporals.format(c.dateCandidature, 'dd/MM/yyyy')}">date</time></td>
+                    <td><span class="badge-type" th:text="${c.statut.libelle}">statut</span></td>
+                    <td class="col-actions">
+                        <a class="btn btn-primary btn-sm" th:href="@{/admin/candidatures/{id}(id=${c.id})}">
+                            <i class="fa-regular fa-folder-open me-1"></i> Ouvrir le dossier</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="etat-vide" th:if="${#lists.isEmpty(candidatures)}">
+            <i class="fa-solid fa-inbox"></i>
+            <p class="fw-semibold text-body mb-0">Aucune candidature reçue.</p>
+        </div>
+    </div>
 </main>
+<th:block th:replace="~{fragments :: scripts}"></th:block>
 </body>
 </html>

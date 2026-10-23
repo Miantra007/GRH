@@ -185,17 +185,28 @@ public class ContratCandidatService {
         return validerEtEmbaucher(contratCandidatId).contrat();
     }
 
-    /** Validation de la tâche Contrat : le RH responsable valide, sans traiter l'embauche. */
-    public ContratCandidat valider(Integer contratCandidatId, Integer rhId) {
+    /**
+     * Validation de la tâche Contrat par le RH responsable : passe le contrat à « Validé »,
+     * applique la règle du besoin (CREATION : le candidat devient employé ; REMPLACEMENT :
+     * l'occupant est suspendu et archivé, le candidat prend sa place) puis notifie le candidat
+     * avec le rappel de ses consignes d'intégration. Tout est dans la même transaction : si
+     * l'embauche est impossible, la validation est annulée et le contrat reste « Signé ».
+     */
+    public ResultatValidation valider(Integer contratCandidatId, Integer rhId) {
         ContratCandidat cc = findById(contratCandidatId);
         if (cc.getProposition() == null || cc.getIdCandidature() == null)
             throw new IllegalStateException("Le contrat doit être lié à une proposition acceptée.");
         PropositionInfo info = propositionRepo.findInfo(cc.getProposition().getId()).orElseThrow();
         if (!rhId.equals(info.getIdRhTraitant())) throw new SecurityException("Seul le RH chargé de cette proposition peut valider le contrat.");
         exigerStatut(cc, SIGNE, "valider"); changerStatut(cc, VALIDE);
+        // Embauche selon le type du besoin (CREATION / REMPLACEMENT).
+        ResultatEmbauche embauche = embaucheService.embaucher(cc);
         notificationRepo.save(Notification.pour(cc.getCandidat().getId(), null, cc.getProposition().getId(),
-                "Contrat validé par le RH", "Votre contrat est validé. Consultez « Mon intégration » pour les consignes à suivre."));
-        return cc;
+                "Contrat validé par le RH",
+                "Votre contrat est validé. " + embauche.message()
+                        + " Consultez « Mon intégration » pour les démarches à effectuer "
+                        + "(compte bancaire, matériel, formations à suivre)."));
+        return new ResultatValidation(cc, embauche);
     }
 
     /**

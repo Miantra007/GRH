@@ -21,7 +21,7 @@ public class AuthWebController {
 
     @GetMapping("/")
     public String accueil() {
-        return "redirect:/login";
+        return "redirect:/api/candidat/offres";
     }
 
     @GetMapping("/login")
