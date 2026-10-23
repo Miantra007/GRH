@@ -28,15 +28,19 @@ public class CandidatContratWebController {
     private final ConventionCollectiveService conventionService;
     private final PosteService posteService;
     private final MotifCddService motifService;
+    private final NationaliteService nationaliteService;
+    private final CiviliteService civiliteService;
 
     public CandidatContratWebController(ContratCandidatService contratService, PropositionEmbaucheRepository propositions,
             CandidatService candidatService, EmployeurService employeurService, TravailleurService travailleurService,
             LangueContratService langueService, CategorieProfessionnelleService categorieService,
-            ConventionCollectiveService conventionService, PosteService posteService, MotifCddService motifService) {
+            ConventionCollectiveService conventionService, PosteService posteService, MotifCddService motifService,
+            NationaliteService nationaliteService, CiviliteService civiliteService) {
         this.contratService = contratService;
         this.propositions = propositions; this.candidatService = candidatService; this.employeurService = employeurService;
         this.travailleurService = travailleurService; this.langueService = langueService; this.categorieService = categorieService;
         this.conventionService = conventionService; this.posteService = posteService; this.motifService = motifService;
+        this.nationaliteService = nationaliteService; this.civiliteService = civiliteService;
     }
 
     @GetMapping("/contrats/nouveau")
@@ -55,6 +59,7 @@ public class CandidatContratWebController {
         model.addAttribute("langues", langueService.findAll()); model.addAttribute("categories", categorieService.findAll());
         model.addAttribute("conventions", conventionService.findAll()); model.addAttribute("postes", posteService.findAll());
         model.addAttribute("motifs", motifService.findAll()); model.addAttribute("salaire", proposition.getSalaireFinal());
+        model.addAttribute("nationalites", nationaliteService.findAll()); model.addAttribute("civilites", civiliteService.findAll());
         model.addAttribute("datePrisePoste", info.getDatePrisePoste()); model.addAttribute("missions", info.getMissions());
         model.addAttribute("datePrisePosteInput", java.time.LocalDate.parse(info.getDatePrisePoste(), java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")));
         model.addAttribute("horaire", info.getHoraireTravail());

@@ -63,6 +63,16 @@
                 <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
                 <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
                 <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
+                <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                    <select class="form-select" name="travailleur.nationalite.id" required>
+                        <option value="">— Choisir —</option>
+                        <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.nomNationalite}"></option>
+                    </select></div>
+                <div class="col-md-6"><label class="form-label">Civilité</label>
+                    <select class="form-select" name="travailleur.civilite.id">
+                        <option value="">—</option>
+                        <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
+                    </select></div>
                 <div class="col-md-6"><label class="form-label">CIN</label><input class="form-control" type="text" name="travailleur.cinNumero"></div>
                 <div class="col-md-6"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="travailleur.telephone"></div>
             </div>
