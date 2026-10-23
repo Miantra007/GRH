@@ -40,6 +40,11 @@ public class CandidatureService extends GenericService<Candidature> {
         return candidatures.countByOffreId(offre.getId());
     }
 
+    /** Postes encore libres : nombre de postes moins les candidats déjà retenus (proposition non refusée). */
+    public long postesRestants(OffreEmploi offre) {
+        return Math.max(0, nombrePostes(offre) - candidatures.countRetenusActifs(offre.getId()));
+    }
+
     public boolean selectionOuverte(OffreEmploi offre) {
         return nombreCandidatures(offre) >= seuilCandidatures(offre);
     }
@@ -96,6 +101,9 @@ public class CandidatureService extends GenericService<Candidature> {
                 "NON_RETENUE", java.util.Set.of());
         if (!actuel.equals(libelle) && !transitions.getOrDefault(actuel, java.util.Set.of()).contains(libelle))
             throw new IllegalStateException("Transition de candidature interdite : " + actuel + " → " + libelle + ".");
+        if ("RETENUE".equals(libelle) && !"RETENUE".equals(actuel) && postesRestants(c.getOffre()) == 0)
+            throw new IllegalStateException("Tous les postes de l’offre « " + c.getOffre().getTitre()
+                    + " » sont déjà attribués : impossible de retenir un autre candidat.");
         c.setStatut(statuts.findByLibelle(libelle).orElseThrow(() -> new IllegalArgumentException("Statut inconnu.")));
         return candidatures.save(c);
     }

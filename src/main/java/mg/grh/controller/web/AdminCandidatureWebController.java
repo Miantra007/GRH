@@ -115,7 +115,8 @@ public class AdminCandidatureWebController {
                     .add(new EntretienRow(candidature, entretien));
         }
         model.addAttribute("groupes", parOffre.values().stream()
-                .map(rows -> new GroupeEntretiens(rows.get(0).getCandidature().getOffre(), rows))
+                .map(rows -> new GroupeEntretiens(rows.get(0).getCandidature().getOffre(), rows,
+                        candidatureService.postesRestants(rows.get(0).getCandidature().getOffre())))
                 .sorted(Comparator.comparing(g -> g.getOffre().getTitre(), String.CASE_INSENSITIVE_ORDER)).toList());
         return "admin/entretiens-candidats";
     }
@@ -393,8 +394,12 @@ public class AdminCandidatureWebController {
     public static final class GroupeEntretiens {
         private final OffreEmploi offre;
         private final List<EntretienRow> candidatures;
-        GroupeEntretiens(OffreEmploi offre, List<EntretienRow> candidatures) { this.offre = offre; this.candidatures = candidatures; }
+        private final long postesRestants;
+        GroupeEntretiens(OffreEmploi offre, List<EntretienRow> candidatures, long postesRestants) {
+            this.offre = offre; this.candidatures = candidatures; this.postesRestants = postesRestants;
+        }
         public OffreEmploi getOffre() { return offre; }
         public List<EntretienRow> getCandidatures() { return candidatures; }
+        public long getPostesRestants() { return postesRestants; }
     }
 }

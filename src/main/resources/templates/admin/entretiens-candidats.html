@@ -23,6 +23,10 @@
         <div class="card-tete">
             <span class="badge-type"><i class="fa-solid fa-briefcase me-1"></i>Offre</span>
             <h2 class="titre-section" th:text="${groupe.offre.titre}">Offre</h2>
+            <span class="badge-statut valide ms-auto" th:if="${groupe.postesRestants > 0}">
+                <i class="fa-solid fa-user-plus"></i> <span th:text="${groupe.postesRestants}">1</span> poste(s) à pourvoir</span>
+            <span class="badge-statut cree ms-auto" th:if="${groupe.postesRestants == 0}">
+                <i class="fa-solid fa-lock"></i> Tous les postes sont attribués</span>
         </div>
         <div class="table-responsive">
             <table class="table table-grh">
@@ -50,7 +54,10 @@
                     <td class="col-actions">
                         <form method="post" class="d-flex flex-wrap justify-content-end gap-2"
                               th:action="@{/admin/candidatures/{id}/decision-entretien(id=${ligne.candidature.id})}">
-                            <button class="btn btn-success btn-sm" type="submit" name="decision" value="ACCEPTER"><i class="fa-solid fa-user-check me-1"></i>Retenir le candidat</button>
+                            <button class="btn btn-success btn-sm" type="submit" name="decision" value="ACCEPTER"
+                                    th:if="${groupe.postesRestants > 0}"><i class="fa-solid fa-user-check me-1"></i>Retenir le candidat</button>
+                            <button class="btn btn-success btn-sm" type="button" disabled th:if="${groupe.postesRestants == 0}"
+                                    title="Tous les postes de cette offre sont déjà attribués"><i class="fa-solid fa-lock me-1"></i>Retenir le candidat</button>
                             <button class="btn btn-outline-danger btn-sm" type="submit" name="decision" value="REFUSER"><i class="fa-solid fa-xmark me-1"></i>Refuser</button>
                         </form>
                     </td>

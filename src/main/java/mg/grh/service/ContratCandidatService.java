@@ -41,6 +41,7 @@ public class ContratCandidatService {
     private final TravailleurRepository travailleurRepo;
     private final PosteRepository posteRepo;
     private final EmployeurRepository employeurRepo;
+    private final SexeRepository sexeRepo;
 
     public ContratCandidatService(ContratCandidatRepository contratCandidatRepo, ContratCeRepository ceRepo,
                                   ContratCddRepository cddRepo, ContratCdiRepository cdiRepo,
@@ -48,7 +49,7 @@ public class ContratCandidatService {
                                   HistoriqueStatutContratRepository historiqueRepo, EmbaucheService embaucheService,
                                   PropositionEmbaucheRepository propositionRepo, NotificationRepository notificationRepo,
                                   TravailleurRepository travailleurRepo, PosteRepository posteRepo,
-                                  EmployeurRepository employeurRepo) {
+                                  EmployeurRepository employeurRepo, SexeRepository sexeRepo) {
         this.contratCandidatRepo = contratCandidatRepo;
         this.ceRepo = ceRepo;
         this.cddRepo = cddRepo;
@@ -62,6 +63,7 @@ public class ContratCandidatService {
         this.travailleurRepo = travailleurRepo;
         this.posteRepo = posteRepo;
         this.employeurRepo = employeurRepo;
+        this.sexeRepo = sexeRepo;
     }
 
     // ------------------------------------------------------------ lecture
@@ -130,6 +132,7 @@ public class ContratCandidatService {
 
         // Créer travailleur si nouvelles données
         if (ce.getTravailleur() != null && ce.getTravailleur().getId() == null) {
+            validerTravailleur(ce.getTravailleur());
             ce.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
             ce.setTravailleur(travailleurRepo.save(ce.getTravailleur()));
         }
@@ -165,6 +168,7 @@ public class ContratCandidatService {
 
         // Créer travailleur et employeur si nouvelles données
         if (cdd.getTravailleur() != null && cdd.getTravailleur().getId() == null) {
+            validerTravailleur(cdd.getTravailleur());
             cdd.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
             cdd.setTravailleur(travailleurRepo.save(cdd.getTravailleur()));
         }
@@ -191,6 +195,7 @@ public class ContratCandidatService {
 
         // Créer travailleur et employeur si nouvelles données
         if (cdi.getTravailleur() != null && cdi.getTravailleur().getId() == null) {
+            validerTravailleur(cdi.getTravailleur());
             cdi.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
             cdi.setTravailleur(travailleurRepo.save(cdi.getTravailleur()));
         }
@@ -263,6 +268,24 @@ public class ContratCandidatService {
     }
 
     // ------------------------------------------------------------ utilitaires privés
+    /** CIN malgache : 12 chiffres (espaces tolérés à la saisie), 6e chiffre = 1 pour un homme, 2 pour une femme. */
+    private void validerTravailleur(Travailleur t) {
+        String cin = t.getCinNumero() == null ? "" : t.getCinNumero().replaceAll("\\s", "");
+        if (!cin.matches("\\d{12}"))
+            throw new IllegalArgumentException("Le CIN doit contenir exactement 12 chiffres (reçu : " + cin.length() + ").");
+        if (t.getSexe() == null || t.getSexe().getId() == null)
+            throw new IllegalArgumentException("Le sexe du travailleur est obligatoire.");
+        Sexe sexe = sexeRepo.findById(t.getSexe().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Sexe inconnu."));
+        boolean femme = sexe.getLibelle().trim().toUpperCase().startsWith("F");
+        char attendu = femme ? '2' : '1';
+        if (cin.charAt(5) != attendu)
+            throw new IllegalArgumentException("CIN invalide : le 6e chiffre doit être " + attendu
+                    + (femme ? " pour une femme." : " pour un homme."));
+        t.setCinNumero(cin);
+        t.setSexe(sexe);
+    }
+
     private PropositionEmbauche verifierCandidature(Integer candidatId, Integer candidatureId) {
         if (candidatureId == null) throw new IllegalStateException("La création d’un contrat exige une candidature acceptée.");
         boolean retenue = contratCandidatRepo.findCandidaturesRetenues(candidatId).stream()
