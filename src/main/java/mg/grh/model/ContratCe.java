@@ -34,7 +34,7 @@ public class ContratCe implements Identifiable {
     private StatutContrat statut;
 
     @ManyToOne
-    @JoinColumn(name = "langue_id", nullable = false)
+    @JoinColumn(name = "langue_id")
     private LangueContrat langue;
 
     @ManyToOne
