@@ -128,11 +128,6 @@
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/ce(propositionId=${propositionId})} : @{/admin/contrats/ce(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
-                    <select class="form-select" name="employeur.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
-                    </select></div>
                 <div class="col-md-6"><label class="form-label">Catégorie professionnelle<span class="req">*</span></label>
                     <select class="form-select" name="categorie.id" required>
                         <option value="">— Choisir —</option>
