@@ -70,7 +70,7 @@ public class PropositionService {
         return Objects.equals(info(idProposition).getIdRhTraitant(), idRh);
     }
 
-    /** Crée, si besoin, la proposition issue d’une candidature retenue. */
+    /** Crée, si besoin, la proposition issue d’une candidature retenue avec le salaire approprié. */
     @Transactional
     public PropositionEmbauche creerPourCandidature(Integer idCandidature) {
         return propositions.findByCandidatureId(idCandidature).orElseGet(() -> {
@@ -79,6 +79,8 @@ public class PropositionService {
             proposition.setDateEnvoi(LocalDateTime.now());
             proposition.setStatut(statuts.findByLibelle("EN_ATTENTE_CANDIDAT")
                     .orElseThrow(() -> new RegleMetierException("Statut de proposition non initialisé.")));
+            PropositionInfo info = info(propositions.saveAndFlush(proposition).getId());
+            proposition.setSalaireFinal(salaireInitial(info));
             return propositions.saveAndFlush(proposition);
         });
     }

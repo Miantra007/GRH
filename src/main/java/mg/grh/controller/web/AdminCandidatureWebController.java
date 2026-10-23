@@ -232,7 +232,7 @@ public class AdminCandidatureWebController {
             if (!"ACCEPTER".equals(decision)) throw new IllegalArgumentException("Décision invalide.");
             c = candidatureService.changerStatut(id, "RETENUE");
             PropositionEmbauche proposition = propositionService.creerPourCandidature(id);
-            notifier(c, "Candidature retenue", "Votre candidature pour l’offre « " + c.getOffre().getTitre() + " » est retenue. Consultez la proposition d’embauche et indiquez votre réponse.");
+            notifier(c, "Candidature retenue", "Votre candidature pour l’offre « " + c.getOffre().getTitre() + " » est retenue. Consultez la proposition d’embauche et indiquez votre réponse.", proposition.getId());
             ra.addFlashAttribute("succes", "Candidat retenu et notifié. Ouverture de la page d’acceptation existante.");
             return "redirect:/candidats/" + c.getCandidat().getId() + "/propositions/" + proposition.getId();
         } catch (RuntimeException e) { TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); ra.addFlashAttribute("erreur", e.getMessage()); }

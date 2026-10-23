@@ -25,18 +25,13 @@ public class BesoinService extends GenericService<Besoin> {
     private final OffreEmploiRepository offreEmploiRepository;
     private final StatutOffreRepository statutOffreRepository;
     private final NotificationRepository notificationRepository;
-    private final CandidatureRepository candidatureRepository;
-    private final PropositionEmbaucheRepository propositionRepository;
-    private final StatutPropositionRepository statutPropositionRepository;
 
     public BesoinService(BesoinRepository repository, DirectionRepository directionRepository,
             DepartementRepository departementRepository, ResponsableRepository responsableRepository,
             TypeBesoinRepository typeBesoinRepository, StatutBesoinRepository statutBesoinRepository,
             PosteRepository posteRepository,
             BesoinPosteRepository besoinPosteRepository, OffreEmploiRepository offreEmploiRepository,
-            StatutOffreRepository statutOffreRepository, NotificationRepository notificationRepository,
-            CandidatureRepository candidatureRepository, PropositionEmbaucheRepository propositionRepository,
-            StatutPropositionRepository statutPropositionRepository) {
+            StatutOffreRepository statutOffreRepository, NotificationRepository notificationRepository) {
         super(repository);
         this.besoinRepository = repository;
         this.directionRepository = directionRepository;
@@ -49,9 +44,6 @@ public class BesoinService extends GenericService<Besoin> {
         this.offreEmploiRepository = offreEmploiRepository;
         this.statutOffreRepository = statutOffreRepository;
         this.notificationRepository = notificationRepository;
-        this.candidatureRepository = candidatureRepository;
-        this.propositionRepository = propositionRepository;
-        this.statutPropositionRepository = statutPropositionRepository;
     }
 
     /** Crée un besoin et ses postes. Toute erreur annule l'ensemble des insertions. */
@@ -282,7 +274,6 @@ public class BesoinService extends GenericService<Besoin> {
             besoin.setDateValidationDg(LocalDateTime.now());
             besoin.setStatutBesoin(statut("VALIDEE"));
             notifierRhOffresAPublier(besoin, postesAValider);
-            creerPropositionsAutomatiques(besoin, postesAValider);
         }
         repository.save(besoin);
     }
@@ -298,43 +289,6 @@ public class BesoinService extends GenericService<Besoin> {
                 + "Les offres d'emploi correspondantes sont prêtes : publiez-les depuis le menu « Offres à publier ».";
         destinataires.forEach(rh -> notificationRepository.save(Notification.pour(null, rh.getId(), null,
                 "Besoin validé : offres à publier", message)));
-    }
-
-    /** Crée automatiquement les propositions d'embauche pour les candidatures RETENUE du besoin. */
-    private void creerPropositionsAutomatiques(Besoin besoin, java.util.List<BesoinPoste> postes) {
-        java.util.Set<Integer> idsBesoinPoste = postes.stream()
-                .map(BesoinPoste::getId).collect(java.util.stream.Collectors.toSet());
-
-        for (Candidature candidature : candidatureRepository.findAll()) {
-            if (!"RETENUE".equals(candidature.getStatut().getLibelle())) continue;
-            if (!idsBesoinPoste.contains(candidature.getOffre().getBesoinPosteId())) continue;
-
-            if (propositionRepository.findByCandidatureId(candidature.getId()).isPresent()) continue;
-
-            BesoinPoste bp = besoinPosteRepository.findById(candidature.getOffre().getBesoinPosteId()).orElse(null);
-            if (bp == null) continue;
-
-            java.math.BigDecimal salaireFinal = bp.getSalaireValideFinance() != null
-                    ? bp.getSalaireValideFinance()
-                    : bp.getSalaireProposeRh();
-            if (salaireFinal == null || salaireFinal.signum() < 0) continue;
-
-            PropositionEmbauche proposition = new PropositionEmbauche();
-            proposition.setIdCandidature(candidature.getId());
-            proposition.setSalaireFinal(salaireFinal);
-            proposition.setDateEnvoi(LocalDateTime.now());
-            proposition.setStatut(statutPropositionRepository.findByLibelle("EN_ATTENTE_CANDIDAT")
-                    .orElse(null));
-            if (proposition.getStatut() == null) continue;
-
-            propositionRepository.save(proposition);
-
-            Notification notif = Notification.pour(candidature.getCandidat().getId(), null,
-                    proposition.getId(), "Proposition d'embauche",
-                    "Une proposition d'embauche vous attend dans votre espace candidat. Consultez-la et répondez.");
-            notif.setIdCandidature(candidature.getId());
-            notificationRepository.save(notif);
-        }
     }
 
     private Besoin besoinAvecStatut(Integer id, String statutAttendu) {

@@ -11,9 +11,8 @@ class BesoinCreationFormTest {
     @Test
     void accepteUneLigneDePosteValide() {
         BesoinCreationForm.LignePoste ligne = new BesoinCreationForm.LignePoste();
-        ligne.setLibelle("Développeur");
+        ligne.setPosteId(1);
         ligne.setNombrePostes(2);
-        ligne.setTypeContratId(1);
 
         assertDoesNotThrow(ligne::valider);
     }
@@ -21,8 +20,8 @@ class BesoinCreationFormTest {
     @Test
     void refuseUneLigneSansNombreDePostes() {
         BesoinCreationForm.LignePoste ligne = new BesoinCreationForm.LignePoste();
-        ligne.setLibelle("Développeur");
-        ligne.setTypeContratId(1);
+        ligne.setPosteId(1);
+        ligne.setNombrePostes(null);
 
         assertThrows(IllegalArgumentException.class, ligne::valider);
     }
