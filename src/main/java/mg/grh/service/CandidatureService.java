@@ -15,7 +15,7 @@ import java.util.List;
 @Service
 public class CandidatureService extends GenericService<Candidature> {
     /** Candidatures exigées en plus du nombre de postes avant d'ouvrir la sélection. */
-    public static final int MARGE_CANDIDATURES = 2;
+    public static final int MARGE_CANDIDATURES = 1;
 
     private final CandidatureRepository candidatures;
     private final StatutCandidatureRepository statuts;
