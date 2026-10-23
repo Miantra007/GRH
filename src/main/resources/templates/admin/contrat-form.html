@@ -51,63 +51,6 @@
         </div>
     </div>
 
-    <!-- ===================== Travailleur ===================== -->
-    <div class="card-grh mb-4">
-        <div class="card-tete">
-            <span class="section-icon"><i class="fa-solid fa-user"></i></span>
-            <h2 class="titre-section">Données du travailleur</h2>
-        </div>
-        <div class="card-corps">
-            <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.nomPrenoms" required></div>
-                <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
-                <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
-                <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
-                <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
-                    <select class="form-select" name="travailleur.nationalite.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Civilité</label>
-                    <select class="form-select" name="travailleur.civilite.id">
-                        <option value="">—</option>
-                        <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Sexe<span class="req">*</span></label>
-                    <select class="form-select" name="travailleur.sexe.id" id="sexeField" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="s : ${sexes}" th:value="${s.id}" th:text="${s.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Situation familiale</label>
-                    <select class="form-select" name="travailleur.situationFamille.id">
-                        <option value="">—</option>
-                        <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">CIN<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.cinNumero" id="cinField" placeholder="12 chiffres (ex: 102 092 047 241)" required></div>
-                <div class="col-md-6"><label class="form-label">Téléphone<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.telephone" id="telephoneField" placeholder="03XXXXXXXX" pattern="^03[23478]\d{7}$" title="Format: 03 suivi de 2,3,4,7 ou 8 et 7 chiffres" required></div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ===================== Employeur ===================== -->
-    <div class="card-grh mb-4">
-        <div class="card-tete">
-            <span class="section-icon"><i class="fa-solid fa-building"></i></span>
-            <h2 class="titre-section">Données de l'employeur</h2>
-        </div>
-        <div class="card-corps">
-            <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Raison sociale<span class="req">*</span></label><input class="form-control" type="text" name="employeur.raisonSociale" required></div>
-                <div class="col-md-6"><label class="form-label">Représentant<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantNom" required></div>
-                <div class="col-md-6"><label class="form-label">Fonction<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantFonction" required></div>
-                <div class="col-md-6"><label class="form-label">Forme juridique</label><input class="form-control" type="text" name="employeur.formeJuridique"></div>
-                <div class="col-md-6"><label class="form-label">NIF</label><input class="form-control" type="text" name="employeur.nif"></div>
-                <div class="col-md-6"><label class="form-label">STAT</label><input class="form-control" type="text" name="employeur.stat"></div>
-                <div class="col-12"><label class="form-label">Adresse du siège</label><input class="form-control" type="text" name="employeur.adresseSiege"></div>
-            </div>
-        </div>
-    </div>
-
     <!-- ===================== Type de contrat ===================== -->
     <div class="card-grh card-corps mb-4 d-flex flex-wrap align-items-center gap-3">
         <strong><i class="fa-solid fa-layer-group me-1"></i> Type de contrat</strong>
@@ -127,26 +70,75 @@
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-hourglass-half"></i></span><h2 class="titre-section">Contrat d'essai (CE)</h2></div>
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/ce(propositionId=${propositionId})} : @{/admin/contrats/ce(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
-            <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Catégorie professionnelle<span class="req">*</span></label>
-                    <select class="form-select" name="categorie.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Convention collective</label>
-                    <select class="form-select" name="convention.id"><option value="">—</option>
-                        <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Poste</label><input class="form-control" type="text" name="poste" th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
-                <div class="col-md-6"><label class="form-label">Indice de classification</label><input class="form-control" type="text" name="indiceClassification"></div>
-                <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
-                <div class="col-md-4"><label class="form-label">Durée (mois)</label><input class="form-control" type="number" name="dureeMois" min="1"></div>
-                <div class="col-md-4"><label class="form-label">Date de début</label><input class="form-control" type="date" name="dateDebut" th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
-                <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="heuresHebdo" step="0.5" value="40"></div>
-                <div class="col-md-6"><label class="form-label">Rémunération nette</label>
-                    <div class="input-group"><input class="form-control" type="number" name="remunerationNette" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
-                <div class="col-md-6"><label class="form-label">Lieu de signature</label><input class="form-control" type="text" name="lieuSignature"></div>
-                <div class="col-12"><label class="form-label">Missions</label><textarea class="form-control" name="missions" rows="3" th:text="${proposition != null ? missions : ''}" th:readonly="${proposition != null}"></textarea></div>
+
+            <!-- ===== Travailleur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-user me-2"></i>Données du travailleur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.nomPrenoms" required></div>
+                    <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
+                    <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.nationalite.id" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Civilité</label>
+                        <select class="form-select" name="travailleur.civilite.id">
+                            <option value="">—</option>
+                            <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Sexe<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.sexe.id" id="sexeField" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="s : ${sexes}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Situation familiale</label>
+                        <select class="form-select" name="travailleur.situationFamille.id">
+                            <option value="">—</option>
+                            <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">CIN<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.cinNumero" id="cinField" placeholder="12 chiffres (ex: 102 092 047 241)" required></div>
+                    <div class="col-md-6"><label class="form-label">Téléphone<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.telephone" id="telephoneField" placeholder="03XXXXXXXX" pattern="^03[23478]\d{7}$" title="Format: 03 suivi de 2,3,4,7 ou 8 et 7 chiffres" required></div>
+                </div>
+            </div>
+
+            <!-- ===== Employeur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-building me-2"></i>Données de l'employeur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Raison sociale<span class="req">*</span></label><input class="form-control" type="text" name="employeur.raisonSociale" required></div>
+                    <div class="col-md-6"><label class="form-label">Représentant<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantNom" required></div>
+                    <div class="col-md-6"><label class="form-label">Fonction<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantFonction" required></div>
+                    <div class="col-md-6"><label class="form-label">Forme juridique</label><input class="form-control" type="text" name="employeur.formeJuridique"></div>
+                    <div class="col-md-6"><label class="form-label">NIF</label><input class="form-control" type="text" name="employeur.nif"></div>
+                    <div class="col-md-6"><label class="form-label">STAT</label><input class="form-control" type="text" name="employeur.stat"></div>
+                    <div class="col-12"><label class="form-label">Adresse du siège</label><input class="form-control" type="text" name="employeur.adresseSiege"></div>
+                </div>
+            </div>
+
+            <!-- ===== Contrat CE ===== -->
+            <div><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-hourglass-half me-2"></i>Détails du contrat</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Catégorie professionnelle<span class="req">*</span></label>
+                        <select class="form-select" name="categorie.id" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Convention collective</label>
+                        <select class="form-select" name="convention.id"><option value="">—</option>
+                            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Poste</label><input class="form-control" type="text" name="poste" th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
+                    <div class="col-md-6"><label class="form-label">Indice de classification</label><input class="form-control" type="text" name="indiceClassification"></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
+                    <div class="col-md-4"><label class="form-label">Durée (mois)</label><input class="form-control" type="number" name="dureeMois" min="1"></div>
+                    <div class="col-md-4"><label class="form-label">Date de début</label><input class="form-control" type="date" name="dateDebut" th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
+                    <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="heuresHebdo" step="0.5" value="40"></div>
+                    <div class="col-md-6"><label class="form-label">Rémunération nette</label>
+                        <div class="input-group"><input class="form-control" type="number" name="remunerationNette" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de signature</label><input class="form-control" type="text" name="lieuSignature"></div>
+                    <div class="col-12"><label class="form-label">Missions</label><textarea class="form-control" name="missions" rows="3" th:text="${proposition != null ? missions : ''}" th:readonly="${proposition != null}"></textarea></div>
+                </div>
             </div>
             <div class="mt-4"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer (statut « Créé »)</button></div>
         </form>
@@ -157,52 +149,80 @@
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-calendar-days"></i></span><h2 class="titre-section">Contrat à durée déterminée (CDD)</h2></div>
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/cdd(propositionId=${propositionId})} : @{/admin/contrats/cdd(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
-            <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
-                    <select class="form-select" name="employeur.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Travailleur<span class="req">*</span></label>
-                    <div class="input-group">
-                        <select class="form-select" name="travailleur.id" required>
+
+            <!-- ===== Travailleur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-user me-2"></i>Données du travailleur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.nomPrenoms" required></div>
+                    <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
+                    <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.nationalite.id" required>
                             <option value="">— Choisir —</option>
-                            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
-                        </select>
-                        <a class="btn btn-light border" th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}" title="Créer un travailleur"><i class="fa-solid fa-plus"></i></a>
-                    </div></div>
-                <div class="col-md-6"><label class="form-label">Poste<span class="req">*</span></label>
-                    <select class="form-select" name="poste.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${postes}" th:value="${x.id}" th:text="${x.libelle}" th:selected="${proposition != null and x.libelle == propositionInfo.titreOffre}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Motif du CDD<span class="req">*</span></label>
-                    <select class="form-select" name="motif.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${motifs}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Référence</label><input class="form-control" type="text" name="reference"></div>
-                <div class="col-md-6"><label class="form-label">Précision du motif</label><input class="form-control" type="text" name="motifPrecision"></div>
-                <div class="col-md-6"><label class="form-label">Catégorie professionnelle</label>
-                    <select class="form-select" name="categorie.id"><option value="">—</option>
-                        <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Convention collective</label>
-                    <select class="form-select" name="convention.id"><option value="">—</option>
-                        <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-4"><label class="form-label">Date de début<span class="req">*</span></label><input class="form-control" type="date" name="dateDebut" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
-                <div class="col-md-4"><label class="form-label">Date de fin<span class="req">*</span></label><input class="form-control" type="date" name="dateFin" required></div>
-                <div class="col-md-4"><label class="form-label">Durée de l'essai (jours)</label><input class="form-control" type="number" name="essaiDuree"></div>
-                <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
-                <div class="col-md-4"><label class="form-label">Horaire de travail</label><input class="form-control" type="text" name="horaireTravail"></div>
-                <div class="col-md-4"><label class="form-label">Jours travaillés / semaine</label><input class="form-control" type="number" name="joursTravailSemaine"></div>
-                <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
-                <div class="col-md-6"><label class="form-label">Salaire de base<span class="req">*</span></label>
-                    <div class="input-group"><input class="form-control" type="number" name="salaireBase" required th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
-                <div class="col-md-4"><label class="form-label">Indice de classification</label><input class="form-control" type="text" name="indiceClassification"></div>
-                <div class="col-md-4"><label class="form-label">Congé (jours / mois)</label><input class="form-control" type="number" name="congeJoursParMois" step="0.5"></div>
-                <div class="col-md-4"><label class="form-label">Lieu de conclusion</label><input class="form-control" type="text" name="lieuConclusion"></div>
+                            <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Civilité</label>
+                        <select class="form-select" name="travailleur.civilite.id">
+                            <option value="">—</option>
+                            <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Sexe<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.sexe.id" id="sexeFieldCdd" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="s : ${sexes}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Situation familiale</label>
+                        <select class="form-select" name="travailleur.situationFamille.id">
+                            <option value="">—</option>
+                            <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">CIN<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.cinNumero" id="cinFieldCdd" placeholder="12 chiffres (ex: 102 092 047 241)" required></div>
+                    <div class="col-md-6"><label class="form-label">Téléphone<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.telephone" id="telephoneFieldCdd" placeholder="03XXXXXXXX" pattern="^03[23478]\d{7}$" title="Format: 03 suivi de 2,3,4,7 ou 8 et 7 chiffres" required></div>
+                </div>
+            </div>
+
+            <!-- ===== Employeur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-building me-2"></i>Données de l'employeur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Raison sociale<span class="req">*</span></label><input class="form-control" type="text" name="employeur.raisonSociale" required></div>
+                    <div class="col-md-6"><label class="form-label">Représentant<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantNom" required></div>
+                    <div class="col-md-6"><label class="form-label">Fonction<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantFonction" required></div>
+                    <div class="col-md-6"><label class="form-label">Forme juridique</label><input class="form-control" type="text" name="employeur.formeJuridique"></div>
+                    <div class="col-md-6"><label class="form-label">NIF</label><input class="form-control" type="text" name="employeur.nif"></div>
+                    <div class="col-md-6"><label class="form-label">STAT</label><input class="form-control" type="text" name="employeur.stat"></div>
+                    <div class="col-12"><label class="form-label">Adresse du siège</label><input class="form-control" type="text" name="employeur.adresseSiege"></div>
+                </div>
+            </div>
+
+            <!-- ===== Contrat CDD ===== -->
+            <div><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-calendar-days me-2"></i>Détails du contrat</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Poste<span class="req">*</span></label>
+                        <select class="form-select" name="poste.id" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="x : ${postes}" th:value="${x.id}" th:text="${x.libelle}" th:selected="${proposition != null and x.libelle == propositionInfo.titreOffre}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Motif du CDD<span class="req">*</span></label>
+                        <select class="form-select" name="motif.id" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="x : ${motifs}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Catégorie professionnelle</label>
+                        <select class="form-select" name="categorie.id"><option value="">—</option>
+                            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Convention collective</label>
+                        <select class="form-select" name="convention.id"><option value="">—</option>
+                            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-4"><label class="form-label">Date de début<span class="req">*</span></label><input class="form-control" type="date" name="dateDebut" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
+                    <div class="col-md-4"><label class="form-label">Date de fin<span class="req">*</span></label><input class="form-control" type="date" name="dateFin" required></div>
+                    <div class="col-md-4"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
+                    <div class="col-md-6"><label class="form-label">Salaire de base<span class="req">*</span></label>
+                        <div class="input-group"><input class="form-control" type="number" name="salaireBase" required th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de travail</label><input class="form-control" type="text" name="lieuTravail"></div>
+                </div>
             </div>
             <div class="mt-4"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer (statut « Créé »)</button></div>
         </form>
@@ -213,50 +233,69 @@
         <div class="card-tete"><span class="section-icon"><i class="fa-solid fa-infinity"></i></span><h2 class="titre-section">Contrat à durée indéterminée (CDI)</h2></div>
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/cdi(propositionId=${propositionId})} : @{/admin/contrats/cdi(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
-            <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
-                    <select class="form-select" name="employeur.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Travailleur<span class="req">*</span></label>
-                    <div class="input-group">
-                        <select class="form-select" name="travailleur.id" required>
+
+            <!-- ===== Travailleur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-user me-2"></i>Données du travailleur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.nomPrenoms" required></div>
+                    <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
+                    <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
+                    <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.nationalite.id" required>
                             <option value="">— Choisir —</option>
-                            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
-                        </select>
-                        <a class="btn btn-light border" th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}" title="Créer un travailleur"><i class="fa-solid fa-plus"></i></a>
-                    </div></div>
-                <div class="col-md-6"><label class="form-label">Emploi<span class="req">*</span></label><input class="form-control" type="text" name="emploi" required th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
-                <div class="col-md-6"><label class="form-label">Date de prise de fonction<span class="req">*</span></label><input class="form-control" type="date" name="datePriseFonction" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
-                <div class="col-md-6"><label class="form-label">Catégorie professionnelle</label>
-                    <select class="form-select" name="categorie.id"><option value="">—</option>
-                        <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Convention collective</label>
-                    <select class="form-select" name="convention.id"><option value="">—</option>
-                        <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Salaire brut mensuel</label>
-                    <div class="input-group"><input class="form-control" type="number" name="salaireBrutMensuel" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
-                <div class="col-md-6"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
-                <div class="col-md-4"><label class="form-label">Établissement</label><input class="form-control" type="text" name="etablissement"></div>
-                <div class="col-md-4"><label class="form-label">Région</label><input class="form-control" type="text" name="region"></div>
-                <div class="col-md-4"><label class="form-label">District / commune</label><input class="form-control" type="text" name="districtCommune"></div>
-                <div class="col-md-4"><label class="form-label">Durée de l'essai</label><input class="form-control" type="text" name="dureeEssai" placeholder="Ex. 3 mois"></div>
-                <div class="col-md-4"><label class="form-label">Article de référence (essai)</label><input class="form-control" type="text" name="articleReferenceEssai"></div>
-                <div class="col-md-4"><label class="form-label">Source de la période d'essai</label>
-                    <select class="form-select" name="sourceEssai"><option value="">—</option>
-                        <option value="CODE_TRAVAIL">Code du travail</option>
-                        <option value="CONVENTION_COLLECTIVE">Convention collective</option>
-                        <option value="ACCORD_ETABLISSEMENT">Accord d'établissement</option></select></div>
-                <div class="col-md-6"><label class="form-label">Lieu de recrutement</label><input class="form-control" type="text" name="lieuRecrutement"></div>
-                <div class="col-md-6"><label class="form-label">Lieu de signature</label><input class="form-control" type="text" name="lieuSignature"></div>
-                <div class="col-12">
-                    <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" role="switch" id="nonLie" name="nonLieAutreEntreprise" value="true">
-                        <label class="form-check-label" for="nonLie">Le travailleur n'est lié à aucune autre entreprise</label>
-                    </div>
+                            <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Civilité</label>
+                        <select class="form-select" name="travailleur.civilite.id">
+                            <option value="">—</option>
+                            <option th:each="c : ${civilites}" th:value="${c.id}" th:text="${c.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Sexe<span class="req">*</span></label>
+                        <select class="form-select" name="travailleur.sexe.id" id="sexeFieldCdi" required>
+                            <option value="">— Choisir —</option>
+                            <option th:each="s : ${sexes}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Situation familiale</label>
+                        <select class="form-select" name="travailleur.situationFamille.id">
+                            <option value="">—</option>
+                            <option th:each="s : ${situationsFamiliales}" th:value="${s.id}" th:text="${s.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">CIN<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.cinNumero" id="cinFieldCdi" placeholder="12 chiffres (ex: 102 092 047 241)" required></div>
+                    <div class="col-md-6"><label class="form-label">Téléphone<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.telephone" id="telephoneFieldCdi" placeholder="03XXXXXXXX" pattern="^03[23478]\d{7}$" title="Format: 03 suivi de 2,3,4,7 ou 8 et 7 chiffres" required></div>
+                </div>
+            </div>
+
+            <!-- ===== Employeur ===== -->
+            <div class="mb-4"><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-building me-2"></i>Données de l'employeur</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Raison sociale<span class="req">*</span></label><input class="form-control" type="text" name="employeur.raisonSociale" required></div>
+                    <div class="col-md-6"><label class="form-label">Représentant<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantNom" required></div>
+                    <div class="col-md-6"><label class="form-label">Fonction<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantFonction" required></div>
+                    <div class="col-md-6"><label class="form-label">Forme juridique</label><input class="form-control" type="text" name="employeur.formeJuridique"></div>
+                    <div class="col-md-6"><label class="form-label">NIF</label><input class="form-control" type="text" name="employeur.nif"></div>
+                    <div class="col-md-6"><label class="form-label">STAT</label><input class="form-control" type="text" name="employeur.stat"></div>
+                    <div class="col-12"><label class="form-label">Adresse du siège</label><input class="form-control" type="text" name="employeur.adresseSiege"></div>
+                </div>
+            </div>
+
+            <!-- ===== Contrat CDI ===== -->
+            <div><h3 class="h5 text-primary border-bottom pb-2"><i class="fa-solid fa-infinity me-2"></i>Détails du contrat</h3>
+                <div class="row g-3">
+                    <div class="col-md-6"><label class="form-label">Emploi<span class="req">*</span></label><input class="form-control" type="text" name="emploi" required th:value="${proposition != null ? propositionInfo.titreOffre : null}" th:readonly="${proposition != null}"></div>
+                    <div class="col-md-6"><label class="form-label">Date de prise de fonction<span class="req">*</span></label><input class="form-control" type="date" name="datePriseFonction" required th:value="${proposition != null ? datePrisePosteInput : null}" th:readonly="${proposition != null}"></div>
+                    <div class="col-md-6"><label class="form-label">Catégorie professionnelle</label>
+                        <select class="form-select" name="categorie.id"><option value="">—</option>
+                            <option th:each="x : ${categories}" th:value="${x.id}" th:text="${x.code + ' – ' + x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Convention collective</label>
+                        <select class="form-select" name="convention.id"><option value="">—</option>
+                            <option th:each="x : ${conventions}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label">Salaire brut mensuel</label>
+                        <div class="input-group"><input class="form-control" type="number" name="salaireBrutMensuel" th:value="${proposition != null ? salaire : null}" th:readonly="${proposition != null}"><span class="input-group-text">Ar</span></div></div>
+                    <div class="col-md-6"><label class="form-label">Heures hebdomadaires</label><input class="form-control" type="number" name="dureeHebdoHeures" step="0.5" value="40"></div>
+                    <div class="col-12"><label class="form-label">Lieu de signature</label><input class="form-control" type="text" name="lieuSignature"></div>
                 </div>
             </div>
             <div class="mt-4"><button class="btn btn-primary" type="submit"><i class="fa-solid fa-floppy-disk me-1"></i> Enregistrer (statut « Créé »)</button></div>
@@ -266,7 +305,6 @@
 
 <th:block th:replace="~{fragments :: scripts}"></th:block>
 <script>
-    // Affiche le formulaire du type choisi (CE / CDD / CDI)
     function afficher() {
         var t = document.querySelector('input[name=type]:checked').value;
         document.querySelectorAll('.form-contrat').forEach(function (f) { f.classList.add('d-none'); });
@@ -275,7 +313,6 @@
     document.querySelectorAll('input[name=type]').forEach(function (r) { r.addEventListener('change', afficher); });
     afficher();
 
-    // Le besoin choisi en haut de page est recopié dans le formulaire du contrat qui sera envoyé
     var choix = document.getElementById('candidatureChoix');
     function recopier() {
         document.querySelectorAll('.champ-candidature').forEach(function (c) { c.value = choix.value; });
@@ -284,64 +321,61 @@
         choix.addEventListener('change', recopier);
         recopier();
 
-        // Validation CIN et sexe
-        const sexeField = document.getElementById('sexeField');
-        const cinField = document.getElementById('cinField');
-        const telephoneField = document.getElementById('telephoneField');
+        // Validation CIN pour tous les types
+        ['', 'Cdd', 'Cdi'].forEach(suffix => {
+            const sexeId = 'sexeField' + suffix;
+            const cinId = 'cinField' + suffix;
+            const telId = 'telephoneField' + suffix;
 
-        if (cinField && sexeField) {
-            cinField.addEventListener('blur', function() {
-                const cin = cinField.value.replace(/\s/g, '');
-                const sexe = sexeField.value;
+            const sexeField = document.getElementById(sexeId);
+            const cinField = document.getElementById(cinId);
+            const telephoneField = document.getElementById(telId);
 
-                if (!cin) return;
-
-                if (!/^\d{12}$/.test(cin)) {
-                    cinField.setCustomValidity('Le CIN doit contenir 12 chiffres.');
-                    cinField.reportValidity();
-                    return;
-                }
-
-                if (sexe) {
-                    const sixiemeChiffre = cin.charAt(5);
-                    // sexe = 2 pour F (femme), 1 pour M (homme)
-                    const sexeId = sexeField.selectedOptions[0].textContent;
-                    const expectedChiffre = sexeId.includes('F') ? '2' : '1';
-
-                    if (sixiemeChiffre !== expectedChiffre) {
-                        cinField.setCustomValidity(
-                            sexeId.includes('F')
-                                ? 'CIN invalide : le 6e chiffre doit être 2 pour les femmes.'
-                                : 'CIN invalide : le 6e chiffre doit être 1 pour les hommes.'
-                        );
+            if (cinField && sexeField) {
+                cinField.addEventListener('blur', function() {
+                    const cin = cinField.value.replace(/\s/g, '');
+                    const sexe = sexeField.value;
+                    if (!cin) return;
+                    if (!/^\d{12}$/.test(cin)) {
+                        cinField.setCustomValidity('Le CIN doit contenir 12 chiffres.');
                         cinField.reportValidity();
-                    } else {
-                        cinField.setCustomValidity('');
+                        return;
                     }
-                }
-            });
+                    if (sexe) {
+                        const sixiemeChiffre = cin.charAt(5);
+                        const sexeText = sexeField.selectedOptions[0].textContent;
+                        const expectedChiffre = sexeText.includes('F') ? '2' : '1';
+                        if (sixiemeChiffre !== expectedChiffre) {
+                            cinField.setCustomValidity(
+                                sexeText.includes('F')
+                                    ? 'CIN invalide : le 6e chiffre doit être 2 pour les femmes.'
+                                    : 'CIN invalide : le 6e chiffre doit être 1 pour les hommes.'
+                            );
+                            cinField.reportValidity();
+                        } else {
+                            cinField.setCustomValidity('');
+                        }
+                    }
+                });
+                cinField.addEventListener('change', function() { cinField.setCustomValidity(''); });
+            }
 
-            cinField.addEventListener('change', function() {
-                cinField.setCustomValidity('');
-            });
-        }
-
-        // Validation téléphone
-        if (telephoneField) {
-            telephoneField.addEventListener('blur', function() {
-                const tel = telephoneField.value;
-                if (tel && !/^03[23478]\d{7}$/.test(tel)) {
-                    telephoneField.setCustomValidity('Format : 03 suivi de 2, 3, 4, 7 ou 8 et 7 chiffres.');
-                    telephoneField.reportValidity();
-                } else {
-                    telephoneField.setCustomValidity('');
-                }
-            });
-        }
+            if (telephoneField) {
+                telephoneField.addEventListener('blur', function() {
+                    const tel = telephoneField.value;
+                    if (tel && !/^03[23478]\d{7}$/.test(tel)) {
+                        telephoneField.setCustomValidity('Format : 03 suivi de 2, 3, 4, 7 ou 8 et 7 chiffres.');
+                        telephoneField.reportValidity();
+                    } else {
+                        telephoneField.setCustomValidity('');
+                    }
+                });
+            }
+        });
 
         document.querySelectorAll('.form-contrat form').forEach(function (f) {
             f.addEventListener('submit', function (e) {
-                if (!choix.value) {   // besoin obligatoire quand le candidat a une proposition acceptée
+                if (!choix.value) {
                     e.preventDefault();
                     choix.setCustomValidity('Choisissez la candidature à laquelle répond ce contrat.');
                     choix.reportValidity();
