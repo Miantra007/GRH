@@ -1,33 +1,34 @@
+-- grh_schema.sql
 -- =====================================================================
--- GRH : SCHÉMA COMPLET
--- Contient toutes les tables nécessaires
--- Exécution : psql -U postgres -f 001_schema_complet.sql
+-- GRH : schéma corrigé (remplace base.sql)
+-- Exécution : psql -U postgres -f grh_schema.sql
 -- =====================================================================
-
-DROP DATABASE IF EXISTS grh;
 CREATE DATABASE grh;
 \c grh
 
--- ============================================================
--- ORGANISATION
--- ============================================================
-
+-- ---------- ORGANISATION ----------
 CREATE TABLE role(
     id_role SERIAL PRIMARY KEY,
     libelle VARCHAR(50)
 );
-
-CREATE TABLE statut_employe (
+CREATE TABLE IF NOT EXISTS statut_employe (
     id_statut_employe SERIAL PRIMARY KEY,
     libelle VARCHAR(20) NOT NULL UNIQUE
 );
 
+
 CREATE TABLE responsable(
     id_responsable SERIAL PRIMARY KEY,
+
     id_role INTEGER REFERENCES role(id_role),
-    id_statut_employe INTEGER REFERENCES statut_employe(id_statut_employe),
+
+    id_statut_employe INTEGER
+        REFERENCES statut_employe(id_statut_employe),
+
     email VARCHAR(150) UNIQUE NOT NULL,
+
     mot_de_passe VARCHAR(255) NOT NULL,
+
     date_embauche DATE
 );
 
@@ -62,29 +63,46 @@ CREATE TABLE poste_fille(
     id_statut_poste INTEGER REFERENCES statut_poste(id_statut_poste)
 );
 
-CREATE TABLE employe (
+-- ============================================================
+-- 4. TABLE EMPLOYE
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS employe (
     id_employe SERIAL PRIMARY KEY,
+
     nom_employe VARCHAR(50) NOT NULL,
-    id_poste_fille INTEGER REFERENCES poste_fille(id_poste_fille),
+
+    id_poste_fille INTEGER
+        REFERENCES poste_fille(id_poste_fille),
+
     date_embauche DATE NOT NULL,
-    id_statut_employe INTEGER NOT NULL REFERENCES statut_employe(id_statut_employe)
-);
 
-CREATE TABLE historique_employe (
+    id_statut_employe INTEGER NOT NULL
+        REFERENCES statut_employe(id_statut_employe)
+);
+CREATE TABLE IF NOT EXISTS historique_employe (
     id_historique_employe SERIAL PRIMARY KEY,
-    id_employe INTEGER NOT NULL REFERENCES employe(id_employe),
-    id_statut_employe INTEGER NOT NULL REFERENCES statut_employe(id_statut_employe),
+
+    id_employe INTEGER NOT NULL
+        REFERENCES employe(id_employe),
+
+    id_statut_employe INTEGER NOT NULL
+        REFERENCES statut_employe(id_statut_employe),
+
     date_debut DATE NOT NULL,
+
     date_fin DATE,
+
     motif TEXT,
+
     date_enregistrement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CHECK (date_fin IS NULL OR date_fin >= date_debut)
+
+    CHECK (
+        date_fin IS NULL
+        OR date_fin >= date_debut
+    )
 );
-
--- ============================================================
--- CANDIDAT + CV
--- ============================================================
-
+-- ---------- CANDIDAT + CV ----------
 CREATE TABLE candidat(
     id_candidat SERIAL PRIMARY KEY,
     nom_candidat VARCHAR(50),
@@ -174,6 +192,7 @@ CREATE TABLE niveau_langue (
     libelle_niveau VARCHAR(50) UNIQUE NOT NULL
 );
 
+-- ajout d'une clé primaire simple (plus facile pour JPA qu'une clé composite)
 CREATE TABLE cv_langue (
     id_cv_langue SERIAL PRIMARY KEY,
     id_cv INTEGER NOT NULL REFERENCES cv(id_cv) ON DELETE CASCADE,
@@ -189,16 +208,22 @@ CREATE TABLE centre_interet (
     description TEXT
 );
 
--- ============================================================
--- RÉFÉRENTIELS CONTRAT
--- ============================================================
+-- CREATE TABLE test_technique(
+--     id_test_technique SERIAL PRIMARY KEY,
+--     description VARCHAR(50),
+--     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
+--     date_test DATE
+-- );
 
+-- CREATE TABLE entretien(
+--     id_entretien SERIAL PRIMARY KEY,
+--     description VARCHAR(50),
+--     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat) ON DELETE CASCADE,
+--     date_entretien DATE
+-- );
+
+-- ---------- RÉFÉRENTIELS CONTRAT ----------
 CREATE TABLE civilite (
-    id SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE sexe (
     id SERIAL PRIMARY KEY,
     libelle VARCHAR(100) NOT NULL UNIQUE
 );
@@ -250,31 +275,6 @@ CREATE TABLE type_rupture (
     libelle VARCHAR(100) NOT NULL UNIQUE
 );
 
-CREATE TABLE type_contrat (
-    id_type_contrat SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE type_consigne (
-    id_type_consigne SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE type_critere_proposition (
-    id_type_critere SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE statut_besoin (
-    id_statut_besoin SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE statut_candidature (
-    id_statut_candidature SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
 CREATE TABLE texte_legal (
     id SERIAL PRIMARY KEY,
     reference VARCHAR(100) NOT NULL,
@@ -282,10 +282,7 @@ CREATE TABLE texte_legal (
     intitule VARCHAR(100) NOT NULL
 );
 
--- ============================================================
--- PARTIES AU CONTRAT
--- ============================================================
-
+-- ---------- PARTIES AU CONTRAT ----------
 CREATE TABLE employeur (
     id SERIAL PRIMARY KEY,
     raison_sociale VARCHAR(100) NOT NULL,
@@ -308,7 +305,6 @@ CREATE TABLE employeur (
 CREATE TABLE travailleur (
     id SERIAL PRIMARY KEY,
     civilite_id INT REFERENCES civilite(id),
-    sexe_id INT REFERENCES sexe(id),
     nom_prenoms VARCHAR(100) NOT NULL,
     date_naissance DATE NOT NULL,
     lieu_naissance VARCHAR(100) NOT NULL,
@@ -323,23 +319,16 @@ CREATE TABLE travailleur (
     cin_numero VARCHAR(100),
     cin_date_delivrance DATE,
     cin_lieu_delivrance VARCHAR(100),
-    numero_cnaps VARCHAR(100),
-    id_candidat INT REFERENCES candidat(id_candidat) ON DELETE CASCADE
+    numero_cnaps VARCHAR(100)
 );
 
-CREATE INDEX idx_travailleur_sexe ON travailleur(sexe_id);
-CREATE INDEX idx_travailleur_candidat ON travailleur(id_candidat);
-
--- ============================================================
--- CONTRATS
--- ============================================================
-
+-- ---------- CONTRAT D'ESSAI (CE) ----------
 CREATE TABLE contrat_ce (
     id SERIAL PRIMARY KEY,
     employeur_id INT NOT NULL REFERENCES employeur(id),
     travailleur_id INT NOT NULL REFERENCES travailleur(id),
     statut_id INT NOT NULL REFERENCES statut_contrat(id),
-    langue_id INT REFERENCES langue_contrat(id),
+    langue_id INT NOT NULL REFERENCES langue_contrat(id),
     contrat_initial_id INT REFERENCES contrat_ce(id) ON DELETE CASCADE,
     poste VARCHAR(100),
     categorie_id INT NOT NULL REFERENCES categorie_professionnelle(id),
@@ -356,6 +345,8 @@ CREATE TABLE contrat_ce (
     nb_exemplaires INT DEFAULT 2
 );
 
+-- ---------- CDD ----------
+-- poste_id référence maintenant poste(id_poste) (l'ancienne 3e table "poste" est supprimée)
 CREATE TABLE contrat_cdd (
     id SERIAL PRIMARY KEY,
     reference VARCHAR(100) UNIQUE,
@@ -389,6 +380,35 @@ CREATE TABLE contrat_cdd (
     tribunal_competent VARCHAR(100) DEFAULT 'Tribunal du travail'
 );
 
+CREATE TABLE element_salaire_cdd (
+    id SERIAL PRIMARY KEY,
+    contrat_id INT NOT NULL REFERENCES contrat_cdd(id) ON DELETE CASCADE,
+    libelle VARCHAR(100) NOT NULL,
+    montant NUMERIC(12, 0) NOT NULL,
+    nature VARCHAR(100)
+);
+
+CREATE TABLE avenant_cdd (
+    id SERIAL PRIMARY KEY,
+    contrat_id INT NOT NULL REFERENCES contrat_cdd(id) ON DELETE CASCADE,
+    type_avenant_id INT NOT NULL REFERENCES type_avenant(id),
+    numero INT NOT NULL,
+    date_avenant DATE NOT NULL,
+    nouvelle_date_fin DATE,
+    nouveau_salaire NUMERIC(12, 0),
+    objet TEXT
+);
+
+CREATE TABLE rupture_cdd (
+    id SERIAL PRIMARY KEY,
+    contrat_id INT NOT NULL UNIQUE REFERENCES contrat_cdd(id) ON DELETE CASCADE,
+    type_rupture_id INT NOT NULL REFERENCES type_rupture(id),
+    date_rupture DATE NOT NULL,
+    motif VARCHAR(100),
+    observations TEXT
+);
+
+-- ---------- CDI ----------
 CREATE TABLE contrat_cdi (
     id SERIAL PRIMARY KEY,
     employeur_id INT NOT NULL REFERENCES employeur(id),
@@ -430,111 +450,8 @@ CREATE TABLE signature_cdi (
     UNIQUE (contrat_id, role)
 );
 
--- ============================================================
--- RECRUTEMENT
--- ============================================================
-
-CREATE TABLE type_besoin (
-    id_type_besoin SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE besoin (
-    id_besoin SERIAL PRIMARY KEY,
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE besoin_poste (
-    id_besoin_poste SERIAL PRIMARY KEY,
-    id_besoin INT NOT NULL REFERENCES besoin(id_besoin),
-    id_poste INT NOT NULL REFERENCES poste(id_poste),
-    id_type_besoin INT REFERENCES type_besoin(id_type_besoin),
-    date_limite DATE,
-    description TEXT
-);
-
-CREATE TABLE candidature (
-    id_candidature SERIAL PRIMARY KEY,
-    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
-    id_besoin_poste INT NOT NULL REFERENCES besoin_poste(id_besoin_poste),
-    date_candidature TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    statut VARCHAR(50) DEFAULT 'NOUVELLE'
-);
-
-CREATE TABLE statut_offre (
-    id_statut_offre SERIAL PRIMARY KEY,
-    libelle VARCHAR(50) NOT NULL UNIQUE
-);
-
-CREATE TABLE offre_emploi (
-    id_offre SERIAL PRIMARY KEY,
-    id_besoin_poste INT NOT NULL REFERENCES besoin_poste(id_besoin_poste),
-    id_statut_offre INT NOT NULL REFERENCES statut_offre(id_statut_offre),
-    titre VARCHAR(255),
-    description TEXT,
-    profil_recherche TEXT,
-    visible_client BOOLEAN DEFAULT FALSE,
-    date_publication DATE,
-    date_limite DATE
-);
-
-CREATE TABLE proposition_embauche (
-    id_proposition SERIAL PRIMARY KEY,
-    id_candidature INT NOT NULL REFERENCES candidature(id_candidature),
-    salaire_demande NUMERIC(12, 0),
-    salaire_propose_rh NUMERIC(12, 0),
-    salaire_valide_finance NUMERIC(12, 0),
-    salaire_final NUMERIC(12, 0),
-    statut VARCHAR(50) DEFAULT 'EN_ATTENTE_CANDIDAT',
-    date_envoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE decision_rh (
-    id_decision_rh SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE reponse_candidat (
-    id_reponse_candidat SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL UNIQUE
-);
-
-CREATE TABLE statut_proposition (
-    id_statut_proposition SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL UNIQUE
-);
-
--- ============================================================
--- UTILISATEURS (LOGIN)
--- ============================================================
-
-CREATE TABLE utilisateur (
-    id_utilisateur SERIAL PRIMARY KEY,
-    email VARCHAR(150) UNIQUE NOT NULL,
-    mot_de_passe VARCHAR(255) NOT NULL,
-    role VARCHAR(50) NOT NULL,
-    active BOOLEAN DEFAULT TRUE
-);
-
--- ============================================================
--- NOTIFICATIONS
--- ============================================================
-
-CREATE TABLE notification (
-    id_notification SERIAL PRIMARY KEY,
-    id_candidat INT REFERENCES candidat(id_candidat),
-    id_utilisateur INT REFERENCES utilisateur(id_utilisateur),
-    titre VARCHAR(255),
-    message TEXT,
-    lu BOOLEAN DEFAULT FALSE,
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    id_proposition INT REFERENCES proposition_embauche(id_proposition)
-);
-
--- ============================================================
--- CONTRAT CANDIDAT (LIEN)
--- ============================================================
-
+-- ---------- LIEN CANDIDAT <-> CONTRAT (cœur de ta tâche) ----------
+-- Un contrat_candidat pointe vers UN SEUL contrat (CE, CDD ou CDI)
 CREATE TABLE contrat_candidat(
     id_contrat_candidat SERIAL PRIMARY KEY,
     id_candidat INTEGER NOT NULL REFERENCES candidat(id_candidat),
@@ -552,109 +469,10 @@ CREATE TABLE historique_contrat_employe(
     date_embauche DATE
 );
 
+-- journal des changements de statut : Créé -> Signé -> Validé
 CREATE TABLE historique_statut_contrat(
     id_historique_statut_contrat SERIAL PRIMARY KEY,
     id_statut_contrat INTEGER NOT NULL REFERENCES statut_contrat(id),
     id_contrat_candidat INTEGER NOT NULL REFERENCES contrat_candidat(id_contrat_candidat),
     date_changement TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================================
--- DOSSIER CANDIDATURE ET DOCUMENTS
--- ============================================================
-
-CREATE TABLE dossier_candidature (
-    id_dossier SERIAL PRIMARY KEY,
-    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
-    id_proposition INT REFERENCES proposition_embauche(id_proposition),
-    date_creation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE document_dossier (
-    id_document SERIAL PRIMARY KEY,
-    id_dossier INT NOT NULL REFERENCES dossier_candidature(id_dossier),
-    nom_document VARCHAR(255),
-    url_document TEXT,
-    date_ajout TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================================
--- CRITERES ET REPONSES
--- ============================================================
-
-CREATE TABLE critere_proposition (
-    id_critere SERIAL PRIMARY KEY,
-    id_proposition INT NOT NULL REFERENCES proposition_embauche(id_proposition),
-    id_type_critere INT NOT NULL REFERENCES type_critere_proposition(id_type_critere),
-    description TEXT
-);
-
-CREATE TABLE reponse_critere (
-    id_reponse SERIAL PRIMARY KEY,
-    id_critere INT NOT NULL REFERENCES critere_proposition(id_critere),
-    reponse TEXT,
-    date_reponse TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ============================================================
--- ENTRETIENS ET TESTS
--- ============================================================
-
-CREATE TABLE entretien (
-    id_entretien SERIAL PRIMARY KEY,
-    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
-    id_proposition INT REFERENCES proposition_embauche(id_proposition),
-    date_entretien TIMESTAMP,
-    lieu VARCHAR(255),
-    notes TEXT,
-    resultat VARCHAR(50)
-);
-
-CREATE TABLE test_technique (
-    id_test SERIAL PRIMARY KEY,
-    id_candidat INT NOT NULL REFERENCES candidat(id_candidat),
-    id_proposition INT REFERENCES proposition_embauche(id_proposition),
-    date_test TIMESTAMP,
-    titre VARCHAR(255),
-    score NUMERIC(5,2),
-    notes TEXT
-);
-
--- ============================================================
--- AVENANTS ET RUPTURES CDD
--- ============================================================
-
-CREATE TABLE avenant_cdd (
-    id_avenant SERIAL PRIMARY KEY,
-    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
-    id_type_avenant INT REFERENCES type_avenant(id),
-    date_avenant DATE,
-    description TEXT
-);
-
-CREATE TABLE rupture_cdd (
-    id_rupture SERIAL PRIMARY KEY,
-    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
-    id_type_rupture INT REFERENCES type_rupture(id),
-    date_rupture DATE,
-    description TEXT
-);
-
-CREATE TABLE element_salaire_cdd (
-    id_element SERIAL PRIMARY KEY,
-    id_contrat_cdd INT NOT NULL REFERENCES contrat_cdd(id),
-    libelle VARCHAR(100),
-    montant NUMERIC(12,2),
-    type_element VARCHAR(50)
-);
-
--- ============================================================
--- CONSIGNES INTEGRATION
--- ============================================================
-
-CREATE TABLE consigne_integration (
-    id_consigne SERIAL PRIMARY KEY,
-    id_type_consigne INT NOT NULL REFERENCES type_consigne(id_type_consigne),
-    libelle VARCHAR(255),
-    description TEXT
 );

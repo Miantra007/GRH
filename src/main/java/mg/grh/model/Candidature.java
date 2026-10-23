@@ -24,6 +24,4 @@ public class Candidature implements Identifiable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "id_statut_candidature", nullable = false)
     private StatutCandidature statut;
-    @Column(name = "code_suivi", nullable = false, unique = true, length = 64)
-    private String codeSuivi;
 }

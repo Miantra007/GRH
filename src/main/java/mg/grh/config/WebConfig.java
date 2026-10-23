@@ -18,7 +18,6 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/candidat/offres", "/api/candidat/offres/*",
                         "/api/candidat/offres/*/postuler",
                         "/api/candidat/etape/**",
-                        "/api/candidat/confirmation/*",
-                        "/api/candidat/suivi", "/api/candidat/suivi/**");
+                        "/api/candidat/confirmation");
     }
 }

@@ -53,12 +53,6 @@ public class CandidatController {
     private final NiveauLangueRepository niveauLangueRepository;
     private final DossierCandidatureRepository dossierRepository;
     private final DocumentDossierRepository documentRepository;
-    private final TestTechniqueRepository testTechniqueRepository;
-    private final EntretienRepository entretienRepository;
-    private final PropositionEmbaucheRepository propositionRepository;
-    private final NotificationRepository notificationRepository;
-    private final ReponseCandidatRepository reponseRepository;
-    private final StatutPropositionRepository statutPropositionRepository;
     private final EducationService educationService;
     private final CvLangueService cvLangueService;
     private final Path uploadRoot;
@@ -71,10 +65,7 @@ public class CandidatController {
             CandidatureService candidatureService, EducationRepository educationRepository,
             CvLangueRepository cvLangueRepository, LangueRepository langueRepository,
             NiveauLangueRepository niveauLangueRepository, DossierCandidatureRepository dossierRepository,
-            DocumentDossierRepository documentRepository, TestTechniqueRepository testTechniqueRepository,
-            EntretienRepository entretienRepository, PropositionEmbaucheRepository propositionRepository,
-            NotificationRepository notificationRepository, ReponseCandidatRepository reponseRepository,
-            StatutPropositionRepository statutPropositionRepository, EducationService educationService,
+            DocumentDossierRepository documentRepository, EducationService educationService,
             CvLangueService cvLangueService,
             @Value("${grh.upload-dir:uploads/candidatures}") String uploadDir) {
         this.candidatService = candidatService;
@@ -95,12 +86,6 @@ public class CandidatController {
         this.niveauLangueRepository = niveauLangueRepository;
         this.dossierRepository = dossierRepository;
         this.documentRepository = documentRepository;
-        this.testTechniqueRepository = testTechniqueRepository;
-        this.entretienRepository = entretienRepository;
-        this.propositionRepository = propositionRepository;
-        this.notificationRepository = notificationRepository;
-        this.reponseRepository = reponseRepository;
-        this.statutPropositionRepository = statutPropositionRepository;
         this.educationService = educationService;
         this.cvLangueService = cvLangueService;
         this.uploadRoot = Paths.get(uploadDir).toAbsolutePath().normalize();
@@ -412,13 +397,12 @@ public class CandidatController {
                 piece.setTailleOctets(tailleFichier(candidat.getId(), doc.get("fichier")));
                 documentRepository.save(piece);
             }
-            session.setAttribute("codeSuiviDerniereCandidature", candidature.getCodeSuivi());
             session.removeAttribute("candidatureCandidatId");
             session.removeAttribute("candidatureOffreId");
             session.removeAttribute("lettreCandidatureDraft");
             session.removeAttribute("documentsCandidatureDraft");
-            ra.addFlashAttribute("codeSuivi", candidature.getCodeSuivi());
-            return "redirect:/api/candidat/confirmation/" + candidature.getCodeSuivi();
+            ra.addFlashAttribute("offreTitre", offre.getTitre());
+            return "redirect:/api/candidat/confirmation";
         } catch (RuntimeException e) {
             TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
             ra.addFlashAttribute("erreur", message(e));
@@ -427,79 +411,10 @@ public class CandidatController {
         }
     }
 
-    @GetMapping("/confirmation/{code}")
-    public String confirmation(@PathVariable String code, Model model) {
-        Candidature candidature = candidatureService.parCodeSuivi(code);
-        model.addAttribute("candidature", candidature);
+    @GetMapping("/confirmation")
+    public String confirmation(Model model) {
+        if (!model.containsAttribute("offreTitre")) return "redirect:/api/candidat/offres";
         return "candidat/confirmation";
-    }
-
-    @GetMapping("/suivi/{code}")
-    public String suivi(@PathVariable String code, Model model) {
-        Candidature candidature = candidatureService.parCodeSuivi(code);
-        model.addAttribute("candidature", candidature);
-        model.addAttribute("tests", testTechniqueRepository.findByCandidatureIdOrderByDateTestAsc(candidature.getId()));
-        model.addAttribute("entretiens", entretienRepository.findByCandidatureIdOrderByDateEntretienAsc(candidature.getId()));
-        model.addAttribute("notifications", notificationRepository.findByIdCandidatureOrderByDateCreationDesc(candidature.getId()));
-        model.addAttribute("proposition", propositionRepository.findByCandidatureId(candidature.getId()).orElse(null));
-        model.addAttribute("dossier", dossierRepository.findByCandidatureId(candidature.getId()).orElse(null));
-        return "candidat/suivi-candidature";
-    }
-
-    @PostMapping("/suivi/{code}/test/{testId}/accepter")
-    @Transactional
-    public String accepterTest(@PathVariable String code, @PathVariable Integer testId, RedirectAttributes ra) {
-        try {
-            Candidature candidature = candidatureService.parCodeSuivi(code);
-            List<TestTechnique> tests = testTechniqueRepository.findByCandidatureIdOrderByDateTestAsc(candidature.getId());
-            TestTechnique test = tests.stream().filter(t -> t.getId().equals(testId)).findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("Convocation au test introuvable."));
-            if (tests.isEmpty() || !tests.get(tests.size() - 1).getId().equals(testId))
-                throw new IllegalStateException("Seule la convocation la plus récente peut être acceptée.");
-            if (!"TEST_TECHNIQUE".equals(candidature.getStatut().getLibelle()))
-                throw new IllegalStateException("Cette convocation n’est plus en attente d’acceptation.");
-            if (test.isAccepteCandidat()) throw new IllegalStateException("Cette convocation a déjà été acceptée.");
-            test.setAccepteCandidat(true);
-            testTechniqueRepository.save(test);
-            ra.addFlashAttribute("succes", "Convocation au test acceptée. Le service RH pourra ensuite vous transmettre une date d’entretien.");
-        } catch (RuntimeException e) {
-            ra.addFlashAttribute("erreur", message(e));
-        }
-        return "redirect:/api/candidat/suivi/" + code;
-    }
-
-    @GetMapping("/suivi")
-    public String rechercherSuivi(@RequestParam String code) {
-        String token = code.trim();
-        candidatureService.parCodeSuivi(token);
-        return "redirect:/api/candidat/suivi/" + token;
-    }
-
-    @PostMapping("/suivi/{code}/proposition")
-    @Transactional
-    public String repondreProposition(@PathVariable String code, @RequestParam String reponse,
-            @RequestParam(required = false) String contreProposition, @RequestParam(required = false) String commentaire,
-            @RequestParam(required = false) java.math.BigDecimal salaireDemande, RedirectAttributes ra) {
-        try {
-            Candidature candidature = candidatureService.parCodeSuivi(code);
-            PropositionEmbauche proposition = propositionRepository.findByCandidatureId(candidature.getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Aucune proposition n’est disponible."));
-            if (proposition.getReponseCandidat() != null) throw new IllegalArgumentException("Une réponse a déjà été transmise.");
-            String libelle = reponse.trim().toUpperCase(Locale.ROOT);
-            if (!Set.of("OUI", "NON", "AUTRE").contains(libelle)) throw new IllegalArgumentException("Réponse invalide.");
-            if (salaireDemande != null && salaireDemande.signum() < 0) throw new IllegalArgumentException("Le salaire demandé doit être positif ou nul.");
-            ReponseCandidat ref = reponseRepository.findByLibelle(libelle).orElseThrow(() -> new IllegalStateException("Référentiel de réponse non initialisé."));
-            if (libelle.equals("AUTRE") && (contreProposition == null || contreProposition.isBlank()) && salaireDemande == null)
-                throw new IllegalArgumentException("Précisez votre contre-proposition ou le salaire demandé.");
-            proposition.setReponseCandidat(ref); proposition.setContreProposition(limiter(contreProposition, 10000));
-            proposition.setCommentaireCandidat(limiter(commentaire, 10000)); proposition.setSalaireDemande(salaireDemande);
-            proposition.setDateReponseCandidat(LocalDateTime.now());
-            if (libelle.equals("NON")) proposition.setStatut(statutPropositionRepository.findByLibelle("REFUSEE_CANDIDAT").orElse(proposition.getStatut()));
-            else proposition.setStatut(statutPropositionRepository.findByLibelle("EN_ATTENTE_RH").orElse(proposition.getStatut()));
-            propositionRepository.save(proposition);
-            ra.addFlashAttribute("succes", "Votre réponse a été transmise au service RH.");
-        } catch (RuntimeException e) { TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); ra.addFlashAttribute("erreur", message(e)); }
-        return "redirect:/api/candidat/suivi/" + code;
     }
 
     private Candidat candidatConnecte(HttpSession session) {
