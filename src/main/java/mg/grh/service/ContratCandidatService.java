@@ -40,13 +40,15 @@ public class ContratCandidatService {
     private final NotificationRepository notificationRepo;
     private final TravailleurRepository travailleurRepo;
     private final PosteRepository posteRepo;
+    private final EmployeurRepository employeurRepo;
 
     public ContratCandidatService(ContratCandidatRepository contratCandidatRepo, ContratCeRepository ceRepo,
                                   ContratCddRepository cddRepo, ContratCdiRepository cdiRepo,
                                   CandidatRepository candidatRepo, StatutContratRepository statutRepo,
                                   HistoriqueStatutContratRepository historiqueRepo, EmbaucheService embaucheService,
                                   PropositionEmbaucheRepository propositionRepo, NotificationRepository notificationRepo,
-                                  TravailleurRepository travailleurRepo, PosteRepository posteRepo) {
+                                  TravailleurRepository travailleurRepo, PosteRepository posteRepo,
+                                  EmployeurRepository employeurRepo) {
         this.contratCandidatRepo = contratCandidatRepo;
         this.ceRepo = ceRepo;
         this.cddRepo = cddRepo;
@@ -59,6 +61,7 @@ public class ContratCandidatService {
         this.notificationRepo = notificationRepo;
         this.travailleurRepo = travailleurRepo;
         this.posteRepo = posteRepo;
+        this.employeurRepo = employeurRepo;
     }
 
     // ------------------------------------------------------------ lecture
@@ -123,9 +126,26 @@ public class ContratCandidatService {
         PropositionInfo info = propositionRepo.findInfo(propositionId).orElseThrow();
         ce.setRemunerationNette(p.getSalaireFinal()); ce.setPoste(info.getTitreOffre());
         ce.setMissions(info.getMissions()); ce.setDateDebut(date(info.getDatePrisePoste()));
-        ce.setHeuresHebdo(heures(info.getHoraireTravail())); verifierTravailleur(candidatId, ce.getTravailleur());
+        ce.setHeuresHebdo(heures(info.getHoraireTravail()));
+
+        // Créer travailleur si nouvelles données
+        if (ce.getTravailleur() != null && ce.getTravailleur().getId() == null) {
+            ce.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
+            ce.setTravailleur(travailleurRepo.save(ce.getTravailleur()));
+        }
+        // Créer employeur si nouvelles données
+        if (ce.getEmployeur() != null && ce.getEmployeur().getId() == null) {
+            ce.setEmployeur(employeurRepo.save(ce.getEmployeur()));
+        }
+
         ce.setId(null); ce.setStatut(statut(CREE));
         return lier(candidatId, "CE", ceRepo.save(ce), null, null, p.getIdCandidature(), p);
+    }
+
+    private void creerOuRecupererTravailleurEtEmployeur(Integer candidatId, Object contrat) {
+        // Cette méthode générique sera spécialisée selon le type de contrat
+        // Pour l'instant, elle ne fait rien. Les implémentations spécifiques
+        // (creerCe, creerCdd, creerCdi) doivent créer travailleur et employeur
     }
 
     public ContratCandidat creerCdd(Integer candidatId, ContratCdd cdd, Integer candidatureId) {
@@ -142,7 +162,17 @@ public class ContratCandidatService {
         cdd.setPoste(posteRepo.findByLibelleIgnoreCase(info.getTitreOffre())
                 .orElseThrow(() -> new IllegalStateException("Le poste de la proposition est introuvable dans le référentiel des postes.")));
         cdd.setDateDebut(date(info.getDatePrisePoste())); cdd.setHoraireTravail(info.getHoraireTravail());
-        verifierTravailleur(candidatId, cdd.getTravailleur()); cdd.setId(null); cdd.setStatut(statut(CREE));
+
+        // Créer travailleur et employeur si nouvelles données
+        if (cdd.getTravailleur() != null && cdd.getTravailleur().getId() == null) {
+            cdd.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
+            cdd.setTravailleur(travailleurRepo.save(cdd.getTravailleur()));
+        }
+        if (cdd.getEmployeur() != null && cdd.getEmployeur().getId() == null) {
+            cdd.setEmployeur(employeurRepo.save(cdd.getEmployeur()));
+        }
+
+        cdd.setId(null); cdd.setStatut(statut(CREE));
         return lier(candidatId, "CDD", null, cddRepo.save(cdd), null, p.getIdCandidature(), p);
     }
 
@@ -158,7 +188,17 @@ public class ContratCandidatService {
         PropositionInfo info = propositionRepo.findInfo(propositionId).orElseThrow();
         cdi.setSalaireBrutMensuel(p.getSalaireFinal()); cdi.setDatePriseFonction(date(info.getDatePrisePoste()));
         cdi.setEmploi(info.getTitreOffre()); cdi.setDureeHebdoHeures(heures(info.getHoraireTravail()));
-        verifierTravailleur(candidatId, cdi.getTravailleur()); cdi.setId(null); cdi.setStatut(statut(CREE));
+
+        // Créer travailleur et employeur si nouvelles données
+        if (cdi.getTravailleur() != null && cdi.getTravailleur().getId() == null) {
+            cdi.getTravailleur().setCandidat(candidatRepo.findById(candidatId).orElse(null));
+            cdi.setTravailleur(travailleurRepo.save(cdi.getTravailleur()));
+        }
+        if (cdi.getEmployeur() != null && cdi.getEmployeur().getId() == null) {
+            cdi.setEmployeur(employeurRepo.save(cdi.getEmployeur()));
+        }
+
+        cdi.setId(null); cdi.setStatut(statut(CREE));
         return lier(candidatId, "CDI", null, null, cdiRepo.save(cdi), p.getIdCandidature(), p);
     }
 
