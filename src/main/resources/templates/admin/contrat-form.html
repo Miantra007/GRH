@@ -47,7 +47,7 @@
                     un <strong>remplacement</strong> suspend l'employé en poste (archivé dans l'historique) et le candidat prend sa place.
                 </div>
             </th:block>
-            <div class="encart neutre" th:if="${#lists.isEmpty(candidatures)}">
+            <div class="encart neutre" th:if="${proposition == null and #lists.isEmpty(candidatures)}">
                 <i class="fa-solid fa-circle-info"></i>
                 <span>Ce candidat n'a aucune proposition d'embauche acceptée : le contrat ne sera lié à aucun besoin,
                     et sa validation ne modifiera pas la liste des employés.</span>
