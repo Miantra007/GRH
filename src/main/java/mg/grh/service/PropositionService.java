@@ -79,7 +79,8 @@ public class PropositionService {
             proposition.setDateEnvoi(LocalDateTime.now());
             proposition.setStatut(statuts.findByLibelle("EN_ATTENTE_CANDIDAT")
                     .orElseThrow(() -> new RegleMetierException("Statut de proposition non initialisé.")));
-            PropositionInfo info = info(propositions.saveAndFlush(proposition).getId());
+            proposition = propositions.saveAndFlush(proposition);
+            PropositionInfo info = info(proposition.getId());
             proposition.setSalaireFinal(salaireInitial(info));
             return propositions.saveAndFlush(proposition);
         });
