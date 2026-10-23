@@ -66,7 +66,7 @@
                 <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
                     <select class="form-select" name="travailleur.nationalite.id" required>
                         <option value="">— Choisir —</option>
-                        <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.nomNationalite}"></option>
+                        <option th:each="n : ${nationalites}" th:value="${n.id}" th:text="${n.libelle}"></option>
                     </select></div>
                 <div class="col-md-6"><label class="form-label">Civilité</label>
                     <select class="form-select" name="travailleur.civilite.id">
