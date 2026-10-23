@@ -5,9 +5,7 @@
 
 -- Ajouter colonne id_candidat à travailleur
 ALTER TABLE travailleur
-ADD COLUMN id_candidat INT REFERENCES candidat(id_candidature) ON DELETE CASCADE;
+ADD COLUMN id_candidat INT REFERENCES candidat(id_candidat) ON DELETE CASCADE;
 
 -- Index pour améliorer les requêtes par candidat
 CREATE INDEX idx_travailleur_candidat ON travailleur(id_candidat);
-
-COMMIT;

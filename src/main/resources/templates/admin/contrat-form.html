@@ -55,6 +55,53 @@
         </div>
     </div>
 
+    <!-- ===================== Travailleur ===================== -->
+    <div class="card-grh mb-4">
+        <div class="card-tete">
+            <span class="section-icon"><i class="fa-solid fa-user"></i></span>
+            <h2 class="titre-section">Données du travailleur</h2>
+        </div>
+        <div class="card-corps">
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Nom et prénoms<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.nomPrenoms" required></div>
+                <div class="col-md-6"><label class="form-label">Email<span class="req">*</span></label><input class="form-control" type="email" name="travailleur.email" required></div>
+                <div class="col-md-6"><label class="form-label">Date de naissance<span class="req">*</span></label><input class="form-control" type="date" name="travailleur.dateNaissance" required></div>
+                <div class="col-md-6"><label class="form-label">Lieu de naissance<span class="req">*</span></label><input class="form-control" type="text" name="travailleur.lieuNaissance" required></div>
+                <div class="col-md-6"><label class="form-label">Nationalité<span class="req">*</span></label>
+                    <select class="form-select" name="travailleur.nationalite.id" required>
+                        <option value="">— Choisir —</option>
+                        <option th:each="x : ${nationalites}" th:value="${x.id}" th:text="${x.nomNationalite}"></option>
+                    </select></div>
+                <div class="col-md-6"><label class="form-label">Civilité</label>
+                    <select class="form-select" name="travailleur.civilite.id">
+                        <option value="">—</option>
+                        <option th:each="x : ${civilites}" th:value="${x.id}" th:text="${x.libelle}"></option>
+                    </select></div>
+                <div class="col-md-6"><label class="form-label">CIN</label><input class="form-control" type="text" name="travailleur.cinNumero"></div>
+                <div class="col-md-6"><label class="form-label">Téléphone</label><input class="form-control" type="tel" name="travailleur.telephone"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================== Employeur ===================== -->
+    <div class="card-grh mb-4">
+        <div class="card-tete">
+            <span class="section-icon"><i class="fa-solid fa-building"></i></span>
+            <h2 class="titre-section">Données de l'employeur</h2>
+        </div>
+        <div class="card-corps">
+            <div class="row g-3">
+                <div class="col-md-6"><label class="form-label">Raison sociale<span class="req">*</span></label><input class="form-control" type="text" name="employeur.raisonSociale" required></div>
+                <div class="col-md-6"><label class="form-label">Représentant<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantNom" required></div>
+                <div class="col-md-6"><label class="form-label">Fonction<span class="req">*</span></label><input class="form-control" type="text" name="employeur.representantFonction" required></div>
+                <div class="col-md-6"><label class="form-label">Forme juridique</label><input class="form-control" type="text" name="employeur.formeJuridique"></div>
+                <div class="col-md-6"><label class="form-label">NIF</label><input class="form-control" type="text" name="employeur.nif"></div>
+                <div class="col-md-6"><label class="form-label">STAT</label><input class="form-control" type="text" name="employeur.stat"></div>
+                <div class="col-12"><label class="form-label">Adresse du siège</label><input class="form-control" type="text" name="employeur.adresseSiege"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- ===================== Type de contrat ===================== -->
     <div class="card-grh card-corps mb-4 d-flex flex-wrap align-items-center gap-3">
         <strong><i class="fa-solid fa-layer-group me-1"></i> Type de contrat</strong>
@@ -75,19 +122,6 @@
         <form method="post" class="card-corps needs-validation" novalidate th:action="${proposition != null} ? @{/candidat/contrats/ce(propositionId=${propositionId})} : @{/admin/contrats/ce(candidatId=${candidat.id})}">
             <input type="hidden" name="candidatureId" class="champ-candidature" th:unless="${#lists.isEmpty(candidatures)}">
             <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Employeur<span class="req">*</span></label>
-                    <select class="form-select" name="employeur.id" required>
-                        <option value="">— Choisir —</option>
-                        <option th:each="x : ${employeurs}" th:value="${x.id}" th:text="${x.raisonSociale}"></option>
-                    </select></div>
-                <div class="col-md-6"><label class="form-label">Travailleur<span class="req">*</span></label>
-                    <div class="input-group">
-                        <select class="form-select" name="travailleur.id" required>
-                            <option value="">— Choisir —</option>
-                            <option th:each="x : ${travailleurs}" th:value="${x.id}" th:text="${x.nomPrenoms}"></option>
-                        </select>
-                        <a class="btn btn-light border" th:href="@{/admin/travailleurs/nouveau(candidatId=${candidat.id})}" title="Créer un travailleur"><i class="fa-solid fa-plus"></i></a>
-                    </div></div>
                 <div class="col-md-6"><label class="form-label">Langue du contrat<span class="req">*</span></label>
                     <select class="form-select" name="langue.id" required>
                         <option th:each="x : ${langues}" th:value="${x.id}" th:text="${x.libelle}"></option>
