@@ -176,16 +176,28 @@ INSERT INTO pays (nom_pays) VALUES
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
--- UTILISATEURS PAR DÉFAUT
+-- UTILISATEURS (Tous les responsables peuvent se connecter)
+-- Mot de passe par défaut: password123
 -- ============================================================
 
--- Mot de passe: password123 (à changer en production!)
+-- Utilisateurs administratifs
 INSERT INTO utilisateur (email, mot_de_passe, role, active) VALUES
 ('admin@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'ADMIN', TRUE),
 ('rh@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'RH', TRUE),
 ('dg@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DG', TRUE),
 ('finance@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'FINANCE', TRUE),
-('directeur@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE)
+('directeur@test.com', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+-- Directeurs
+('dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR_GENERAL', TRUE),
+('directeur.dsi@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+('directeur.drh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+('directeur.df@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+('directeur.dg@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'DIRECTEUR', TRUE),
+-- Managers
+('manager.it@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
+('manager.rh@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
+('manager.finance@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE),
+('manager.general@entreprise.mg', '$2a$10$u/m4.7.OI4fADHXiRmfnWuTCdHg0qrLkXWaI5eCqkpQ.KGRwvWQv2', 'MANAGER', TRUE)
 ON CONFLICT DO NOTHING;
 
 -- ============================================================
