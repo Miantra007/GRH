@@ -323,7 +323,7 @@ public class AdminCandidatureWebController {
             p.setStatut(statutPropositionRepository.findByLibelle("EN_ATTENTE_CANDIDAT")
                     .orElseThrow(() -> new IllegalStateException("Statut de proposition non initialisé.")));
             propositionRepository.save(p);
-            notifier(c, "Proposition d’embauche", "Une proposition d’embauche vous attend dans votre espace de suivi.");
+            notifier(c, "Proposition d’embauche", "Une proposition d’embauche vous attend dans votre espace de suivi.", p.getId());
             ra.addFlashAttribute("succes", "Proposition transmise au candidat.");
             return "redirect:/candidats/" + c.getCandidat().getId() + "/propositions/" + p.getId();
         } catch (RuntimeException e) { TransactionAspectSupport.currentTransactionStatus().setRollbackOnly(); ra.addFlashAttribute("erreur", e.getMessage()); }
@@ -354,7 +354,11 @@ public class AdminCandidatureWebController {
     }
 
     private void notifier(Candidature c, String titre, String message) {
-        Notification n = Notification.pour(c.getCandidat().getId(), null, null, titre, message);
+        notifier(c, titre, message, null);
+    }
+
+    private void notifier(Candidature c, String titre, String message, Integer idProposition) {
+        Notification n = Notification.pour(c.getCandidat().getId(), null, idProposition, titre, message);
         n.setIdCandidature(c.getId());
         n.setDateCreation(LocalDateTime.now()); n.setLu(false); notificationRepository.save(n);
     }
